@@ -1,0 +1,33 @@
+<!-- Aturan kustom Tameng untuk sinyal dari sensor endpoint. -->
+<group name="local,tameng,">
+
+  <!-- Induk: semua event dari sensor Tameng (JSON). -->
+  <rule id="100000" level="0">
+    <decoded_as>json</decoded_as>
+    <field name="sensor">tameng</field>
+    <description>Tameng: event sensor endpoint</description>
+  </rule>
+
+  <!-- Eksekusi berkas dari /tmp. -->
+  <rule id="100010" level="10">
+    <if_sid>100000</if_sid>
+    <field name="event">tmp_exec</field>
+    <description>Tameng: eksekusi berkas dari /tmp oleh $(dstuser)</description>
+    <mitre>
+      <id>T1059.004</id>
+    </mitre>
+    <group>tameng_tmp_exec,</group>
+  </rule>
+
+  <!-- Pembacaan /etc/shadow. -->
+  <rule id="100011" level="12">
+    <if_sid>100000</if_sid>
+    <field name="event">shadow_read</field>
+    <description>Tameng: pembacaan /etc/shadow oleh $(dstuser) (indikasi pencurian kredensial)</description>
+    <mitre>
+      <id>T1003.008</id>
+    </mitre>
+    <group>tameng_shadow_read,</group>
+  </rule>
+
+</group>

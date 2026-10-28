@@ -1,0 +1,103 @@
+# Lab Tameng SOC — satu laptop (MacBook Air M4, Docker 6 GB).
+# Subnet 10.10.5.0/24 sengaja dipilih agar cocok dengan narasi demo.
+# Wazuh dijalankan single-node (tanpa indexer & dashboard) untuk hemat RAM;
+# alerts.json dibaca langsung dari host lewat bind mount ke SSD.
+name: tameng-lab
+
+networks:
+  lab:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.10.5.0/24
+          gateway: 10.10.5.1
+
+services:
+  wazuh-manager:
+    build: { context: ./wazuh, dockerfile: Dockerfile }
+    image: tameng/wazuh-manager:4.14.9
+    container_name: wazuh-manager
+    hostname: wazuh-manager
+    restart: unless-stopped
+    networks:
+      lab:
+        ipv4_address: 10.10.5.2
+    ulimits:
+      memlock: { soft: -1, hard: -1 }
+      nofile: { soft: 655360, hard: 655360 }
+    environment:
+      # Single-node: tidak menunjuk ke indexer apa pun.
+      - INDEXER_URL=
+      - FILEBEAT_SSL_VERIFICATION_MODE=none
+    volumes:
+      # Baca alerts.json langsung dari host (SSD).
+      - /Volumes/Prika-Tameng/lab-data/wazuh/alerts:/var/ossec/logs/alerts
+    ports:
+      - "127.0.0.1:1514:1514"
+      - "127.0.0.1:1515:1515"
+      - "127.0.0.1:55000:55000"
+
+  pc-staf-07:
+    build: { context: ., dockerfile: victim/Dockerfile }
+    image: tameng/victim:latest
+    container_name: pc-staf-07
+    hostname: pc-staf-07
+    restart: unless-stopped
+    privileged: true            # agar auditd bisa dicoba di VM Docker Desktop
+    environment:
+      - WAZUH_MANAGER=10.10.5.2
+      - AGENT_NAME=pc-staf-07
+    networks:
+      lab:
+        ipv4_address: 10.10.5.66
+    depends_on: [wazuh-manager]
+
+  srv-file-01:
+    image: tameng/victim:latest       # pakai image yang sama
+    container_name: srv-file-01
+    hostname: srv-file-01
+    restart: unless-stopped
+    privileged: true
+    environment:
+      - WAZUH_MANAGER=10.10.5.2
+      - AGENT_NAME=srv-file-01
+    networks:
+      lab:
+        ipv4_address: 10.10.5.7
+    depends_on: [wazuh-manager, pc-staf-07]
+
+  plc-genset-01:
+    build: { context: ./plc, dockerfile: Dockerfile }
+    image: tameng/plc-genset:latest
+    container_name: plc-genset-01
+    hostname: plc-genset-01
+    restart: unless-stopped
+    networks:
+      lab:
+        ipv4_address: 10.10.5.20
+
+  attacker:
+    image: tameng/victim:latest        # punya ssh client, sshpass, python3
+    container_name: attacker
+    hostname: kali-ops
+    restart: unless-stopped
+    entrypoint: ["/bin/sleep", "infinity"]   # tanpa agent/sshd; hanya penyerang
+    networks:
+      lab:
+        ipv4_address: 10.10.5.90
+
+  suricata:
+    build: { context: ./suricata, dockerfile: Dockerfile }
+    image: tameng/suricata:latest
+    container_name: suricata
+    restart: unless-stopped
+    # Berbagi network namespace PLC agar melihat semua trafik Modbus ke PLC.
+    network_mode: "service:plc-genset-01"
+    cap_add: [NET_ADMIN, NET_RAW, SYS_NICE]
+    depends_on: [plc-genset-01]
+    volumes:
+      - /Volumes/Prika-Tameng/lab-data/suricata/eve:/var/log/suricata
+    command: >
+      -i eth0 -S /etc/suricata/rules/tameng.rules
+      --set app-layer.protocols.modbus.enabled=yes
+      --set app-layer.protocols.modbus.detection-ports.dp=502

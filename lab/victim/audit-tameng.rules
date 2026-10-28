@@ -1,0 +1,5 @@
+# Aturan audit minimal untuk skenario IT->OT.
+# 1) Eksekusi apa pun dari /tmp (skrip penyerang).
+-a always,exit -F dir=/tmp -F perm=x -F key=tameng_tmp_exec
+# 2) Akses baca ke /etc/shadow (pencurian kredensial).
+-w /etc/shadow -p r -k tameng_shadow_read

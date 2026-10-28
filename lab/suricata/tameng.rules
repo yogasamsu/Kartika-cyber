@@ -1,0 +1,11 @@
+# Aturan Suricata Tameng untuk OT (Modbus TCP).
+# Perintah TULIS ke PLC adalah sinyal utama serangan IT->OT:
+# penyerang mematikan coil genset dari host yang tidak sah.
+
+alert modbus any any -> any 502 (msg:"Tameng: Modbus WRITE single coil (fc5) ke PLC"; modbus:function 5; sid:7000005; rev:1;)
+alert modbus any any -> any 502 (msg:"Tameng: Modbus WRITE multiple coils (fc15) ke PLC"; modbus:function 15; sid:7000015; rev:1;)
+alert modbus any any -> any 502 (msg:"Tameng: Modbus WRITE single register (fc6) ke PLC"; modbus:function 6; sid:7000006; rev:1;)
+alert modbus any any -> any 502 (msg:"Tameng: Modbus WRITE multiple registers (fc16) ke PLC"; modbus:function 16; sid:7000016; rev:1;)
+
+# Catatan koneksi Modbus (konteks; level rendah).
+alert tcp any any -> any 502 (msg:"Tameng: koneksi TCP ke port Modbus PLC"; flow:to_server,established; flags:S; sid:7000100; rev:1;)
