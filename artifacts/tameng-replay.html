@@ -365,7 +365,7 @@ function renderStep(k){
   else { const [x,y]=EDGES[s.edge]||[]; if(x){setNode(x,true);setNode(y,true);firePacket(s.edge);} }
 
   // tech light
-  s.tech.forEach(t=>{const b=$("#tech-"+t); if(b)b.classList.add("lit");});
+  s.tech.forEach(t=>{const b=document.getElementById("tech-"+t); if(b)b.classList.add("lit");});
 
   if(s.ot) gensetOff();
 }
