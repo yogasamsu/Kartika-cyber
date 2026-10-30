@@ -21,6 +21,8 @@ CORR_WINDOW_S = int(os.environ.get("TAMENG_CORR_WINDOW_S", "300"))
 PAM_WINDOW_S = int(os.environ.get("TAMENG_PAM_WINDOW_S", "3"))
 # shadow_read dianggap jahat bila ada eksekusi /tmp di host sama dalam rentang ini.
 SHADOW_TMP_WINDOW_S = int(os.environ.get("TAMENG_SHADOW_TMP_WINDOW_S", "120"))
+# Toleransi selisih jam antar-sensor (Wazuh vs Suricata, latensi ingest), detik.
+CLOCK_SKEW_S = int(os.environ.get("TAMENG_CLOCK_SKEW_S", "5"))
 
 # Inventaris aset lab (di produksi berasal dari CMDB/daftar aset satuan).
 # ip -> (nama, peran, kritikalitas, internal?)

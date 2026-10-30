@@ -62,7 +62,12 @@ def render_markdown(inc, summary):
             L.append(f"- {n}")
         L.append("")
 
-    mode = "ringkasan cadangan (LLM tidak dipakai)" if meta.get("fallback") else f"LLM {meta.get('model')}"
+    if meta.get("rejected"):
+        mode = f"ringkasan cadangan (narasi LLM {meta.get('model')} ditolak validasi)"
+    elif meta.get("fallback"):
+        mode = "ringkasan cadangan (LLM tidak dipakai)"
+    else:
+        mode = f"LLM {meta.get('model')}"
     L.append("---")
     L.append(f"*Dihasilkan lokal (air-gapped) oleh Tameng · narasi: {mode}"
              + (f" · {meta.get('elapsed_s')} dtk" if meta.get("elapsed_s") is not None else "")

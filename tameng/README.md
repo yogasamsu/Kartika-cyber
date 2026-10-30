@@ -48,7 +48,27 @@ Lokasi bukti & model bisa diatur lewat env (lihat `config.py`):
 ## Catatan
 
 - Severity `kritis` otomatis bila ada dampak OT (perintah tulis Modbus ke PLC).
-- `shadow_read` hanya dianggap jahat bila ada eksekusi `/tmp` di host sama dalam
-  rentang `SHADOW_TMP_WINDOW_S`; selainnya diperlakukan sebagai derau login PAM.
+- Korelasi berbasis **entitas**, bukan sekadar waktu: brute force dan login
+  berhasil membentuk rantai per pelaku (IP luar atau host yang sudah dikuasai);
+  eksekusi `/tmp`, pembacaan shadow, dan perintah Modbus ditempelkan ke rantai
+  yang menguasai host asalnya. Serangan tak terkait tidak digabung. Login antar
+  host internal tanpa rantai dianggap aktivitas normal.
+- Bukti dari sensor berbeda boleh bergeser jam hingga `CLOCK_SKEW_S` (default
+  5 dtk); kronologi diurutkan menurut sebab-akibat dan pergeseran dicatat.
+- `shadow_read` hanya dianggap jahat bila terjadi **setelah** eksekusi `/tmp` di
+  host sama dalam rentang `SHADOW_TMP_WINDOW_S`, atau prosesnya berasal dari
+  `/tmp`. Pembacaan oleh `sshd`/`unix_chkpwd` (login PAM) selalu dianggap derau.
+- Validasi narasi LLM memeriksa IP, penanda bukti, waktu, ID teknik ATT&CK, dan
+  nama host. Satu saja yang di luar bukti membuat narasi ditolak dan diganti
+  ringkasan cadangan.
+
+## Tes
+
+```bash
+python3 -m unittest discover -s tests -v
+```
+
+Tes memakai bukti sintetis (tanpa SSD, tanpa Ollama), termasuk rekonstruksi
+insiden lab 28 Okt.
 - Inventaris aset (`config.ASSETS`) di lab bersifat statis; di produksi diisi
   dari daftar aset/CMDB satuan.

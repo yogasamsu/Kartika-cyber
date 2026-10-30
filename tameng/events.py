@@ -79,9 +79,11 @@ def load_wazuh(since=None):
             level=a.get("rule", {}).get("level", 0),
             host=a.get("agent", {}).get("name"),
             src_ip=d.get("srcip"),
-            user=d.get("dstuser") or d.get("srcuser"),
+            # sshd memakai dstuser/srcuser; sensor Tameng (JSON) memakai user.
+            user=d.get("dstuser") or d.get("srcuser") or d.get("user"),
             native_id=a.get("id"),
-            raw={"full_log": a.get("full_log", ""), "rule_desc": a.get("rule", {}).get("description", "")},
+            raw={"full_log": a.get("full_log", ""), "rule_desc": a.get("rule", {}).get("description", ""),
+                 "cmd": d.get("cmd", "")},
         ))
     return out
 

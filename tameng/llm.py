@@ -2,8 +2,9 @@
 
 Prinsip: kronologi, teknik ATT&CK, dan tingkat bahaya sudah ditetapkan oleh
 kode. LLM HANYA menulis judul, ringkasan, dan rekomendasi. Keluarannya
-divalidasi: IP dan penanda bukti yang muncul wajib ada di masukan (anti
-halusinasi). Bila LLM gagal/menyimpang, dipakai ringkasan cadangan deterministik.
+divalidasi: IP, penanda bukti, waktu, teknik ATT&CK, dan nama host yang muncul
+wajib ada di masukan (anti halusinasi). Bila LLM gagal atau menyimpang,
+narasinya DITOLAK dan dipakai ringkasan cadangan deterministik.
 """
 import json
 import re
@@ -14,6 +15,10 @@ from . import config
 
 IP_RE = re.compile(r"\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b")
 EID_RE = re.compile(r"\b[WS]\d+\b")
+TIME_RE = re.compile(r"\b\d{1,2}[:.]\d{2}(?:[:.]\d{2})?\b")
+TECH_RE = re.compile(r"\bT\d{4}(?:\.\d{3})?\b")
+# Nama host bergaya inventaris (mengandung tanda hubung dan angka, mis. srv-file-01).
+HOST_RE = re.compile(r"\b[a-z][a-z0-9]*(?:-[a-z0-9]+)*-[a-z]*\d[a-z0-9]*\b", re.IGNORECASE)
 
 SYSTEM = (
     "Kamu analis SOC satuan TNI AD. Insiden SUDAH dianalisis mesin: kronologi, "
@@ -57,45 +62,75 @@ def _call_ollama(system, user, num_predict=320):
         return json.load(resp)
 
 
-def _validate(text, allowed_ips, allowed_eids):
-    """Kembalikan daftar peringatan bila output menyebut IP/bukti di luar masukan."""
+def _validate(text, facts):
+    """Kembalikan daftar peringatan bila output menyebut fakta di luar masukan."""
     warn = []
-    for ip in set(IP_RE.findall(text)):
-        if ip not in allowed_ips:
-            warn.append(f"IP di luar bukti: {ip}")
-    for eid in set(EID_RE.findall(text)):
-        if eid not in allowed_eids:
-            warn.append(f"penanda bukti tak dikenal: {eid}")
-    return warn
+    checks = (
+        (IP_RE, "IP di luar bukti"),
+        (EID_RE, "penanda bukti tak dikenal"),
+        (TECH_RE, "teknik ATT&CK di luar analisis"),
+        (HOST_RE, "nama host di luar bukti"),
+    )
+    for rx, msg in checks:
+        allowed = set(rx.findall(facts))
+        for tok in sorted(set(rx.findall(text))):
+            if tok not in allowed:
+                warn.append(f"{msg}: {tok}")
+    # Waktu dicek setelah IP dibuang, agar "10.10" dari 10.10.5.90 tidak terbaca jam.
+    allowed_times = {t.replace(".", ":") for t in TIME_RE.findall(IP_RE.sub(" ", facts))}
+    allowed_times |= {t[:5] for t in allowed_times}          # HH:MM dari HH:MM:SS
+    for tok in sorted(set(TIME_RE.findall(IP_RE.sub(" ", text)))):
+        if tok.replace(".", ":") not in allowed_times:
+            warn.append(f"waktu di luar bukti: {tok}")
+    # Nama aset inventaris (mis. kali-ops) yang disebut tapi tidak terlibat.
+    for name, _role, _crit, _internal in config.ASSETS.values():
+        if name in text and name not in facts:
+            warn.append(f"nama host di luar bukti: {name}")
+    return sorted(set(warn))
 
 
 def _fallback(inc):
     tnames = ", ".join(t[1] for t in inc.techniques[:4])
-    dampak = "mematikan genset (dampak OT)" if inc.has_ot_impact else "akses tidak sah"
+    hosts = ", ".join(inc.hosts) or "host tak dikenal"
+    if inc.has_ot_impact:
+        judul = f"Serangan {inc.severity} IT ke OT: perintah tak sah ke PLC"
+        dampak = "mengirim perintah tulis tak sah ke PLC (dampak OT)"
+    else:
+        judul = f"Insiden {inc.severity}: akses tidak sah ke {hosts}"
+        dampak = "melakukan aktivitas tidak sah"
+    sumber = f"dari {inc.entry_ip} " if inc.entry_ip else ""
+    rek = []
+    it_hosts = [h for h in inc.hosts if not h.startswith("plc-")]
+    if it_hosts:
+        rek.append(f"Isolasi host terdampak ({', '.join(it_hosts)}) dari jaringan.")
+    if inc.identities:
+        rek.append(f"Reset kata sandi akun {', '.join(inc.identities)} dan cabut sesi SSH yang aktif.")
+    if inc.has_ot_impact:
+        rek.append("Periksa PLC dan kembalikan peralatan ke status aman secara manual.")
+        rek.append("Batasi akses Modbus ke PLC hanya dari HMI/SCADA yang sah.")
+    if inc.entry_ip and not config.asset(inc.entry_ip)[3]:
+        rek.append(f"Blokir {inc.entry_ip} di perimeter.")
+    if any(t[0] == "T1003.008" for t in inc.techniques):
+        rek.append("Anggap seluruh hash kata sandi di host terdampak bocor; ganti kata sandi akun lokal.")
+    if not rek:
+        rek.append("Verifikasi kejadian bersama pemilik host dan pantau aktivitas lanjutan.")
     return {
-        "judul": f"Serangan {inc.severity} IT ke OT: {dampak}",
+        "judul": judul,
         "ringkasan": (
-            f"Penyerang dari {inc.entry_ip} menembus {', '.join(inc.hosts)} lalu {dampak}. "
-            f"Teknik yang terlihat: {tnames}."
-        ),
-        "rekomendasi": [
-            "Isolasi host terdampak dari jaringan OT.",
-            "Reset kredensial akun yang disalahgunakan dan paksa kunci SSH.",
-            "Periksa PLC genset dan kembalikan ke status aman.",
-            "Blokir IP penyerang di perimeter.",
-        ],
+            f"Penyerang {sumber}menyasar {hosts} lalu {dampak}. "
+            + (f"Teknik yang terlihat: {tnames}." if tnames else "")
+        ).strip(),
+        "rekomendasi": rek,
     }
 
 
 def summarize(inc):
-    allowed_ips = set(IP_RE.findall(_facts(inc)))
-    allowed_eids = set(inc.evidence_ids())
-    user = _facts(inc)
+    facts = _facts(inc)
     meta = {"model": config.OLLAMA_MODEL, "elapsed_s": None, "tokens": None,
-            "warnings": [], "fallback": False}
+            "warnings": [], "fallback": False, "rejected": False}
     t0 = time.time()
     try:
-        out = _call_ollama(SYSTEM, user)
+        out = _call_ollama(SYSTEM, facts)
         meta["elapsed_s"] = round(time.time() - t0, 1)
         meta["tokens"] = out.get("eval_count")
         data = json.loads(out["message"]["content"])
@@ -107,14 +142,22 @@ def summarize(inc):
         rek = [str(x).strip() for x in rek if str(x).strip()]
         if not (judul and ringkasan and rek):
             raise ValueError("field kosong")
-        meta["warnings"] = _validate(judul + " " + ringkasan + " " + " ".join(rek),
-                                     allowed_ips, allowed_eids)
-        return {"judul": judul, "ringkasan": ringkasan, "rekomendasi": rek, "_meta": meta}
     except Exception as e:
         meta["fallback"] = True
-        meta["warnings"] = [f"LLM gagal/menyimpang ({e}); pakai ringkasan cadangan"]
+        meta["warnings"] = [f"LLM gagal ({e}); pakai ringkasan cadangan"]
         if meta["elapsed_s"] is None:
             meta["elapsed_s"] = round(time.time() - t0, 1)
         res = _fallback(inc)
         res["_meta"] = meta
         return res
+
+    warnings = _validate(judul + " " + ringkasan + " " + " ".join(rek), facts)
+    if warnings:
+        # Narasi yang menyebut fakta di luar bukti tidak boleh masuk laporan.
+        meta["fallback"] = True
+        meta["rejected"] = True
+        meta["warnings"] = ["Narasi LLM ditolak validasi: " + "; ".join(warnings)]
+        res = _fallback(inc)
+        res["_meta"] = meta
+        return res
+    return {"judul": judul, "ringkasan": ringkasan, "rekomendasi": rek, "_meta": meta}

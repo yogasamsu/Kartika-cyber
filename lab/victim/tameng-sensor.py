@@ -131,7 +131,7 @@ def watch_shadow_read():
     wd = libc.inotify_add_watch(fd, SHADOW.encode(), IN_ACCESS)
     if wd < 0:
         return
-    last = 0.0
+    last = {}
     HDR = struct.calcsize("iIII")
     while True:
         data = os.read(fd, 4096)  # blocking
@@ -140,11 +140,14 @@ def watch_shadow_read():
             _wd, mask, _cookie, length = struct.unpack_from("iIII", data, off)
             off += HDR + length
             if mask & IN_ACCESS:
+                pid = attribute_reader()
                 now = time.time()
-                if now - last < 2:   # redam banjir event
+                # Redam banjir per proses: pembacaan PAM oleh sshd tidak boleh
+                # menelan pembacaan oleh payload penyerang sedetik kemudian.
+                if now - last.get(pid, 0) < 2:
                     continue
-                last = now
-                emit("shadow_read", {"target": SHADOW}, pid=attribute_reader())
+                last[pid] = now
+                emit("shadow_read", {"target": SHADOW}, pid=pid)
 
 
 def main():
