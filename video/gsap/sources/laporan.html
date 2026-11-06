@@ -1,0 +1,34 @@
+<!doctype html><meta charset="utf-8">
+<style>
+body{margin:0;background:#fff;color:#1b2733;font:17px/1.6 -apple-system,"SF Pro Text",sans-serif;width:1600px;padding:48px 64px;box-sizing:border-box}
+h1{font-size:34px;margin:0 0 14px} h2{font-size:23px;margin:30px 0 10px;border-bottom:1px solid #e3e8ee;padding-bottom:6px}
+p{margin:6px 0} code{font:15px "SF Mono",Menlo,monospace;background:#eef2f6;padding:1px 6px;border-radius:4px}
+table{border-collapse:collapse;width:100%;font-size:15.5px;margin:8px 0} th,td{border:1px solid #dde4ea;padding:7px 10px;text-align:left;vertical-align:top}
+th{background:#f3f6f9} ul{margin:6px 0;padding-left:24px} hr{border:0;border-top:1px solid #e3e8ee;margin:24px 0} i{color:#6b7c8c}
+</style><h1>Penyerangan Sistem Kritis dengan Brute Force dan Lateral Movement</h1>
+<p><b>Insiden</b> <code>INC-20261106-101926</code> · <b>Tingkat bahaya</b> 🔴 KRITIS · <b>Dampak OT</b> Ya</p>
+<p><b>Waktu</b> 2026-11-06 10:19:26 – 10:19:41 UTC · <b>IP masuk</b> 10.10.5.90 · <b>Host</b> pc-staf-07, srv-file-01, plc-genset-01</p>
+<p><b>Akun disalahgunakan</b> sertu</p>
+<h2>Ringkasan</h2>
+<p>Penyerangan dengan tingkat bahaya kritis ini melibatkan serangan brute force dan lateral movement, mengakibatkan shutdown genset. Serangan dimulai dengan serangan brute force terhadap SSH di pc-staf-07, berhasil dengan akun &#x27;sertu&#x27;. Penyerang kemudian melakukan lateral movement ke srv-file-01 dan mematikan genset melalui perintah Modbus.</p>
+<h2>Kronologi</h2>
+<table><tr><th>Waktu</th><th>Kejadian</th><th>Bukti</th><th>ATT&amp;CK</th></tr><tr><td>10:19:26</td><td>4 percobaan login SSH gagal ke pc-staf-07 dari 10.10.5.90 (kali-ops) — pola brute force</td><td>W13, W14, W16, W17</td><td>T1110</td></tr><tr><td>10:19:37</td><td>Login SSH BERHASIL ke pc-staf-07 sebagai &#x27;sertu&#x27; dari 10.10.5.90 (akses awal dari luar jaringan)</td><td>W18</td><td>T1078, T1021.004</td></tr><tr><td>10:19:37</td><td>Login SSH BERHASIL ke pc-staf-07 sebagai &#x27;sertu&#x27; dari 10.10.5.90 (akses awal dari luar jaringan)</td><td>W19</td><td>T1078, T1021.004</td></tr><tr><td>10:19:37</td><td>Eksekusi berkas dari /tmp di pc-staf-07 (pengguna &#x27;?&#x27;) — payload penyerang</td><td>W24</td><td>T1059.004</td></tr><tr><td>10:19:37</td><td>Pembacaan /etc/shadow di pc-staf-07 — pencurian hash kredensial</td><td>W22, W23, W25, W26</td><td>T1003.008</td></tr><tr><td>10:19:38</td><td>Login SSH BERHASIL ke srv-file-01 sebagai &#x27;sertu&#x27; dari 10.10.5.66 (gerak lateral dari pc-staf-07)</td><td>W27</td><td>T1078, T1021.004</td></tr><tr><td>10:19:41</td><td>Perintah tulis Modbus dari 10.10.5.7 (srv-file-01) ke PLC plc-genset-01 — mematikan genset (DAMPAK OT)</td><td>S1</td><td>T0855, T0816</td></tr></table>
+<h2>Teknik MITRE ATT&amp;CK</h2>
+<p><b>Enterprise:</b> T1110 (Brute Force), T1078 (Valid Accounts), T1021.004 (Remote Services: SSH), T1059.004 (Command and Scripting Interpreter: Unix Shell), T1003.008 (OS Credential Dumping: /etc/passwd and /etc/shadow)</p>
+<p><b>ICS:</b> T0855 (Unauthorized Command Message), T0816 (Device Restart/Shutdown)</p>
+<h2>Rekomendasi</h2>
+<ul>
+<li>Menerapkan firewall yang lebih ketat untuk membatasi akses SSH dari luar jaringan.</li>
+<li>Mengimplementasikan autentikasi dua faktor (2FA) pada akun yang sensitif.</li>
+<li>Meningkatkan monitoring dan logging pada sistem untuk mendeteksi aktivitas mencurigakan.</li>
+<li>Melakukan audit kredensial dan memastikan keamanan file /etc/shadow.</li>
+<li>Menerapkan isolasi antar sistem kritis untuk mencegah lateral movement.</li>
+</ul>
+<h2>Bukti</h2>
+<table><tr><th>ID</th><th>Sumber</th><th>Sinyal</th><th>Host/Alur</th><th>Waktu</th></tr><tr><td>W13</td><td>wazuh (5710)</td><td>Login SSH gagal (indikasi brute force)</td><td>10.10.5.90 → pc-staf-07</td><td>10:19:26</td></tr><tr><td>W14</td><td>wazuh (5710)</td><td>Login SSH gagal (indikasi brute force)</td><td>10.10.5.90 → pc-staf-07</td><td>10:19:27</td></tr><tr><td>W16</td><td>wazuh (5710)</td><td>Login SSH gagal (indikasi brute force)</td><td>10.10.5.90 → pc-staf-07</td><td>10:19:33</td></tr><tr><td>W17</td><td>wazuh (5710)</td><td>Login SSH gagal (indikasi brute force)</td><td>10.10.5.90 → pc-staf-07</td><td>10:19:36</td></tr><tr><td>W18</td><td>wazuh (5715)</td><td>Login SSH BERHASIL</td><td>10.10.5.90 → pc-staf-07</td><td>10:19:37</td></tr><tr><td>W19</td><td>wazuh (5715)</td><td>Login SSH BERHASIL</td><td>10.10.5.90 → pc-staf-07</td><td>10:19:37</td></tr><tr><td>W24</td><td>wazuh (100010)</td><td>Eksekusi berkas dari /tmp</td><td>pc-staf-07</td><td>10:19:37</td></tr><tr><td>W22</td><td>wazuh (100011)</td><td>Pembacaan /etc/shadow</td><td>pc-staf-07</td><td>10:19:37</td></tr><tr><td>W23</td><td>wazuh (100011)</td><td>Pembacaan /etc/shadow</td><td>pc-staf-07</td><td>10:19:37</td></tr><tr><td>W25</td><td>wazuh (100011)</td><td>Pembacaan /etc/shadow</td><td>pc-staf-07</td><td>10:19:37</td></tr><tr><td>W26</td><td>wazuh (100011)</td><td>Pembacaan /etc/shadow</td><td>pc-staf-07</td><td>10:19:37</td></tr><tr><td>W27</td><td>wazuh (5715)</td><td>Login SSH BERHASIL</td><td>10.10.5.66 → srv-file-01</td><td>10:19:38</td></tr><tr><td>S1</td><td>suricata (7000005)</td><td>Perintah tulis Modbus (fc5) ke PLC</td><td>10.10.5.7 → 10.10.5.20</td><td>10:19:41</td></tr></table>
+<h2>Catatan analisis</h2>
+<ul>
+<li>27 pembacaan /etc/shadow diabaikan sebagai derau login PAM (tidak didahului eksekusi /tmp di host yang sama).</li>
+</ul>
+<hr>
+<p><i>Dihasilkan lokal (air-gapped) oleh Tameng · narasi: LLM qwen2.5:7b · 80.3 dtk · 249 token.</i></p>

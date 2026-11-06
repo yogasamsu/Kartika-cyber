@@ -150,6 +150,9 @@
   .verify{display:inline-flex; align-items:center; gap:7px; font-family:var(--mono); font-size:11px;
     color:var(--ok); border:1px solid rgba(46,204,113,.3); background:rgba(46,204,113,.08); padding:5px 10px; border-radius:7px}
   footer{margin-top:18px; color:var(--faint); font-size:11.5px; font-family:var(--mono); text-align:center}
+  .still *{animation:none!important; transition:none!important}
+  .still .alert{opacity:1; transform:none}
+  .still .packet{opacity:0!important}
   @media(prefers-reduced-motion:reduce){ *{animation:none!important; transition:none!important} }
 </style>
 
@@ -227,42 +230,172 @@
 <footer id="foot">Tameng · analisis & narasi berjalan 100% lokal di satu laptop.</footer>
 
 <script>
+// Data dari artifacts/insiden-tameng-20261106.json (uji lab 6 Nov 2026), dihasilkan
+// mesin Tameng tanpa suntingan tangan.
 const INCIDENT = {
-  "id":"INC-20261028-101352","severity":"kritis","has_ot_impact":true,
-  "start":"10:13:52","end":"10:14:01","entry_ip":"10.10.5.90",
-  "identities":["sertu"],
-  "techniques":[
-    {"id":"T1110","name":"Brute Force","domain":"enterprise"},
-    {"id":"T1003.008","name":"Credential Dumping: /etc/shadow","domain":"enterprise"},
-    {"id":"T1078","name":"Valid Accounts","domain":"enterprise"},
-    {"id":"T1021.004","name":"Remote Services: SSH","domain":"enterprise"},
-    {"id":"T1059.004","name":"Unix Shell","domain":"enterprise"},
-    {"id":"T0855","name":"Unauthorized Command Message","domain":"ics"},
-    {"id":"T0816","name":"Device Restart/Shutdown","domain":"ics"}
-  ],
-  "steps":[
-    {"time":"10:13:52","text":"2 percobaan login SSH gagal ke pc-staf-07 dari 10.10.5.90 (kali-ops) — pola brute force","evidence":["W1","W2"],"tech":["T1110"],"src":"wazuh","edge":"atk-pc"},
-    {"time":"10:13:54","text":"Pembacaan /etc/shadow di pc-staf-07 — pencurian hash kredensial","evidence":["W3"],"tech":["T1003.008"],"src":"wazuh","edge":"pc"},
-    {"time":"10:13:56","text":"2 percobaan login SSH gagal ke pc-staf-07 dari 10.10.5.90 — pola brute force","evidence":["W4","W5"],"tech":["T1110"],"src":"wazuh","edge":"atk-pc"},
-    {"time":"10:13:59","text":"Login SSH BERHASIL ke pc-staf-07 sebagai 'sertu' dari 10.10.5.90 (akses awal dari luar jaringan)","evidence":["W6"],"tech":["T1078","T1021.004"],"src":"wazuh","edge":"atk-pc","win":true},
-    {"time":"10:13:59","text":"Pembacaan /etc/shadow di pc-staf-07 — pencurian hash kredensial","evidence":["W8"],"tech":["T1003.008"],"src":"wazuh","edge":"pc"},
-    {"time":"10:14:00","text":"Eksekusi berkas dari /tmp di pc-staf-07 — payload penyerang","evidence":["W10"],"tech":["T1059.004"],"src":"wazuh","edge":"pc"},
-    {"time":"10:14:00","text":"Perintah tulis Modbus dari 10.10.5.7 (srv-file-01) ke PLC genset — MEMATIKAN GENSET","evidence":["S1"],"tech":["T0855","T0816"],"src":"suricata","edge":"srv-plc","ot":true},
-    {"time":"10:14:01","text":"Login SSH BERHASIL ke srv-file-01 sebagai 'sertu' dari pc-staf-07 (gerak lateral)","evidence":["W12"],"tech":["T1078","T1021.004"],"src":"wazuh","edge":"pc-srv","win":true}
-  ],
-  "summary":{
-    "judul":"Insiden Penyerangan Sistem Kritis",
-    "ringkasan":"Penyerangan dengan tingkat bahaya kritis ini melibatkan serangkaian teknik seperti brute force, credential dumping, dan lateral movement, yang mengakibatkan shutdown genset dan eksekusi payload. Penyerang berhasil mendapatkan akses ke beberapa host dan memanfaatkan kelemahan untuk merusak operasi.",
-    "rekomendasi":[
-      "Menerapkan firewall yang lebih ketat untuk mengontrol akses ke layanan SSH.",
-      "Mengimplementasikan otentikasi dua faktor (2FA) pada semua akun yang sensitif.",
-      "Melakukan audit kredensial dan menghapus akun yang tidak digunakan.",
-      "Meningkatkan keamanan pada perangkat PLC dan genset dengan membatasi akses dan memverifikasi setiap permintaan.",
-      "Melakukan pemantauan real-time pada aktivitas jaringan untuk mendeteksi anomali segera."
-    ]
+ "id": "INC-20261106-101926",
+ "severity": "kritis",
+ "has_ot_impact": true,
+ "start": "10:19:26",
+ "end": "10:19:41",
+ "entry_ip": "10.10.5.90",
+ "identities": [
+  "sertu"
+ ],
+ "techniques": [
+  {
+   "id": "T1110",
+   "name": "Brute Force",
+   "domain": "enterprise"
   },
-  "note":"1 pembacaan /etc/shadow diabaikan sebagai derau login PAM (tidak berkaitan dengan eksekusi /tmp).",
-  "meta":{"model":"qwen2.5:7b","elapsed_s":29.2,"tokens":236}
+  {
+   "id": "T1078",
+   "name": "Valid Accounts",
+   "domain": "enterprise"
+  },
+  {
+   "id": "T1021.004",
+   "name": "Remote Services: SSH",
+   "domain": "enterprise"
+  },
+  {
+   "id": "T1059.004",
+   "name": "Command and Scripting Interpreter: Unix Shell",
+   "domain": "enterprise"
+  },
+  {
+   "id": "T1003.008",
+   "name": "OS Credential Dumping: /etc/passwd and /etc/shadow",
+   "domain": "enterprise"
+  },
+  {
+   "id": "T0855",
+   "name": "Unauthorized Command Message",
+   "domain": "ics"
+  },
+  {
+   "id": "T0816",
+   "name": "Device Restart/Shutdown",
+   "domain": "ics"
+  }
+ ],
+ "steps": [
+  {
+   "time": "10:19:26",
+   "text": "4 percobaan login SSH gagal ke pc-staf-07 dari 10.10.5.90 (kali-ops) — pola brute force",
+   "evidence": [
+    "W13",
+    "W14",
+    "W16",
+    "W17"
+   ],
+   "tech": [
+    "T1110"
+   ],
+   "src": "wazuh",
+   "edge": "atk-pc"
+  },
+  {
+   "time": "10:19:37",
+   "text": "Login SSH BERHASIL ke pc-staf-07 sebagai 'sertu' dari 10.10.5.90 (akses awal dari luar jaringan)",
+   "evidence": [
+    "W18"
+   ],
+   "tech": [
+    "T1078",
+    "T1021.004"
+   ],
+   "src": "wazuh",
+   "edge": "atk-pc",
+   "win": true
+  },
+  {
+   "time": "10:19:37",
+   "text": "Login SSH BERHASIL ke pc-staf-07 sebagai 'sertu' dari 10.10.5.90 (akses awal dari luar jaringan)",
+   "evidence": [
+    "W19"
+   ],
+   "tech": [
+    "T1078",
+    "T1021.004"
+   ],
+   "src": "wazuh",
+   "edge": "atk-pc",
+   "win": true
+  },
+  {
+   "time": "10:19:37",
+   "text": "Eksekusi berkas dari /tmp di pc-staf-07 (pengguna '?') — payload penyerang",
+   "evidence": [
+    "W24"
+   ],
+   "tech": [
+    "T1059.004"
+   ],
+   "src": "wazuh",
+   "edge": "pc"
+  },
+  {
+   "time": "10:19:37",
+   "text": "Pembacaan /etc/shadow di pc-staf-07 — pencurian hash kredensial",
+   "evidence": [
+    "W22",
+    "W23",
+    "W25",
+    "W26"
+   ],
+   "tech": [
+    "T1003.008"
+   ],
+   "src": "wazuh",
+   "edge": "pc"
+  },
+  {
+   "time": "10:19:38",
+   "text": "Login SSH BERHASIL ke srv-file-01 sebagai 'sertu' dari 10.10.5.66 (gerak lateral dari pc-staf-07)",
+   "evidence": [
+    "W27"
+   ],
+   "tech": [
+    "T1078",
+    "T1021.004"
+   ],
+   "src": "wazuh",
+   "edge": "pc-srv",
+   "win": true
+  },
+  {
+   "time": "10:19:41",
+   "text": "Perintah tulis Modbus dari 10.10.5.7 (srv-file-01) ke PLC plc-genset-01 — mematikan genset (DAMPAK OT)",
+   "evidence": [
+    "S1"
+   ],
+   "tech": [
+    "T0855",
+    "T0816"
+   ],
+   "src": "suricata",
+   "edge": "srv-plc",
+   "ot": true
+  }
+ ],
+ "summary": {
+  "judul": "Penyerangan Sistem Kritis dengan Brute Force dan Lateral Movement",
+  "ringkasan": "Penyerangan dengan tingkat bahaya kritis ini melibatkan serangan brute force dan lateral movement, mengakibatkan shutdown genset. Serangan dimulai dengan serangan brute force terhadap SSH di pc-staf-07, berhasil dengan akun 'sertu'. Penyerang kemudian melakukan lateral movement ke srv-file-01 dan mematikan genset melalui perintah Modbus.",
+  "rekomendasi": [
+   "Menerapkan firewall yang lebih ketat untuk membatasi akses SSH dari luar jaringan.",
+   "Mengimplementasikan autentikasi dua faktor (2FA) pada akun yang sensitif.",
+   "Meningkatkan monitoring dan logging pada sistem untuk mendeteksi aktivitas mencurigakan.",
+   "Melakukan audit kredensial dan memastikan keamanan file /etc/shadow.",
+   "Menerapkan isolasi antar sistem kritis untuk mencegah lateral movement."
+  ]
+ },
+ "note": "27 pembacaan /etc/shadow diabaikan sebagai derau login PAM (tidak didahului eksekusi /tmp di host yang sama).",
+ "meta": {
+  "model": "qwen2.5:7b",
+  "elapsed_s": 80.3,
+  "tokens": 249
+ }
 };
 
 // Node & posisi (persen dalam kotak peta)
@@ -398,7 +531,16 @@ document.querySelectorAll(".seg button").forEach(b=>b.onclick=()=>{
   if(timer){ clearInterval(timer); timer=setInterval(step,1600/speed); }
 });
 
-// auto-play saat dibuka
+// ?step=N : tampilkan keadaan setelah N langkah tanpa animasi (untuk footage video).
+// ?step=all : seluruh langkah + laporan. Tanpa parameter: putar otomatis.
+const STEP = new URLSearchParams(location.search).get("step");
 restart();
-setTimeout(play, 600);
+if (STEP !== null) {
+  document.documentElement.classList.add("still");
+  const n = STEP === "all" ? INCIDENT.steps.length : Math.min(+STEP, INCIDENT.steps.length);
+  for (let k = 0; k < n; k++) { i = k; renderStep(k); }
+  if (STEP === "all") $("#report").classList.add("show");
+} else {
+  setTimeout(play, 600);
+}
 </script>

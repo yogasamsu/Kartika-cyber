@@ -1,0 +1,15 @@
+{
+  "name": "tameng-video",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "render": "node gsap/render.mjs",
+    "capture": "node gsap/capture.mjs gsap/sources/log.html gsap/sources/laporan.html"
+  },
+  "dependencies": {
+    "gsap": "3.12.5"
+  },
+  "devDependencies": {
+    "playwright-core": "1.48.2"
+  }
+}

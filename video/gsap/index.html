@@ -1,0 +1,612 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>Video Tameng</title>
+<!--
+  Video Tameng ±5:20, satu timeline GSAP yang dijeda (bisa di-seek ke detik mana pun).
+  Tanpa VO: cerita dibawa teks layar (COPY di bawah). Audio musik opsional saat render.
+  Buka langsung di browser:   index.html           Spasi putar/jeda, ← → mundur/maju 5 dtk
+                              index.html?t=212     mulai dari detik 212
+  Render per bingkai:         node render.mjs      (memakai window.__seek)
+-->
+<style>
+:root{
+  --bg:#070b10; --panel:#101821; --panel2:#0c131b; --line:#1d2a37;
+  --fg:#e9f0f5; --muted:#8ea3b4; --faint:#5a6b7a;
+  --it:#36c3e0; --ot:#f3a638; --ok:#2ecc71; --crit:#ff4d4f;
+  --sans:-apple-system,"SF Pro Display","Segoe UI",Roboto,system-ui,sans-serif;
+  --mono:"SF Mono",ui-monospace,Menlo,monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:#000;overflow:hidden}
+#stage{position:absolute;left:50%;top:50%;width:1920px;height:1080px;overflow:hidden;transform-origin:50% 50%;
+  background:radial-gradient(1400px 800px at 85% -10%,#0f2230 0%,transparent 60%),var(--bg);color:var(--fg);font-family:var(--sans)}
+.sc{position:absolute;inset:0;visibility:hidden;opacity:0}
+.mono{font-family:var(--mono)}
+.pad{position:absolute;inset:0;padding:110px 140px}
+.grid-bg{position:absolute;inset:0;opacity:.35;
+  background-image:linear-gradient(#13202c 1px,transparent 1px),linear-gradient(90deg,#13202c 1px,transparent 1px);background-size:80px 80px;
+  mask-image:radial-gradient(ellipse at 50% 55%,#000 30%,transparent 75%)}
+.kicker{font:600 24px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--it)}
+h1{font-size:80px;line-height:1.05;margin:16px 0 0;font-weight:800;letter-spacing:-.02em}
+h1 em{font-style:normal;color:var(--it)}
+.sub{font-size:36px;color:var(--muted);margin-top:18px;line-height:1.35}
+.src{position:absolute;left:140px;bottom:60px;font-size:20px;color:var(--faint)}
+.pill{position:absolute;left:56px;top:48px;display:flex;gap:12px;z-index:5}
+.pill span{font:600 22px var(--sans);padding:10px 20px;border-radius:999px;background:rgba(7,11,16,.86);border:1px solid #2b4a63;color:var(--fg);
+  display:inline-flex;align-items:center;gap:10px;box-shadow:0 8px 30px rgba(0,0,0,.5)}
+.pill span i{width:10px;height:10px;border-radius:50%;background:var(--it);box-shadow:0 0 10px var(--it)}
+.pill span.red i{background:var(--crit);box-shadow:0 0 10px var(--crit)}
+.pill span.amber i{background:var(--ot);box-shadow:0 0 10px var(--ot)}
+.pill.bottom{top:auto;bottom:52px}
+svg.ic{fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+/* kamera di atas footage */
+.cam{position:absolute;left:0;top:0;width:1920px;transform-origin:0 0}
+.cam img{position:absolute;left:0;top:0;width:1920px;display:block}
+.vignette{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,.55))}
+.hl{position:absolute;border:4px solid var(--it);border-radius:10px;box-shadow:0 0 0 9999px rgba(0,0,0,.45),0 0 30px rgba(54,195,224,.6);opacity:0}
+
+/* 1a */
+.devices{position:absolute;left:140px;right:140px;top:560px;display:flex;justify-content:space-between}
+.devline{position:absolute;left:230px;right:230px;top:650px;height:3px;background:linear-gradient(90deg,var(--it),var(--ot));transform-origin:0 50%;transform:scaleX(0)}
+.dev{width:300px;text-align:center;opacity:0}
+.dev .c{width:180px;height:180px;margin:0 auto;border-radius:50%;display:grid;place-items:center;background:var(--panel);border:2px solid #24425a;color:var(--it);
+  box-shadow:0 0 50px rgba(54,195,224,.18)}
+.dev.ot .c{color:var(--ot);border-color:#5a4213;box-shadow:0 0 50px rgba(243,166,56,.2)}
+.dev b{display:block;font-size:34px;margin-top:22px}
+.dev small{display:block;font-size:24px;color:var(--muted);margin-top:4px}
+
+/* 1b */
+.big{font:800 200px/1 var(--sans);font-variant-numeric:tabular-nums;letter-spacing:-.03em;color:var(--it)}
+.big small{font:700 80px var(--sans);letter-spacing:0;margin-left:16px}
+.events{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:70px}
+.event{background:var(--panel);border:1px solid var(--line);border-radius:24px;padding:36px 40px;opacity:0}
+.event .d{font:600 24px var(--mono);color:var(--crit);letter-spacing:.06em}
+.event p{font-size:36px;line-height:1.35;margin:14px 0 0}
+
+/* 1c */
+.side-panel{position:absolute;right:0;top:0;bottom:0;width:780px;padding:150px 90px;
+  background:linear-gradient(90deg,transparent,rgba(5,8,12,.94) 22%)}
+.count{font:800 220px/1 var(--mono);color:var(--fg);letter-spacing:-.04em}
+.count-l{font-size:36px;color:var(--muted);margin-top:10px}
+.count2{font:800 120px/1 var(--mono);color:var(--crit);margin-top:60px;opacity:0}
+
+/* 2 & 3 */
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:30px;margin-top:70px}
+.card{position:relative;background:var(--panel);border:2px solid var(--line);border-radius:26px;padding:40px 34px;min-height:520px;opacity:0}
+.card .c{width:96px;height:96px;border-radius:50%;display:grid;place-items:center;background:#0e2a36;color:var(--it)}
+.card h3{font-size:38px;margin:28px 0 10px;line-height:1.15}
+.card p{font-size:28px;color:var(--muted);line-height:1.4;margin:0}
+.card .weak{position:absolute;left:24px;right:24px;bottom:24px;border-radius:18px;padding:22px 24px;background:rgba(255,77,79,.12);
+  border:1px solid rgba(255,77,79,.5);font-size:28px;line-height:1.35;color:#ffc7c8;opacity:0}
+.card.bad{border-color:rgba(255,77,79,.6)}
+
+/* 4 */
+.center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.brand{font-size:190px;font-weight:800;letter-spacing:-.03em;margin-top:10px}
+.tag{font-size:46px;color:var(--it);margin-top:6px}
+.chips{display:flex;gap:22px;margin-top:60px}
+.chips span{font-size:30px;padding:14px 28px;border-radius:999px;border:1px solid #2b4a63;background:var(--panel);opacity:0}
+
+/* 5a */
+.topo{position:absolute;left:140px;right:140px;top:330px;height:520px}
+.tn{position:absolute;width:300px;text-align:center;opacity:0}
+.tn .c{width:170px;height:170px;margin:0 auto;border-radius:50%;display:grid;place-items:center;color:#fff}
+.tn b{display:block;font:700 32px var(--mono);margin-top:18px}
+.tn small{display:block;font:22px var(--mono);color:var(--muted);margin-top:6px}
+.tl{position:absolute;height:4px;top:85px;background:#2a3d4f;transform-origin:0 50%;transform:scaleX(0)}
+.sensor{position:absolute;top:360px;border-radius:20px;padding:22px 30px;font-size:30px;font-weight:700;opacity:0}
+.sensor small{display:block;font-weight:400;font-size:24px;margin-top:6px;opacity:.85}
+
+/* 5b terminal */
+.term{position:absolute;left:140px;top:170px;width:1240px;height:800px;border-radius:18px;background:#05080c;border:1px solid #1f2d3b;
+  box-shadow:0 30px 90px rgba(0,0,0,.7);overflow:hidden}
+.term .bar{height:46px;background:#111a24;display:flex;align-items:center;gap:10px;padding:0 18px}
+.term .bar i{width:14px;height:14px;border-radius:50%;background:#2a3846}
+.term .bar span{font:20px var(--mono);color:var(--faint);margin-left:14px}
+.term pre{margin:0;padding:26px 30px;font:25px/1.55 var(--mono);color:#b9c7d3;white-space:pre-wrap}
+.term .h{color:var(--it);font-weight:600} .term .bad{color:#ff8a8b} .term .ok{color:var(--ok)} .term .p{color:#7ee787}
+.plc{position:absolute;right:120px;top:300px;width:520px;border-radius:20px;background:var(--panel);border:2px solid var(--line);padding:30px;opacity:0}
+.plc .t{font:600 22px var(--mono);color:var(--muted)}
+.plc .st{font:800 52px var(--sans);margin-top:16px;color:var(--ok)}
+.plc .lg{font:19px/1.5 var(--mono);color:var(--muted);margin-top:18px}
+.plc.off{border-color:var(--crit);box-shadow:0 0 60px rgba(255,77,79,.35)} .plc.off .st{color:var(--crit)}
+
+/* 5d validasi */
+.val{position:absolute;left:0;right:0;top:170px;bottom:0;background:rgba(5,8,12,.94);padding:120px 140px 0;
+  display:grid;grid-template-columns:1fr 1fr;gap:50px;opacity:0}
+.vc{position:relative;background:var(--panel);border:2px solid var(--line);border-radius:24px;padding:34px 40px;height:330px}
+.vc.good{border-color:var(--ok);background:#0d1d16;opacity:0}
+.vc .h{font:22px var(--mono);color:var(--muted);margin-bottom:16px}
+.vc .x{font-size:36px;line-height:1.4}
+.lie{border-radius:8px;padding:0 6px}
+.lie.on{background:rgba(255,77,79,.25);color:#ff8a8b;outline:3px solid var(--crit)}
+.stamp{position:absolute;right:40px;bottom:34px;font:900 64px var(--sans);letter-spacing:.1em;color:var(--crit);border:6px solid var(--crit);border-radius:14px;
+  padding:4px 24px;transform:rotate(-12deg) scale(2);opacity:0}
+
+/* 6 */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:30px;margin-top:80px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:26px;padding:46px 36px;min-height:420px;opacity:0}
+.stat b{display:block;font:800 96px/1 var(--mono);letter-spacing:-.04em;white-space:nowrap}
+.stat p{font-size:32px;color:var(--muted);line-height:1.38;margin:26px 0 0}
+
+/* 7 */
+table.cmp{border-collapse:separate;border-spacing:0;margin-top:60px;width:100%;font-size:32px}
+.cmp th,.cmp td{padding:22px 26px;text-align:center;border-bottom:1px solid var(--line)}
+.cmp th{font-size:28px;color:var(--muted);font-weight:600}
+.cmp td:first-child,.cmp th:first-child{text-align:left;color:var(--fg)}
+.cmp tr{opacity:0}
+.cmp .no{color:#ff8a8b} .cmp .mid{color:var(--ot)} .cmp .yes{color:var(--ok)}
+.cmp .tm{background:rgba(54,195,224,.0);font-weight:800}
+.cmp .tm.on{background:rgba(54,195,224,.14)}
+.next{font-size:40px;margin-top:50px;color:var(--it);font-weight:700;opacity:0}
+
+/* UI di luar render */
+#hud{position:fixed;right:14px;bottom:10px;font:13px var(--mono);color:#9ab;background:rgba(0,0,0,.6);padding:6px 10px;border-radius:6px}
+.render #hud{display:none!important}
+/* teks layar: pembawa cerita (pengganti VO) */
+.cap{position:absolute;left:50%;bottom:58px;transform:translateX(-50%);max-width:1560px;width:max-content;z-index:20;
+  font:600 44px/1.3 var(--sans);text-align:center;color:#fff;padding:16px 34px;border-radius:16px;
+  background:rgba(5,8,12,.82);border:1px solid #22384b;box-shadow:0 12px 40px rgba(0,0,0,.5);opacity:0;visibility:hidden}
+.cap b{color:var(--it)} .cap .r{color:#ff8a8b}
+</style>
+</head>
+<body>
+<div id="stage">
+
+<!-- ========== 1a Markas hidup di jaringan ========== -->
+<section class="sc" id="s1a">
+  <div class="grid-bg"></div>
+  <div class="pad">
+    <div class="kicker">Masalah</div>
+    <h1 id="s1a-h">Markas satuan kini <em>hidup di jaringan</em>.</h1>
+  </div>
+  <div class="devline" id="devline"></div>
+  <div class="devices">
+    <div class="dev" data-ic="pc"><div class="c"></div><b>PC staf</b><small>administrasi</small></div>
+    <div class="dev" data-ic="server"><div class="c"></div><b>Server data</b><small>arsip satuan</small></div>
+    <div class="dev" data-ic="cctv"><div class="c"></div><b>CCTV</b><small>pengamanan</small></div>
+    <div class="dev" data-ic="radio"><div class="c"></div><b>Radio</b><small>komunikasi</small></div>
+    <div class="dev ot" data-ic="bolt"><div class="c"></div><b>Genset</b><small>listrik cadangan</small></div>
+  </div>
+</section>
+
+<!-- ========== 1b Ancamannya nyata ========== -->
+<section class="sc" id="s1b">
+  <div class="pad">
+    <div class="kicker">Ancamannya nyata</div>
+    <div class="big" style="margin-top:40px"><span id="cnt52">0</span><small>miliar</small></div>
+    <div class="sub" id="s1b-sub">anomali trafik ke Indonesia, Januari sampai November 2025 (BSSN)</div>
+    <div class="events">
+      <div class="event" id="ev1"><div class="d">JUNI 2024</div><p>Ransomware melumpuhkan Pusat Data Nasional. <b>282 instansi</b> terdampak.</p></div>
+      <div class="event" id="ev2"><div class="d">JUNI 2024</div><p>Data yang diklaim milik <b>BAIS TNI</b> dijual di forum gelap.</p></div>
+    </div>
+  </div>
+  <div class="src" style="bottom:auto;top:56px;left:auto;right:56px">Sumber: BSSN via Investortrust, Bisnis.com (2025); Detik, Investortrust (2024)</div>
+</section>
+
+<!-- ========== 1c Layar analis ========== -->
+<section class="sc" id="s1c">
+  <div class="cam" id="camLog"><img src="assets/log.png" alt=""></div>
+  <div class="side-panel">
+    <div class="count mono" id="cnt654">0</div>
+    <div class="count-l">alert dalam 4 menit</div>
+    <div class="count2" id="cnt13">13</div>
+    <div class="count-l" id="cnt13l" style="opacity:0">yang berkaitan dengan serangan</div>
+  </div>
+  <div class="pill"><span><i></i>Log Wazuh asli · lab Tameng 6 Nov 2026</span></div>
+  <div class="vignette"></div>
+</section>
+
+<!-- ========== 2 Solusi yang ada ========== -->
+<section class="sc" id="s2">
+  <div class="pad">
+    <div class="kicker">Solusi yang sudah ada</div>
+    <h1>Alatnya sebenarnya sudah ada</h1>
+    <div class="cards" id="cards2">
+      <div class="card" data-ic="search"><div class="c"></div><h3>SIEM dan IDS</h3><p>Wazuh, Suricata. Gratis dan andal untuk mendeteksi.</p></div>
+      <div class="card" data-ic="cloud"><div class="c"></div><h3>Copilot AI komersial</h3><p>Microsoft Security Copilot, Google SecOps.</p></div>
+      <div class="card" data-ic="factory"><div class="c"></div><h3>Platform keamanan OT</h3><p>Nozomi, Claroty, Dragos untuk PLC dan mesin industri.</p></div>
+      <div class="card" data-ic="flow"><div class="c"></div><h3>Otomasi buatan sendiri</h3><p>Alur n8n yang mengirim alert ke GPT.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== 3 Masalah solusi yang ada ========== -->
+<section class="sc" id="s3">
+  <div class="pad">
+    <div class="kicker">Masalahnya</div>
+    <h1>Setiap solusi punya lubang</h1>
+    <div class="cards" id="cards3">
+      <div class="card" data-ic="search"><div class="c"></div><h3>SIEM dan IDS</h3><p>Wazuh, Suricata</p>
+        <div class="weak">Satu alert per kejadian. Merangkai cerita serangan tetap tugas manusia.</div></div>
+      <div class="card" data-ic="cloud"><div class="c"></div><h3>Copilot AI komersial</h3><p>Microsoft, Google</p>
+        <div class="weak">Data diproses di cloud asing. Tidak boleh untuk data militer.</div></div>
+      <div class="card" data-ic="factory"><div class="c"></div><h3>Platform keamanan OT</h3><p>Nozomi, Claroty, Dragos</p>
+        <div class="weak">Harga jauh di luar anggaran satuan.</div></div>
+      <div class="card" data-ic="flow"><div class="c"></div><h3>Otomasi buatan sendiri</h3><p>n8n + GPT</p>
+        <div class="weak">Isi insiden keluar ke server luar negeri.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== 4 Tameng ========== -->
+<section class="sc" id="s4">
+  <div class="grid-bg"></div>
+  <div class="center">
+    <svg class="ic" width="200" height="200" viewBox="0 0 24 24" style="color:var(--it)">
+      <path id="shield1" d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6l-8-3z" stroke-width="1.1"/>
+      <path id="check1" d="m8.5 12 2.5 2.5 4.5-5" stroke-width="1.3"/>
+    </svg>
+    <div class="brand" id="s4-brand">Tameng</div>
+    <div class="tag" id="s4-tag">Analis insiden IT/OT yang bekerja di dalam satuan</div>
+    <div class="chips" id="s4-chips">
+      <span>Di atas Wazuh + Suricata</span><span>Laporan bahasa Indonesia</span><span>1 laptop · tanpa internet</span>
+    </div>
+  </div>
+</section>
+
+<!-- ========== 5a Lab ========== -->
+<section class="sc" id="s5a">
+  <div class="pad">
+    <div class="kicker">Proses kerja · lab</div>
+    <h1>Kami membangun markas mini di satu laptop</h1>
+  </div>
+  <div class="topo">
+    <div class="tl" style="left:150px;width:1490px" id="topoLine"></div>
+    <div class="tn" style="left:0" data-ic="attacker" data-bg="#c8312f"><div class="c"></div><b>kali-ops</b><small>penyerang · 10.10.5.90</small></div>
+    <div class="tn" style="left:480px" data-ic="pc" data-bg="#0f6f86"><div class="c"></div><b>pc-staf-07</b><small>10.10.5.66</small></div>
+    <div class="tn" style="left:960px" data-ic="server" data-bg="#0f6f86"><div class="c"></div><b>srv-file-01</b><small>10.10.5.7</small></div>
+    <div class="tn" style="left:1340px" data-ic="bolt" data-bg="#b8720b"><div class="c"></div><b>PLC genset</b><small>10.10.5.20 · Modbus</small></div>
+    <div class="sensor" id="sensIt" style="left:440px;width:820px;background:rgba(54,195,224,.12);border:2px solid var(--it)">Wazuh menjaga sisi IT<small>login, eksekusi berkas, akses /etc/shadow</small></div>
+    <div class="sensor" id="sensOt" style="left:1300px;width:340px;background:rgba(243,166,56,.12);border:2px solid var(--ot)">Suricata<small>jaringan kendali OT</small></div>
+  </div>
+  <div class="pill" style="left:auto;right:56px"><span><i></i>6 container Docker · 685 MB RAM · MacBook Air 16 GB</span></div>
+</section>
+
+<!-- ========== 5b Serangan ========== -->
+<section class="sc" id="s5b">
+  <div class="term">
+    <div class="bar"><i></i><i></i><i></i><span>kali-ops · bash lab/scripts/attack.sh</span></div>
+    <pre id="termText"></pre>
+  </div>
+  <div class="plc" id="plc">
+    <div class="t">plc-genset-01 · log PLC</div>
+    <div class="st" id="plcSt">GENSET NYALA</div>
+    <div class="lg" id="plcLg">10:19:24,635 PERINTAH TULIS coil0=1<br>-&gt; GENSET NYALA</div>
+  </div>
+  <div class="pill"><span class="red"><i></i>Serangan sungguhan di lab · output asli 6 Nov 2026</span></div>
+</section>
+
+<!-- ========== 5c Dashboard ========== -->
+<section class="sc" id="s5c">
+  <div class="cam" id="camDash">
+    <img src="assets/dash-0.png" alt="" data-step="0">
+    <img src="assets/dash-2.png" alt="" data-step="2" style="opacity:0">
+    <img src="assets/dash-4.png" alt="" data-step="4" style="opacity:0">
+    <img src="assets/dash-6.png" alt="" data-step="6" style="opacity:0">
+    <img src="assets/dash-7.png" alt="" data-step="7" style="opacity:0">
+  </div>
+  <div class="vignette"></div>
+  <div class="pill" id="pill5c"><span><i></i>Dashboard Tameng · data asli 6 Nov</span><span id="pill5c2" style="opacity:0"><i></i>Dirangkai kode, bukan tebakan AI</span></div>
+</section>
+
+<!-- ========== 5d Laporan + validasi ========== -->
+<section class="sc" id="s5d">
+  <div class="cam" id="camRep"><img src="assets/laporan.png" alt="">
+    <div class="hl" id="hlBukti"></div>
+  </div>
+  <div class="pill"><span class="amber"><i></i>AI lokal · Qwen 2.5 7B · tanpa internet</span></div>
+  <div class="val" id="val">
+    <div class="vc"><div class="h">Narasi AI · contoh uji</div>
+      <div class="x" id="lieText"></div><div class="stamp" id="stamp">DITOLAK</div></div>
+    <div class="vc good" id="good"><div class="h">Ringkasan cadangan dari kode</div>
+      <div class="x">Penyerang dari 10.10.5.90 menyasar pc-staf-07, srv-file-01, plc-genset-01, lalu mengirim perintah tulis tak sah ke PLC.</div></div>
+  </div>
+</section>
+
+<!-- ========== 6 Manfaat ========== -->
+<section class="sc" id="s6">
+  <div class="pad">
+    <div class="kicker">Manfaat bagi satuan</div>
+    <h1>Analis menerima cerita, bukan tumpukan alert</h1>
+    <div class="stats">
+      <div class="stat"><b style="color:var(--it)">654→1</b><p>alert mentah menjadi satu insiden dengan 13 bukti</p></div>
+      <div class="stat"><b style="color:var(--ot)">±1,5 mnt</b><p>dari bukti mentah sampai laporan berbahasa Indonesia</p></div>
+      <div class="stat"><b style="color:var(--ok)">0</b><p>data yang keluar dari jaringan satuan</p></div>
+      <div class="stat"><b>1 laptop</b><p>16 GB, perangkat lunak open-source</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== 7 Mengapa Tameng ========== -->
+<section class="sc" id="s7">
+  <div class="pad">
+    <div class="kicker">Mengapa Tameng</div>
+    <h1>Satu-satunya yang memenuhi keempatnya</h1>
+    <table class="cmp">
+      <tr><th></th><th>SIEM/IDS</th><th>Copilot AI</th><th>Platform OT</th><th class="tm">Tameng</th></tr>
+      <tr><td>Merangkai insiden</td><td class="no">tidak</td><td class="yes">ya</td><td class="mid">sebagian</td><td class="tm yes">ya</td></tr>
+      <tr><td>Data tetap di satuan</td><td class="yes">ya</td><td class="no">tidak</td><td class="yes">ya</td><td class="tm yes">ya</td></tr>
+      <tr><td>IT dan OT sekaligus</td><td class="mid">sebagian</td><td class="mid">sebagian</td><td class="mid">OT saja</td><td class="tm yes">ya</td></tr>
+      <tr><td>Biaya untuk satuan</td><td class="yes">rendah</td><td class="no">tinggi</td><td class="no">sangat tinggi</td><td class="tm yes">rendah</td></tr>
+    </table>
+    <div class="next" id="next">Langkah berikutnya: pilot di satu markas.</div>
+  </div>
+</section>
+
+<!-- ========== Penutup ========== -->
+<section class="sc" id="s8">
+  <div class="grid-bg"></div>
+  <div class="center">
+    <svg class="ic" width="170" height="170" viewBox="0 0 24 24" style="color:var(--it)">
+      <path id="shield2" d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6l-8-3z" stroke-width="1.1"/>
+      <path id="check2" d="m8.5 12 2.5 2.5 4.5-5" stroke-width="1.3"/>
+    </svg>
+    <div class="brand" id="s8-brand">Tameng</div>
+    <div class="tag" id="s8-tag">Analis insiden yang bekerja di dalam satuan, untuk satuan</div>
+    <div class="sub" id="s8-ev" style="margin-top:50px">Kartika Cyber Hackathon 2026 · Defensive Shield<span id="tim"></span></div>
+  </div>
+</section>
+
+</div>
+<div id="hud"></div>
+
+<script src="../node_modules/gsap/dist/gsap.min.js"></script>
+<script>
+// Isi nama tim untuk penutup (kosongkan bila tidak perlu).
+const TIM = "";
+
+// ---------- ikon ----------
+const ICON = {
+  pc:'<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/>',
+  server:'<rect x="4" y="3" width="16" height="7" rx="1.5"/><rect x="4" y="14" width="16" height="7" rx="1.5"/><path d="M8 6.5h.01M8 17.5h.01"/>',
+  cctv:'<path d="M3 7l12-3 2 6-12 3z"/><path d="M15 10l4 1-1 3-4-1M7 12l-1 6H3"/>',
+  radio:'<rect x="4" y="9" width="16" height="12" rx="2"/><path d="M8 9l9-5M8 15h.01M12 13h5M12 17h5"/>',
+  bolt:'<path d="M13 2 4 14h7l-1 8 9-12h-7l1-8z"/>',
+  attacker:'<circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/>',
+  search:'<circle cx="11" cy="11" r="6"/><path d="m20 20-4.5-4.5"/>',
+  cloud:'<path d="M7 18a4 4 0 0 1-.5-8A6 6 0 0 1 18 9a4.5 4.5 0 0 1 0 9z"/>',
+  factory:'<path d="M3 21V10l6 4V10l6 4V5h6v16z"/><path d="M7 18h2M12 18h2M17 18h2"/>',
+  flow:'<rect x="3" y="3" width="6" height="6" rx="1"/><rect x="15" y="15" width="6" height="6" rx="1"/><path d="M6 9v4a3 3 0 0 0 3 3h6"/>',
+};
+document.querySelectorAll("[data-ic]").forEach(el => {
+  const c = el.querySelector(".c"), size = el.classList.contains("card") ? 52 : 88;
+  c.innerHTML = `<svg class="ic" width="${size}" height="${size}" viewBox="0 0 24 24">${ICON[el.dataset.ic]}</svg>`;
+  if (el.dataset.bg) c.style.background = el.dataset.bg;
+});
+if (TIM) document.getElementById("tim").textContent = " · " + TIM;
+
+// ---------- data ----------
+const SCENES = [   // [id, mulai, selesai]
+  ["s1a", 0, 16], ["s1b", 16, 38], ["s1c", 38, 60], ["s2", 60, 100], ["s3", 100, 140], ["s4", 140, 165],
+  ["s5a", 165, 185], ["s5b", 185, 210], ["s5c", 210, 235], ["s5d", 235, 255], ["s6", 255, 285], ["s7", 285, 310], ["s8", 310, 320],
+];
+// Teks layar pembawa cerita: [muncul, hilang, teks]. <b> = sian, <span class="r"> = merah.
+const COPY = [
+  [4, 9.6, "PC staf, server, CCTV, radio, sampai <b>genset</b>: pembangkit listrik cadangan markas."],
+  [10.2, 15.6, "Semuanya tersambung, dan semuanya bisa dikendalikan dari jauh."],
+  [20.6, 25.8, "Malware terbanyak menyasar perangkat seperti CCTV dan router."],
+  [27.2, 32.2, "Ransomware pernah melumpuhkan layanan negara."],
+  [33.2, 37.6, "Data militer pernah bocor ke pasar gelap."],
+  [39.5, 45.2, "Ini layar analis saat lab kami diserang: <b>654 alert</b> dalam 4 menit."],
+  [45.8, 51.6, "Hanya <span class='r'>13</span> yang berkaitan dengan serangan. Sisanya pemeriksaan rutin."],
+  [52.2, 59.4, "Analis satuan sedikit. Mereka harus menemukan 13 baris itu sendiri."],
+  [63.4, 68.8, "Wazuh dan Suricata mendeteksi kejadian, gratis dan andal."],
+  [69.4, 76.6, "Copilot AI komersial merangkum alert menjadi cerita."],
+  [77.4, 85.4, "Platform OT menjaga PLC dan mesin industri."],
+  [86.4, 98.8, "Sebagian tim merakit sendiri: alert dikirim ke GPT."],
+  [103.4, 110.6, "SIEM berhenti di alert. Merangkai cerita serangan tetap pekerjaan manusia."],
+  [111.4, 120.4, "Copilot AI memproses data di cloud asing. Untuk data militer, itu <span class='r'>tidak boleh</span>."],
+  [121.4, 129.4, "Platform OT harganya jauh di luar anggaran satuan."],
+  [130.4, 139.0, "Alur GPT buatan sendiri juga mengirim isi insiden ke luar negeri."],
+  [145.0, 150.0, "Karena itu kami membuat <b>Tameng</b>."],
+  [150.6, 157.0, "Tameng bekerja di atas Wazuh dan Suricata yang sudah terpasang."],
+  [157.6, 164.2, "Ia merangkai alert menjadi insiden dan menulis laporannya, tanpa internet."],
+  [167.0, 175.0, "Untuk membuktikannya, kami membangun markas mini: PC staf, server file, dan PLC genset."],
+  [175.6, 184.4, "Wazuh menjaga sisi IT. Suricata menjaga jaringan kendali OT."],
+  [186.0, 190.6, "Lalu kami menyerang markas itu."],
+  [191.2, 196.6, "Penyerang menebak kata sandi, lalu masuk dengan akun <b>sertu</b>."],
+  [197.2, 202.6, "Ia menyalin hash kata sandi, lalu pindah ke server file."],
+  [203.2, 209.4, "Dari server itu, satu perintah Modbus <span class='r'>mematikan genset</span>."],
+  [211.0, 217.0, "Tameng membaca bukti dari Wazuh dan Suricata."],
+  [217.6, 224.0, "Kode, bukan AI, merangkai rantai serangan per pelaku dan per host."],
+  [224.6, 229.6, "Hasilnya: <b>satu insiden kritis</b>."],
+  [230.2, 234.6, "15 detik dari tebakan pertama sampai genset mati. 7 teknik MITRE ATT&CK."],
+  [236.0, 240.6, "Baru di tahap akhir, AI lokal menulis laporannya."],
+  [241.0, 245.4, "Setiap fakta menunjuk ke bukti aslinya."],
+  [246.0, 254.6, "AI menyebut IP, waktu, atau host di luar bukti? Narasinya <span class='r'>ditolak</span>."],
+  [257.6, 263.6, "Analis menerima satu insiden dengan 13 bukti, bukan 654 baris."],
+  [264.4, 270.2, "Laporan berbahasa Indonesia siap dalam sekitar satu setengah menit."],
+  [270.8, 275.8, "Tidak ada data yang keluar dari jaringan satuan."],
+  [276.4, 284.4, "Cukup satu laptop dan perangkat lunak open-source."],
+  [294.6, 301.8, "Hanya Tameng yang memenuhi keempatnya."],
+];
+// Output asli attack.sh (uji lab 6 Nov 2026, 10:19 UTC).
+const TERM = [
+  ["p", "kali-ops$ bash lab/scripts/attack.sh"],
+  ["h", "==> 0. Reset: pastikan genset NYALA (coil0=1)"], ["", "genset di-set NYALA"],
+  ["h", "==> 1. Brute force SSH ke pc-staf-07 (beberapa percobaan gagal)"],
+  ["bad", "  coba admin ... gagal"], ["bad", "  coba root ... gagal"], ["bad", "  coba operator ... gagal"],
+  ["h", "==> 2. Login BERHASIL dengan kredensial curian (sertu) + eksekusi payload dari /tmp"],
+  ["", "  [pc-staf-07] /etc/shadow disalin ke /tmp/creds.txt"],
+  ["h", "==> 3. Gerak lateral: lewat sesi penyerang di pc-staf-07, SSH ke srv-file-01, lalu kirim Modbus MATIKAN genset (coil0=0)"],
+  ["", "  [srv-file-01] berhasil diakses dari pc-staf-07"],
+  ["bad", "  perintah Modbus OFF terkirim ke PLC genset dari srv-file-01"],
+];
+
+// ---------- timeline ----------
+const $ = (s) => document.querySelector(s);
+const $$ = (s) => [...document.querySelectorAll(s)];
+const tl = gsap.timeline({ paused: true, defaults: { ease: "power3.out" } });
+const IN = { opacity: 1, y: 0, duration: 0.8 };
+
+// Visibilitas tiap adegan (silang-pudar 0,6 dtk).
+SCENES.forEach(([id, a, b]) => {
+  tl.fromTo("#" + id, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.6, ease: "none" }, a);
+  if (id !== "s8") tl.to("#" + id, { autoAlpha: 0, duration: 0.6, ease: "none" }, b - 0.3);
+});
+
+// Kamera: bingkai persegi [x0,y0,x1,y1] (0..1 dari gambar) mengisi layar.
+function frame(camSel, natW, natH, r) {
+  const W = 1920, H = W * natH / natW;
+  const s = Math.min(1920 / ((r[2] - r[0]) * W), 1080 / ((r[3] - r[1]) * H));
+  const cx = (r[0] + r[2]) / 2 * W, cy = (r[1] + r[3]) / 2 * H;
+  return { x: 960 - s * cx, y: 540 - s * cy, scale: s };
+}
+function cam(sel, nat, r, at, dur = 2.2, ease = "power2.inOut") {
+  const f = frame(sel, nat[0], nat[1], r);
+  if (dur === 0) tl.set(sel, f, at); else tl.to(sel, { ...f, duration: dur, ease }, at);
+}
+function counter(sel, to, at, dur, fmt) {
+  const o = { v: 0 };
+  tl.fromTo(o, { v: 0 }, { v: to, duration: dur, ease: "power2.out", onUpdate: () => ($(sel).textContent = fmt(o.v)) }, at);
+}
+function typeText(el, text, at, dur) {
+  const o = { n: 0 };
+  tl.fromTo(o, { n: 0 }, { n: text.length, duration: dur, ease: "none", onUpdate: () => (el.textContent = text.slice(0, Math.round(o.n))) }, at);
+}
+
+// 1a
+tl.from("#s1a-h", { opacity: 0, y: 30, duration: 1 }, 0.4);
+tl.to("#devline", { scaleX: 1, duration: 9, ease: "none" }, 3);
+$$("#s1a .dev").forEach((d, k) => tl.fromTo(d, { opacity: 0, y: 40 }, { ...IN }, 3 + k * 2.2));
+tl.to("#s1a .dev.ot .c", { boxShadow: "0 0 90px rgba(243,166,56,.55)", duration: 1, yoyo: true, repeat: 3, ease: "sine.inOut" }, 12);
+
+// 1b
+counter("#cnt52", 5.2, 16.6, 3, (v) => v.toFixed(1).replace(".", ","));
+tl.from("#s1b-sub", { opacity: 0, y: 20, duration: 0.8 }, 19.5);
+tl.fromTo("#ev1", { opacity: 0, y: 40 }, IN, 26.5);
+tl.fromTo("#ev2", { opacity: 0, y: 40 }, IN, 32.5);
+
+// 1c (log 3200x3410)
+const LOG = [3200, 3410];
+cam("#camLog", LOG, [0, 0, 0.6, 0.18], 38, 0);
+cam("#camLog", LOG, [0, 0.82, 0.6, 1], 39, 18, "none");
+counter("#cnt654", 654, 39.5, 7, (v) => Math.round(v));
+tl.to("#cnt13", { opacity: 1, duration: 0.6 }, 47.5).to("#cnt13l", { opacity: 1, duration: 0.6 }, 47.8);
+
+// 2
+$$("#cards2 .card").forEach((c, k) => tl.fromTo(c, { opacity: 0, y: 50 }, IN, [63, 69, 77, 86][k]));
+
+// 3
+$$("#cards3 .card").forEach((c, k) => {
+  const t = [103, 111, 121, 130][k];
+  tl.set(c, { opacity: 1 }, 100);
+  tl.to(c, { borderColor: "rgba(255,77,79,.7)", duration: 0.5 }, t);
+  tl.fromTo(c.querySelector(".weak"), { opacity: 0, y: 30 }, IN, t);
+});
+
+// 4
+const dash = (sel) => { const p = $(sel), L = p.getTotalLength(); gsap.set(p, { strokeDasharray: L, strokeDashoffset: L }); return p; };
+tl.to(dash("#shield1"), { strokeDashoffset: 0, duration: 1.8, ease: "power2.inOut" }, 140.4);
+tl.to(dash("#check1"), { strokeDashoffset: 0, duration: 0.6 }, 142);
+tl.from("#s4-brand", { opacity: 0, y: 30, duration: 1 }, 141.5);
+tl.from("#s4-tag", { opacity: 0, y: 20, duration: 0.8 }, 143);
+$$("#s4-chips span").forEach((c, k) => tl.fromTo(c, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.6 }, [150, 154, 158][k]));
+
+// 5a
+$$("#s5a .tn").forEach((n, k) => tl.fromTo(n, { opacity: 0, y: 40 }, IN, 166 + k * 1.6));
+tl.to("#topoLine", { scaleX: 1, duration: 4, ease: "none" }, 166.5);
+tl.fromTo("#sensIt", { opacity: 0, y: 30 }, IN, 175);
+tl.fromTo("#sensOt", { opacity: 0, y: 30 }, IN, 178.5);
+
+// 5b
+const term = $("#termText");
+const lineAt = [185.6, 186.6, 187.2, 188.2, 189, 189.6, 190.2, 191.6, 194, 196.6, 199.5, 202];
+tl.add(() => {}, 185);
+TERM.forEach(([cls, txt], k) => {
+  const span = document.createElement("div"); span.className = cls; term.appendChild(span);
+  typeText(span, txt, lineAt[k], Math.min(1.4, txt.length / 55));
+});
+tl.fromTo("#plc", { opacity: 0, x: 40 }, { opacity: 1, x: 0, duration: 0.8 }, 186.5);
+tl.add(() => {}, 202.6);
+tl.set("#plc", { className: "plc off" }, 203);
+tl.set("#plcSt", { textContent: "GENSET DIMATIKAN" }, 203);
+tl.set("#plcLg", { innerHTML: "10:19:41,048 PERINTAH TULIS coil0=0<br>-&gt; GENSET DIMATIKAN (dampak serangan)" }, 203);
+tl.fromTo("#plc", { x: 0 }, { keyframes: { x: [0, -14, 12, -8, 6, 0] }, duration: 0.5 }, 203);
+
+// 5c (dashboard 3200x2382)
+const D = [3200, 2382];
+const showStep = (n, at) => tl.to(`#camDash img[data-step="${n}"]`, { opacity: 1, duration: 0.5, ease: "none" }, at);
+cam("#camDash", D, [0, 0, 1, 0.56], 210, 0);
+cam("#camDash", D, [0.13, 0.11, 0.56, 0.47], 212, 2.5);          // peta + genset
+showStep(2, 213);
+tl.to("#pill5c2", { opacity: 1, duration: 0.6 }, 214.5);
+cam("#camDash", D, [0.54, 0.11, 0.87, 0.47], 217.5, 2.2);        // aliran alert
+showStep(4, 218.5); showStep(6, 221);
+cam("#camDash", D, [0.13, 0.11, 0.56, 0.47], 223.5, 2.2);        // kembali ke peta
+showStep(7, 225);
+cam("#camDash", D, [0.13, 0.36, 0.45, 0.47], 226.5, 2);          // genset DIMATIKAN
+cam("#camDash", D, [0.13, 0.46, 0.87, 0.64], 230, 2.2);          // ATT&CK
+
+// 5d (laporan 3200x4052)
+const R = [3200, 4052];
+cam("#camRep", R, [0, 0, 1, 0.19], 235, 0);
+cam("#camRep", R, [0.02, 0.2, 0.98, 0.38], 237.5, 2.2);          // kronologi
+gsap.set("#hlBukti", { left: 0.703 * 1920, top: 0.212 * 1920 * R[1] / R[0], width: 0.143 * 1920, height: 0.157 * 1920 * R[1] / R[0] });
+tl.to("#hlBukti", { opacity: 1, duration: 0.6 }, 240.5);
+tl.to("#hlBukti", { opacity: 0, duration: 0.5 }, 245.2);
+tl.to("#val", { opacity: 1, duration: 0.6 }, 245.5);
+const LIE = "Penyerang dari 8.8.8.8 masuk ke pc-staf-07, lalu mematikan genset markas.";
+const lie = $("#lieText");
+lie.innerHTML = 'Penyerang dari <span class="lie" id="ip">8.8.8.8</span> masuk ke pc-staf-07, lalu mematikan genset markas.';
+tl.fromTo(lie, { opacity: 0 }, { opacity: 1, duration: 0.4 }, 246);
+tl.set("#ip", { className: "lie on" }, 248.5);
+tl.to("#stamp", { opacity: 1, scale: 1, rotate: -12, duration: 0.5, ease: "back.out(2)" }, 249.6);
+tl.fromTo("#good", { opacity: 0, x: 40 }, { opacity: 1, x: 0, duration: 0.8 }, 251);
+
+// 6
+$$("#s6 .stat").forEach((s, k) => tl.fromTo(s, { opacity: 0, y: 50 }, IN, [257, 264, 270.5, 276][k]));
+
+// 7
+$$("#s7 tr").forEach((r, k) => tl.fromTo(r, { opacity: 0 }, { opacity: 1, duration: 0.6 }, 286 + k * 1.6));
+tl.set("#s7 .tm", { className: "tm on" }, 294);
+$$("#s7 td.tm").forEach((c) => tl.set(c, { className: "tm yes on" }, 294));
+tl.fromTo("#next", { opacity: 0, y: 20 }, IN, 302.5);
+
+// 8
+tl.to(dash("#shield2"), { strokeDashoffset: 0, duration: 1.6, ease: "power2.inOut" }, 310.3);
+tl.to(dash("#check2"), { strokeDashoffset: 0, duration: 0.6 }, 311.7);
+tl.from("#s8-brand", { opacity: 0, y: 30, duration: 1 }, 311);
+tl.from("#s8-tag", { opacity: 0, y: 20, duration: 0.8 }, 312.3);
+tl.from("#s8-ev", { opacity: 0, duration: 0.8 }, 314);
+tl.set({}, {}, 320);
+
+// teks layar
+COPY.forEach(([a, b, html]) => {
+  const el = document.createElement("div"); el.className = "cap"; el.innerHTML = html;
+  $("#stage").appendChild(el);
+  tl.fromTo(el, { autoAlpha: 0, y: 16 }, { autoAlpha: 1, y: 0, duration: 0.45 }, a);
+  tl.to(el, { autoAlpha: 0, duration: 0.35, ease: "none" }, b - 0.35);
+});
+
+// ---------- pemutar ----------
+const P = new URLSearchParams(location.search);
+const DUR = tl.duration();
+window.__duration = DUR;
+window.__seek = (t) => { tl.seek(t, false); };   // jangan kembalikan objek timeline (Playwright akan mencoba menyalinnya)
+if (P.has("render")) document.documentElement.classList.add("render");
+function fit() {
+  const s = Math.min(innerWidth / 1920, innerHeight / 1080);
+  $("#stage").style.transform = `translate(-50%,-50%) scale(${s})`;
+}
+addEventListener("resize", fit); fit();
+tl.eventCallback("onUpdate", () => {
+  const t = tl.time(), m = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
+  $("#hud").textContent = `${tl.paused() ? "❚❚" : "▶"} ${m(t)} / ${m(DUR)} · Spasi putar/jeda · ← → 5 dtk`;
+});
+tl.seek(parseFloat(P.get("t")) || 0);
+addEventListener("keydown", (e) => {
+  if (e.code === "Space") { e.preventDefault(); tl.paused() ? tl.play() : tl.pause(); }
+  if (e.code === "ArrowRight") tl.seek(Math.min(DUR, tl.time() + 5));
+  if (e.code === "ArrowLeft") tl.seek(Math.max(0, tl.time() - 5));
+});
+// Siap direkam bila semua gambar termuat.
+Promise.all([...document.images].map((im) => im.complete ? 1 : new Promise((r) => (im.onload = im.onerror = r))))
+  .then(() => (window.__ready = true));
+</script>
+</body>
+</html>
