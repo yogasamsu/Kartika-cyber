@@ -137,6 +137,33 @@ class Separation(unittest.TestCase):
         self.assertNotIn("shadow_read", [e.kind for e in inc.events])
 
 
+class SourceTime(unittest.TestCase):
+    """Bukti lab 6 Nov: agen mengirim batch ~20 dtk setelah kejadian."""
+
+    def test_waktu_sumber_dipakai_bukan_waktu_manager(self):
+        late = "10:20:06"     # waktu manager menerima batch
+        w = [
+            dict(wazuh(late, "5710", "pc-staf-07", srcip=ATK, dstuser="admin"),
+                 predecoder={"timestamp": "Oct 28 10:19:26"}),
+            dict(wazuh(late, "5715", "pc-staf-07", srcip=ATK, dstuser="sertu"),
+                 predecoder={"timestamp": "Oct 28 10:19:37"}),
+            wazuh(late, "100010", "pc-staf-07", event="tmp_exec", user="sertu",
+                  time="2026-10-28T10:19:37"),
+            wazuh(late, "100011", "pc-staf-07", event="shadow_read", time="2026-10-28T10:19:37"),
+            # agen Wazuh (SCA) membaca shadow 18 dtk kemudian: bukan pencurian
+            wazuh(late, "100011", "pc-staf-07", event="shadow_read", time="2026-10-28T10:19:55"),
+            dict(wazuh(late, "5715", "srv-file-01", srcip="10.10.5.66", dstuser="sertu"),
+                 predecoder={"timestamp": "Oct 28 10:19:38"}),
+        ]
+        with Evidence(w, [modbus("10:19:41", "10.10.5.7")]) as evs:
+            inc, = correlate.build_incidents(evs)
+        self.assertEqual(inc.start.strftime("%H:%M:%S"), "10:19:26")
+        self.assertEqual([e.kind for e in inc.events],
+                         ["brute_force", "auth_success", "tmp_exec", "shadow_read",
+                          "auth_success", "modbus_write"])
+        self.assertFalse(any("disesuaikan" in n for n in inc.notes))
+
+
 class Narration(unittest.TestCase):
     def setUp(self):
         with Evidence(DEMO_WAZUH, DEMO_EVE) as evs:

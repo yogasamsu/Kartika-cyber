@@ -6,8 +6,8 @@ Dua perilaku dipantau:
 
   1. tmp_exec    : proses yang berkas program atau argv-nya berada di /tmp
                    (menangkap biner maupun skrip shell dari /tmp).
-  2. shadow_read : pembacaan /etc/shadow, dideteksi lewat inotify IN_ACCESS
-                   (berbasis event, menangkap bahkan 'cat' yang sekejap).
+  2. shadow_read : pembukaan /etc/shadow, dideteksi lewat inotify IN_OPEN
+                   (satu event per pembukaan, menangkap bahkan 'cat' yang sekejap).
 
 Mirip sensor EDR userland; dipakai karena auditd tidak tersedia di VM
 Docker Desktop.
@@ -122,16 +122,21 @@ def attribute_reader():
 
 
 def watch_shadow_read():
-    """inotify IN_ACCESS pada /etc/shadow (berbasis event)."""
-    IN_ACCESS = 0x00000001
+    """inotify IN_OPEN pada /etc/shadow (berbasis event).
+
+    IN_OPEN dipakai, bukan IN_ACCESS: satu event per pembukaan berkas, sehingga
+    tidak perlu peredam banjir. Peredam lama menelan pembacaan oleh payload
+    penyerang yang terjadi sedetik setelah pembacaan PAM saat login, karena
+    keduanya sama-sama tidak sempat diatribusikan ke pid (proses sudah selesai).
+    """
+    IN_OPEN = 0x00000020
     libc = ctypes.CDLL("libc.so.6", use_errno=True)
     fd = libc.inotify_init1(0)
     if fd < 0:
         return
-    wd = libc.inotify_add_watch(fd, SHADOW.encode(), IN_ACCESS)
+    wd = libc.inotify_add_watch(fd, SHADOW.encode(), IN_OPEN)
     if wd < 0:
         return
-    last = {}
     HDR = struct.calcsize("iIII")
     while True:
         data = os.read(fd, 4096)  # blocking
@@ -139,15 +144,8 @@ def watch_shadow_read():
         while off + HDR <= len(data):
             _wd, mask, _cookie, length = struct.unpack_from("iIII", data, off)
             off += HDR + length
-            if mask & IN_ACCESS:
-                pid = attribute_reader()
-                now = time.time()
-                # Redam banjir per proses: pembacaan PAM oleh sshd tidak boleh
-                # menelan pembacaan oleh payload penyerang sedetik kemudian.
-                if now - last.get(pid, 0) < 2:
-                    continue
-                last[pid] = now
-                emit("shadow_read", {"target": SHADOW}, pid=pid)
+            if mask & IN_OPEN:
+                emit("shadow_read", {"target": SHADOW}, pid=attribute_reader())
 
 
 def main():

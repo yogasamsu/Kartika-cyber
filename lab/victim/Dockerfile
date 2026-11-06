@@ -32,15 +32,20 @@ COPY victim/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
 # Agent membaca auth.log (sshd) dan log sensor Tameng sejak boot pertama.
+# only-future-events=no: setelah agent memuat ulang konfigurasi dari manager
+# (±1 menit setelah terhubung), logcollector melanjutkan dari posisi terakhir.
+# Default-nya membaca dari akhir berkas, sehingga log di sela restart hilang.
 RUN cat >> /var/ossec/etc/ossec.conf <<'EOF'
 <ossec_config>
   <localfile>
     <log_format>syslog</log_format>
     <location>/var/log/auth.log</location>
+    <only-future-events>no</only-future-events>
   </localfile>
   <localfile>
     <log_format>json</log_format>
     <location>/var/log/tameng-sensor.log</location>
+    <only-future-events>no</only-future-events>
   </localfile>
 </ossec_config>
 EOF

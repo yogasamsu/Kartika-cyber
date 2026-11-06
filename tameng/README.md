@@ -53,11 +53,16 @@ Lokasi bukti & model bisa diatur lewat env (lihat `config.py`):
   eksekusi `/tmp`, pembacaan shadow, dan perintah Modbus ditempelkan ke rantai
   yang menguasai host asalnya. Serangan tak terkait tidak digabung. Login antar
   host internal tanpa rantai dianggap aktivitas normal.
-- Bukti dari sensor berbeda boleh bergeser jam hingga `CLOCK_SKEW_S` (default
-  5 dtk); kronologi diurutkan menurut sebab-akibat dan pergeseran dicatat.
-- `shadow_read` hanya dianggap jahat bila terjadi **setelah** eksekusi `/tmp` di
-  host sama dalam rentang `SHADOW_TMP_WINDOW_S`, atau prosesnya berasal dari
-  `/tmp`. Pembacaan oleh `sshd`/`unix_chkpwd` (login PAM) selalu dianggap derau.
+- Waktu kejadian diambil dari sumbernya (`predecoder.timestamp` untuk syslog,
+  `data.time` untuk sensor), bukan `timestamp` Wazuh. Agen mengirim log dalam
+  batch, sehingga waktu terima manager bisa terlambat puluhan detik dan
+  membalik urutan terhadap Suricata. Sisa selisih jam antar-sensor ditoleransi
+  hingga `CLOCK_SKEW_S` (default 5 dtk); kronologi diurutkan menurut
+  sebab-akibat dan setiap penyesuaian dicatat.
+- `shadow_read` hanya dianggap jahat bila terjadi paling lama
+  `SHADOW_TMP_WINDOW_S` (default 10 dtk) **setelah** eksekusi `/tmp` di host
+  sama, atau prosesnya berasal dari `/tmp`. Pembacaan oleh `sshd`/`unix_chkpwd`
+  (login PAM) dan pembacaan rutin agen Wazuh dianggap derau.
 - Validasi narasi LLM memeriksa IP, penanda bukti, waktu, ID teknik ATT&CK, dan
   nama host. Satu saja yang di luar bukti membuat narasi ditolak dan diganti
   ringkasan cadangan.

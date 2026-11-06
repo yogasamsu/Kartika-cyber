@@ -218,12 +218,20 @@ def _build_steps(events):
                 tech=["T1059.004"],
             ))
         elif e.kind == "shadow_read":
+            # gabungkan pembacaan beruntun di host sama menjadi satu langkah
+            j = i
+            grp = []
+            while j < n and events[j].kind == "shadow_read" and events[j].host == e.host:
+                grp.append(events[j])
+                j += 1
             steps.append(Step(
                 time=_hhmmss(e.ts),
                 text=f"Pembacaan /etc/shadow di {e.host} — pencurian hash kredensial",
-                evidence=[e.eid],
+                evidence=[x.eid for x in grp],
                 tech=["T1003.008"],
             ))
+            i = j
+            continue
         elif e.kind == "modbus_write":
             tgt = config.asset(e.dst_ip)[0]
             src_name = config.asset(e.src_ip)[0]
@@ -316,8 +324,8 @@ def build_incidents(events, window=None):
         n_benign = sum(1 for b in benign if b.host in hosts and lo <= b.ts <= hi)
         if n_benign:
             inc.notes.append(
-                f"{n_benign} pembacaan /etc/shadow diabaikan sebagai derau login PAM "
-                f"(tidak didahului eksekusi /tmp di host yang sama)."
+                f"{n_benign} pembacaan /etc/shadow diabaikan sebagai derau (login PAM atau "
+                f"pemindaian agen Wazuh), karena tidak terjadi sesaat setelah eksekusi /tmp."
             )
         incidents.append(inc)
     return incidents

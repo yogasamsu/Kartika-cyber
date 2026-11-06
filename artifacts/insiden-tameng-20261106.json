@@ -1,0 +1,311 @@
+[
+  {
+    "id": "INC-20261106-101926",
+    "severity": "kritis",
+    "has_ot_impact": true,
+    "start": "2026-11-06T10:19:26+00:00",
+    "end": "2026-11-06T10:19:41.050188+00:00",
+    "entry_ip": "10.10.5.90",
+    "hosts": [
+      "pc-staf-07",
+      "srv-file-01",
+      "plc-genset-01"
+    ],
+    "identities": [
+      "sertu"
+    ],
+    "techniques": [
+      {
+        "id": "T1110",
+        "name": "Brute Force",
+        "domain": "enterprise",
+        "tactic": "Credential Access"
+      },
+      {
+        "id": "T1078",
+        "name": "Valid Accounts",
+        "domain": "enterprise",
+        "tactic": "Initial Access / Lateral Movement"
+      },
+      {
+        "id": "T1021.004",
+        "name": "Remote Services: SSH",
+        "domain": "enterprise",
+        "tactic": "Initial Access / Lateral Movement"
+      },
+      {
+        "id": "T1059.004",
+        "name": "Command and Scripting Interpreter: Unix Shell",
+        "domain": "enterprise",
+        "tactic": "Execution"
+      },
+      {
+        "id": "T1003.008",
+        "name": "OS Credential Dumping: /etc/passwd and /etc/shadow",
+        "domain": "enterprise",
+        "tactic": "Credential Access"
+      },
+      {
+        "id": "T0855",
+        "name": "Unauthorized Command Message",
+        "domain": "ics",
+        "tactic": "Impair Process Control"
+      },
+      {
+        "id": "T0816",
+        "name": "Device Restart/Shutdown",
+        "domain": "ics",
+        "tactic": "Impair Process Control"
+      }
+    ],
+    "steps": [
+      {
+        "time": "10:19:26",
+        "text": "4 percobaan login SSH gagal ke pc-staf-07 dari 10.10.5.90 (kali-ops) — pola brute force",
+        "evidence": [
+          "W13",
+          "W14",
+          "W16",
+          "W17"
+        ],
+        "tech": [
+          "T1110"
+        ]
+      },
+      {
+        "time": "10:19:37",
+        "text": "Login SSH BERHASIL ke pc-staf-07 sebagai 'sertu' dari 10.10.5.90 (akses awal dari luar jaringan)",
+        "evidence": [
+          "W18"
+        ],
+        "tech": [
+          "T1078",
+          "T1021.004"
+        ]
+      },
+      {
+        "time": "10:19:37",
+        "text": "Login SSH BERHASIL ke pc-staf-07 sebagai 'sertu' dari 10.10.5.90 (akses awal dari luar jaringan)",
+        "evidence": [
+          "W19"
+        ],
+        "tech": [
+          "T1078",
+          "T1021.004"
+        ]
+      },
+      {
+        "time": "10:19:37",
+        "text": "Eksekusi berkas dari /tmp di pc-staf-07 (pengguna '?') — payload penyerang",
+        "evidence": [
+          "W24"
+        ],
+        "tech": [
+          "T1059.004"
+        ]
+      },
+      {
+        "time": "10:19:37",
+        "text": "Pembacaan /etc/shadow di pc-staf-07 — pencurian hash kredensial",
+        "evidence": [
+          "W22",
+          "W23",
+          "W25",
+          "W26"
+        ],
+        "tech": [
+          "T1003.008"
+        ]
+      },
+      {
+        "time": "10:19:38",
+        "text": "Login SSH BERHASIL ke srv-file-01 sebagai 'sertu' dari 10.10.5.66 (gerak lateral dari pc-staf-07)",
+        "evidence": [
+          "W27"
+        ],
+        "tech": [
+          "T1078",
+          "T1021.004"
+        ]
+      },
+      {
+        "time": "10:19:41",
+        "text": "Perintah tulis Modbus dari 10.10.5.7 (srv-file-01) ke PLC plc-genset-01 — mematikan genset (DAMPAK OT)",
+        "evidence": [
+          "S1"
+        ],
+        "tech": [
+          "T0855",
+          "T0816"
+        ]
+      }
+    ],
+    "events": [
+      {
+        "eid": "W13",
+        "source": "wazuh",
+        "sid": "5710",
+        "label": "Login SSH gagal (indikasi brute force)",
+        "src_ip": "10.10.5.90",
+        "dst_ip": null,
+        "host": "pc-staf-07",
+        "time": "10:19:26",
+        "domain": "it"
+      },
+      {
+        "eid": "W14",
+        "source": "wazuh",
+        "sid": "5710",
+        "label": "Login SSH gagal (indikasi brute force)",
+        "src_ip": "10.10.5.90",
+        "dst_ip": null,
+        "host": "pc-staf-07",
+        "time": "10:19:27",
+        "domain": "it"
+      },
+      {
+        "eid": "W16",
+        "source": "wazuh",
+        "sid": "5710",
+        "label": "Login SSH gagal (indikasi brute force)",
+        "src_ip": "10.10.5.90",
+        "dst_ip": null,
+        "host": "pc-staf-07",
+        "time": "10:19:33",
+        "domain": "it"
+      },
+      {
+        "eid": "W17",
+        "source": "wazuh",
+        "sid": "5710",
+        "label": "Login SSH gagal (indikasi brute force)",
+        "src_ip": "10.10.5.90",
+        "dst_ip": null,
+        "host": "pc-staf-07",
+        "time": "10:19:36",
+        "domain": "it"
+      },
+      {
+        "eid": "W18",
+        "source": "wazuh",
+        "sid": "5715",
+        "label": "Login SSH BERHASIL",
+        "src_ip": "10.10.5.90",
+        "dst_ip": null,
+        "host": "pc-staf-07",
+        "time": "10:19:37",
+        "domain": "it"
+      },
+      {
+        "eid": "W19",
+        "source": "wazuh",
+        "sid": "5715",
+        "label": "Login SSH BERHASIL",
+        "src_ip": "10.10.5.90",
+        "dst_ip": null,
+        "host": "pc-staf-07",
+        "time": "10:19:37",
+        "domain": "it"
+      },
+      {
+        "eid": "W24",
+        "source": "wazuh",
+        "sid": "100010",
+        "label": "Eksekusi berkas dari /tmp",
+        "src_ip": null,
+        "dst_ip": null,
+        "host": "pc-staf-07",
+        "time": "10:19:37",
+        "domain": "it"
+      },
+      {
+        "eid": "W22",
+        "source": "wazuh",
+        "sid": "100011",
+        "label": "Pembacaan /etc/shadow",
+        "src_ip": null,
+        "dst_ip": null,
+        "host": "pc-staf-07",
+        "time": "10:19:37",
+        "domain": "it"
+      },
+      {
+        "eid": "W23",
+        "source": "wazuh",
+        "sid": "100011",
+        "label": "Pembacaan /etc/shadow",
+        "src_ip": null,
+        "dst_ip": null,
+        "host": "pc-staf-07",
+        "time": "10:19:37",
+        "domain": "it"
+      },
+      {
+        "eid": "W25",
+        "source": "wazuh",
+        "sid": "100011",
+        "label": "Pembacaan /etc/shadow",
+        "src_ip": null,
+        "dst_ip": null,
+        "host": "pc-staf-07",
+        "time": "10:19:37",
+        "domain": "it"
+      },
+      {
+        "eid": "W26",
+        "source": "wazuh",
+        "sid": "100011",
+        "label": "Pembacaan /etc/shadow",
+        "src_ip": null,
+        "dst_ip": null,
+        "host": "pc-staf-07",
+        "time": "10:19:37",
+        "domain": "it"
+      },
+      {
+        "eid": "W27",
+        "source": "wazuh",
+        "sid": "5715",
+        "label": "Login SSH BERHASIL",
+        "src_ip": "10.10.5.66",
+        "dst_ip": null,
+        "host": "srv-file-01",
+        "time": "10:19:38",
+        "domain": "it"
+      },
+      {
+        "eid": "S1",
+        "source": "suricata",
+        "sid": "7000005",
+        "label": "Perintah tulis Modbus (fc5) ke PLC",
+        "src_ip": "10.10.5.7",
+        "dst_ip": "10.10.5.20",
+        "host": "10.10.5.20",
+        "time": "10:19:41",
+        "domain": "ot"
+      }
+    ],
+    "notes": [
+      "27 pembacaan /etc/shadow diabaikan sebagai derau login PAM (tidak didahului eksekusi /tmp di host yang sama)."
+    ],
+    "summary": {
+      "judul": "Penyerangan Sistem Kritis dengan Brute Force dan Lateral Movement",
+      "ringkasan": "Penyerangan dengan tingkat bahaya kritis ini melibatkan serangan brute force dan lateral movement, mengakibatkan shutdown genset. Serangan dimulai dengan serangan brute force terhadap SSH di pc-staf-07, berhasil dengan akun 'sertu'. Penyerang kemudian melakukan lateral movement ke srv-file-01 dan mematikan genset melalui perintah Modbus.",
+      "rekomendasi": [
+        "Menerapkan firewall yang lebih ketat untuk membatasi akses SSH dari luar jaringan.",
+        "Mengimplementasikan autentikasi dua faktor (2FA) pada akun yang sensitif.",
+        "Meningkatkan monitoring dan logging pada sistem untuk mendeteksi aktivitas mencurigakan.",
+        "Melakukan audit kredensial dan memastikan keamanan file /etc/shadow.",
+        "Menerapkan isolasi antar sistem kritis untuk mencegah lateral movement."
+      ]
+    },
+    "meta": {
+      "model": "qwen2.5:7b",
+      "elapsed_s": 80.3,
+      "tokens": 249,
+      "warnings": [],
+      "fallback": false,
+      "rejected": false
+    }
+  }
+]

@@ -73,8 +73,15 @@ Dipilih agar muat di satu laptop dan tetap jujur; didokumentasikan untuk juri.
 - **Sensor endpoint `/proc` menggantikan auditd.** auditd tidak jalan di VM
   Docker Desktop. `victim/tameng-sensor.py` mendeteksi eksekusi dari `/tmp`
   (inotify `IN_OPEN` pada direktori) dan pembacaan `/etc/shadow` (inotify
-  `IN_ACCESS`) — berbasis event, seperti sensor EDR userland. Produksi: auditd
-  atau EDR sungguhan.
+  `IN_OPEN` pada berkas, satu event per pembukaan) — berbasis event, seperti
+  sensor EDR userland. Atribusi pid/pengguna bersifat upaya terbaik: proses
+  sekejap seperti `cat` sering sudah selesai sebelum terbaca di `/proc`.
+  Produksi: auditd atau EDR sungguhan.
+- **Agen Wazuh memuat ulang konfigurasi ±1 menit setelah terhubung.** Log
+  dibaca dengan `only-future-events=no` agar tidak ada yang hilang saat itu,
+  dan `attack.sh` menunggu sampai agen benar-benar terhubung sebelum menyerang.
+  Bila korban di-recreate tanpa restart manager, manager tetap mengizinkan
+  pendaftaran ulang nama yang sama (`disconnected_time` dimatikan).
 - **Simulator PLC pymodbus menggantikan OpenPLC.** Ringan & arm64-native;
   perilaku Modbus di kabel tetap nyata sehingga Suricata mendeteksinya sama
   seperti PLC fisik. Produksi/alternatif: OpenPLC atau PLC sungguhan.

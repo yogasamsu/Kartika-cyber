@@ -19,8 +19,10 @@ OLLAMA_MODEL = os.environ.get("TAMENG_OLLAMA_MODEL", "qwen2.5:7b")
 CORR_WINDOW_S = int(os.environ.get("TAMENG_CORR_WINDOW_S", "300"))
 # shadow_read dianggap derau login bila berdekatan dengan login (detik).
 PAM_WINDOW_S = int(os.environ.get("TAMENG_PAM_WINDOW_S", "3"))
-# shadow_read dianggap jahat bila ada eksekusi /tmp di host sama dalam rentang ini.
-SHADOW_TMP_WINDOW_S = int(os.environ.get("TAMENG_SHADOW_TMP_WINDOW_S", "120"))
+# shadow_read dianggap jahat bila terjadi paling lama sekian detik SETELAH eksekusi
+# /tmp di host sama. Sengaja sempit: agen Wazuh sendiri (SCA/rootcheck) membaca
+# /etc/shadow belasan detik setelah memuat ulang konfigurasi.
+SHADOW_TMP_WINDOW_S = int(os.environ.get("TAMENG_SHADOW_TMP_WINDOW_S", "10"))
 # Toleransi selisih jam antar-sensor (Wazuh vs Suricata, latensi ingest), detik.
 CLOCK_SKEW_S = int(os.environ.get("TAMENG_CLOCK_SKEW_S", "5"))
 

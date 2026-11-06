@@ -15,6 +15,26 @@ export PATH="$HOME/.docker/bin:$PATH"
 P='\033[1;36m'; N='\033[0m'
 step(){ echo -e "\n${P}==> $*${N}"; }
 
+# Agen Wazuh yang baru start masih mendaftar ke manager; log sebelum terhubung
+# tidak tercatat sebagai alert. Tunggu sampai tiap korban benar-benar terhubung.
+for c in pc-staf-07 srv-file-01; do
+  waited=0
+  while :; do
+    started=$(docker inspect -f '{{.State.StartedAt}}' "$c" 2>/dev/null) || { echo "container $c tidak jalan" >&2; exit 1; }
+    t0=$(date -u -j -f '%Y-%m-%dT%H:%M:%S' "${started%%.*}" +%s 2>/dev/null || date -u -d "${started}" +%s)
+    age=$(( $(date -u +%s) - t0 ))
+    connected=$(docker exec "$c" grep -c "Connected to the server" /var/ossec/logs/ossec.log 2>/dev/null || true)
+    [ "${connected:-0}" -ge 1 ] && break
+    if [ "$waited" -ge 240 ]; then
+      echo "Agen Wazuh di $c belum terhubung setelah 4 menit. Cek:" >&2
+      echo "  docker exec $c tail /var/ossec/logs/ossec.log" >&2
+      exit 1
+    fi
+    echo "  menunggu agen Wazuh di $c siap (terhubung=${connected:-0}, umur ${age} dtk)..."
+    sleep 10; waited=$((waited + 10))
+  done
+done
+
 step "0. Reset: pastikan genset NYALA (coil0=1) — lewat loopback PLC (operasi sah, bukan bagian serangan)"
 # Dikirim dari dalam container PLC ke 127.0.0.1 agar tidak lewat eth0 yang
 # dipantau Suricata; jadi reset ini tidak ikut terdeteksi sebagai serangan.

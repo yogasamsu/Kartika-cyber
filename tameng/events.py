@@ -46,6 +46,35 @@ def _parse_ts(s):
         return None
 
 
+def _source_ts(alert):
+    """Waktu kejadian di sumber, bukan waktu alert diterima manager.
+
+    Stempel `timestamp` Wazuh adalah waktu manager memproses log; agen bisa
+    mengirim dalam batch puluhan detik kemudian, sehingga urutan antar-host dan
+    terhadap Suricata (waktu paket) kacau. Waktu asli diambil dari:
+      - data.time         : sensor Tameng (ISO, UTC container)
+      - predecoder.timestamp : baris syslog sshd ("Nov  6 10:19:26", UTC container)
+    Bila keduanya tidak ada, dipakai waktu manager.
+    """
+    received = _parse_ts(alert.get("timestamp", ""))
+    sensor = (alert.get("data") or {}).get("time")
+    if sensor:
+        ts = _parse_ts(sensor)
+        if ts:
+            return ts, received
+    pre = (alert.get("predecoder") or {}).get("timestamp")
+    if pre and received:
+        try:
+            ts = dt.datetime.strptime(f"{received.year} {' '.join(pre.split())}", "%Y %b %d %H:%M:%S")
+            ts = ts.replace(tzinfo=dt.timezone.utc)
+            if ts - received > dt.timedelta(days=1):     # log Desember dibaca di Januari
+                ts = ts.replace(year=ts.year - 1)
+            return ts, received
+        except ValueError:
+            pass
+    return received, received
+
+
 def _iter_json(path):
     try:
         with open(path, encoding="utf-8", errors="replace") as f:
@@ -68,7 +97,7 @@ def load_wazuh(since=None):
         meta = mitre.lookup("wazuh", sid)
         if not meta:
             continue
-        ts = _parse_ts(a.get("timestamp", ""))
+        ts, received = _source_ts(a)
         if not ts or (since and ts < since):
             continue
         d = a.get("data", {})
@@ -83,7 +112,8 @@ def load_wazuh(since=None):
             user=d.get("dstuser") or d.get("srcuser") or d.get("user"),
             native_id=a.get("id"),
             raw={"full_log": a.get("full_log", ""), "rule_desc": a.get("rule", {}).get("description", ""),
-                 "cmd": d.get("cmd", "")},
+                 "cmd": d.get("cmd", ""),
+                 "received": received.isoformat() if received else ""},
         ))
     return out
 
