@@ -137,6 +137,45 @@ class Separation(unittest.TestCase):
         self.assertNotIn("shadow_read", [e.kind for e in inc.events])
 
 
+class ModeBlokir(unittest.TestCase):
+    """Suricata mode IPS: perintah Modbus penyerang dijatuhkan, genset tetap menyala."""
+
+    def test_serangan_ot_digagalkan(self):
+        w = DEMO_WAZUH
+        e = [modbus("10:14:00", "10.10.5.7", sid=7100005)]
+        with Evidence(w, e) as evs:
+            inc, = correlate.build_incidents(evs)
+        self.assertFalse(inc.has_ot_impact)
+        self.assertTrue(inc.ot_blocked)
+        self.assertEqual(inc.severity, "tinggi")
+        self.assertIn("DIBLOKIR", inc.steps[-1].text)
+        self.assertTrue(any("digagalkan" in n for n in inc.notes))
+        fb = llm._fallback(inc)
+        self.assertIn("digagalkan", fb["judul"])
+        self.assertNotIn("dimatikan", fb["judul"] + fb["ringkasan"])
+
+    def test_login_lateral_di_detik_sama_tetap_terangkai(self):
+        # Bukti asli 7 Nov: login lateral ke srv-file-01 tercatat lebih dulu di berkas
+        # daripada login penyerang ke pc-staf-07, padahal detiknya sama.
+        w = [
+            wazuh("05:08:38", "5710", "pc-staf-07", srcip=ATK, dstuser="admin"),
+            wazuh("05:08:45", "5715", "srv-file-01", srcip="10.10.5.66", dstuser="sertu"),
+            wazuh("05:08:45", "40112", "pc-staf-07", srcip=ATK, dstuser="sertu"),
+        ]
+        with Evidence(w, [modbus("05:08:47", "10.10.5.7")]) as evs:
+            inc, = correlate.build_incidents(evs)
+        self.assertEqual(inc.identities, ["sertu"])
+        self.assertTrue(inc.has_ot_impact)
+        self.assertEqual([e.kind for e in inc.events],
+                         ["brute_force", "auth_success", "auth_success", "modbus_write"])
+        self.assertIn("srv-file-01", inc.hosts)
+
+    def test_perintah_hmi_resmi_bukan_serangan(self):
+        e = [modbus("10:00:00", "10.10.5.30"), modbus("10:00:05", "10.10.5.30", sid=7000006)]
+        with Evidence([], e) as evs:
+            self.assertEqual(correlate.build_incidents(evs), [])
+
+
 class SourceTime(unittest.TestCase):
     """Bukti lab 6 Nov: agen mengirim batch ~20 dtk setelah kejadian."""
 

@@ -144,10 +144,10 @@ def load_suricata(since=None):
     return out
 
 
-def load_all(minutes=None):
-    """Muat semua event relevan. minutes=None berarti seluruh berkas."""
-    since = None
-    if minutes:
+def load_all(minutes=None, since=None):
+    """Muat semua event relevan sejak `since` (datetime UTC) atau `minutes` terakhir.
+    Keduanya kosong berarti seluruh berkas."""
+    if since is None and minutes:
         since = dt.datetime.now(dt.timezone.utc) - dt.timedelta(minutes=minutes)
     events = load_wazuh(since) + load_suricata(since)
     events.sort(key=lambda e: e.ts)

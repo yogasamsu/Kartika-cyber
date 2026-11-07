@@ -76,6 +76,17 @@ services:
       lab:
         ipv4_address: 10.10.5.20
 
+  hmi-genset:
+    image: tameng/plc-genset:latest     # image PLC berisi hmi.py
+    container_name: hmi-genset
+    hostname: hmi-genset
+    restart: unless-stopped
+    entrypoint: ["/bin/sleep", "infinity"]   # perintah dikirim lewat: docker exec hmi-genset python3 /app/hmi.py on|off|status
+    networks:
+      lab:
+        ipv4_address: 10.10.5.30
+    depends_on: [plc-genset-01]
+
   attacker:
     image: tameng/victim:latest        # punya ssh client, sshpass, python3
     container_name: attacker
@@ -95,9 +106,9 @@ services:
     network_mode: "service:plc-genset-01"
     cap_add: [NET_ADMIN, NET_RAW, SYS_NICE]
     depends_on: [plc-genset-01]
+    environment:
+      # ids = hanya mencatat (default); ips = blokir perintah tulis Modbus dari selain HMI.
+      #   TAMENG_MODE=ips docker compose up -d --force-recreate suricata
+      - TAMENG_MODE=${TAMENG_MODE:-ids}
     volumes:
       - /Volumes/Prika-Tameng/lab-data/suricata/eve:/var/log/suricata
-    command: >
-      -i eth0 -S /etc/suricata/rules/tameng.rules
-      --set app-layer.protocols.modbus.enabled=yes
-      --set app-layer.protocols.modbus.detection-ports.dp=502

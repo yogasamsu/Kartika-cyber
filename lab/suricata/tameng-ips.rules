@@ -1,0 +1,13 @@
+# Aturan Suricata Tameng mode IPS (inline lewat NFQUEUE).
+# HMI resmi (10.10.5.30) boleh mengendalikan PLC; perintah TULIS dari host lain
+# dijatuhkan, sehingga genset tetap pada keadaannya.
+
+pass modbus 10.10.5.30 any -> any 502 (msg:"Tameng: Modbus dari HMI resmi"; sid:7000200; rev:1;)
+
+drop modbus !10.10.5.30 any -> any 502 (msg:"Tameng: BLOKIR Modbus WRITE single coil (fc5) dari host tak sah"; modbus:function 5; sid:7100005; rev:1;)
+drop modbus !10.10.5.30 any -> any 502 (msg:"Tameng: BLOKIR Modbus WRITE multiple coils (fc15) dari host tak sah"; modbus:function 15; sid:7100015; rev:1;)
+drop modbus !10.10.5.30 any -> any 502 (msg:"Tameng: BLOKIR Modbus WRITE single register (fc6) dari host tak sah"; modbus:function 6; sid:7100006; rev:1;)
+drop modbus !10.10.5.30 any -> any 502 (msg:"Tameng: BLOKIR Modbus WRITE multiple registers (fc16) dari host tak sah"; modbus:function 16; sid:7100016; rev:1;)
+
+# Catatan koneksi Modbus (konteks; level rendah).
+alert tcp !10.10.5.30 any -> any 502 (msg:"Tameng: koneksi TCP ke port Modbus PLC"; flow:to_server; flags:S; sid:7000100; rev:1;)

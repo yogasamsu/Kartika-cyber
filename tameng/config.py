@@ -33,8 +33,13 @@ ASSETS = {
     "10.10.5.66": ("pc-staf-07", "Workstation staf", "sedang", True),
     "10.10.5.7":  ("srv-file-01", "Server file satuan", "tinggi", True),
     "10.10.5.20": ("plc-genset-01", "PLC pengendali genset (OT, kritis)", "kritis", True),
+    "10.10.5.30": ("hmi-genset", "HMI operator genset (pengendali sah)", "tinggi", True),
     "10.10.5.90": ("kali-ops", "Host tak terdaftar (indikasi penyerang)", "-", False),
 }
+
+
+# Pengirim perintah Modbus yang sah (HMI/SCADA). Perintah tulis dari sini bukan serangan.
+MODBUS_MASTERS = set(os.environ.get("TAMENG_MODBUS_MASTERS", "10.10.5.30").split(","))
 
 
 def asset(ip):

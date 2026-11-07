@@ -10,7 +10,7 @@ def render_markdown(inc, summary):
     L.append(f"# {summary['judul']}")
     L.append("")
     L.append(f"**Insiden** `{inc.id}` · **Tingkat bahaya** {SEV_BADGE.get(inc.severity, inc.severity)}"
-             f" · **Dampak OT** {'Ya' if inc.has_ot_impact else 'Tidak'}")
+             f" · **Dampak OT** {'Ya' if inc.has_ot_impact else ('Dicoba, DIBLOKIR' if inc.ot_blocked else 'Tidak')}")
     L.append(f"**Waktu** {inc.start.strftime('%Y-%m-%d %H:%M:%S')} – {inc.end.strftime('%H:%M:%S')} UTC"
              f" · **IP masuk** {inc.entry_ip} · **Host** {', '.join(inc.hosts)}")
     if inc.identities:

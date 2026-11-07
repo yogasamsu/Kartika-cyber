@@ -20,6 +20,7 @@ def incident_to_dict(inc, summary):
         "id": inc.id,
         "severity": inc.severity,
         "has_ot_impact": inc.has_ot_impact,
+        "ot_blocked": inc.ot_blocked,
         "start": inc.start.isoformat(),
         "end": inc.end.isoformat(),
         "entry_ip": inc.entry_ip,
@@ -42,16 +43,21 @@ def incident_to_dict(inc, summary):
 def main():
     ap = argparse.ArgumentParser(prog="tameng", description="Analis insiden IT/OT lokal Tameng")
     ap.add_argument("--minutes", type=int, default=15, help="rentang bukti yang dibaca (menit terakhir)")
+    ap.add_argument("--since", help="baca bukti sejak waktu ini (ISO UTC, mis. 2026-11-07T05:08:30Z); menimpa --minutes")
     ap.add_argument("--out", help="tulis laporan Markdown ke berkas (atau direktori)")
     ap.add_argument("--json", dest="json_out", help="tulis insiden sebagai JSON (untuk dashboard/UI)")
     ap.add_argument("--no-llm", action="store_true", help="lewati LLM, pakai ringkasan deterministik")
     args = ap.parse_args()
 
-    evs = events.load_all(minutes=args.minutes)
+    since = events._parse_ts(args.since) if args.since else None
+    if args.since and since is None:
+        ap.error(f"format --since tidak dikenali: {args.since}")
+    evs = events.load_all(minutes=args.minutes, since=since)
     incidents = correlate.build_incidents(evs)
 
     if not incidents:
-        print(f"Tidak ada insiden dalam {args.minutes} menit terakhir "
+        rentang = f"sejak {args.since}" if args.since else f"dalam {args.minutes} menit terakhir"
+        print(f"Tidak ada insiden {rentang} "
               f"({len(evs)} event relevan).")
         return
 

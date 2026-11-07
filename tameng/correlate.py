@@ -30,6 +30,7 @@ class Incident:
     entry_ip: str
     techniques: list        # [(id, nama, domain, taktik)]
     has_ot_impact: bool
+    ot_blocked: bool
     severity: str
     steps: list             # list[Step]
     notes: list = field(default_factory=list)
@@ -40,7 +41,7 @@ class Incident:
 
 # Pembacaan /etc/shadow oleh proses login (PAM) adalah derau, bukan pencurian.
 # Urutan rantai bila waktu urutnya sama: akses dulu, baru aksi di host, lalu OT.
-KIND_RANK = {"brute_force": 0, "auth_success": 1, "tmp_exec": 2, "shadow_read": 3, "modbus_write": 4}
+KIND_RANK = {"brute_force": 0, "auth_success": 1, "tmp_exec": 2, "shadow_read": 3, "modbus_write": 4, "modbus_block": 4}
 
 PAM_CMD_RE = re.compile(r"^(\S*/)?(sshd|unix_chkpwd|login)\b")
 
@@ -120,6 +121,13 @@ def _assemble(events, window):
     """
     drafts, benign = [], []
 
+    def own(d, e):
+        d.add(e)
+        if e.host and e.host not in d.owned:
+            d.owned[e.host] = e.ts
+        d.actors.add(e.host)
+
+    pending = []    # login internal yang belum punya rantai (mungkin rantainya diproses sedetik kemudian)
     for e in events:
         if e.kind == "brute_force":
             actor = _actor(e.src_ip)
@@ -134,20 +142,36 @@ def _assemble(events, window):
             d = _find_by_actor(drafts, actor, e.ts, window)
             if d is None:
                 if config.asset(e.src_ip)[3]:
-                    continue    # login antar-host internal tanpa rantai: aktivitas normal
+                    pending.append(e)
+                    continue
                 d = _Draft()
                 d.actors.add(actor)
                 drafts.append(d)
-            d.add(e)
-            if e.host and e.host not in d.owned:
-                d.owned[e.host] = e.ts
-            d.actors.add(e.host)
+            own(d, e)
 
-    for kind in ("tmp_exec", "modbus_write", "shadow_read"):
+    # Ulangi login internal yang tertunda sampai tidak ada yang bertambah. Bukti
+    # berpresisi detik: login lateral bisa tercatat sebelum login penyerang ke host
+    # asalnya di detik yang sama. Yang tetap tanpa rantai = aktivitas normal.
+    while pending:
+        rest = []
+        for e in pending:
+            d = _find_owner(drafts, _actor(e.src_ip), e.ts, window)
+            if d is None:
+                rest.append(e)
+            else:
+                own(d, e)
+        if len(rest) == len(pending):
+            break
+        pending = rest
+
+    for kind in ("tmp_exec", "modbus_write", "modbus_block", "shadow_read"):
         for e in events:
             if e.kind != kind:
                 continue
-            host = _actor(e.src_ip) if kind == "modbus_write" else e.host
+            ot = kind in ("modbus_write", "modbus_block")
+            if ot and e.src_ip in config.MODBUS_MASTERS:
+                continue    # perintah dari HMI/SCADA resmi: operasi sah
+            host = _actor(e.src_ip) if ot else e.host
             d = _find_owner(drafts, host, e.ts, window)
             if kind == "shadow_read":
                 if _shadow_verdict(e, d):
@@ -161,7 +185,7 @@ def _assemble(events, window):
             if d is None:
                 d = _Draft()
                 drafts.append(d)
-                if kind == "modbus_write":
+                if ot:
                     d.notes.append("Sumber perintah Modbus tidak terhubung ke rantai serangan IT yang terdeteksi.")
             d.add(e, d.owned.get(host))
 
@@ -241,6 +265,15 @@ def _build_steps(events):
                 evidence=[e.eid],
                 tech=["T0855", "T0816"],
             ))
+        elif e.kind == "modbus_block":
+            tgt = config.asset(e.dst_ip)[0]
+            src_name = config.asset(e.src_ip)[0]
+            steps.append(Step(
+                time=_hhmmss(e.ts),
+                text=f"Perintah tulis Modbus dari {e.src_ip} ({src_name}) ke PLC {tgt} DIBLOKIR — genset tetap menyala (serangan OT digagalkan)",
+                evidence=[e.eid],
+                tech=["T0855"],
+            ))
         i += 1
     return steps
 
@@ -249,6 +282,8 @@ def _severity(events, has_ot):
     if has_ot:
         return "kritis"
     kinds = {e.kind for e in events}
+    if "modbus_block" in kinds:
+        return "tinggi"       # penyerang sudah sampai ke jaringan kendali, walau diblokir
     if "shadow_read" in kinds or ("auth_success" in kinds and "brute_force" in kinds):
         return "tinggi"
     if "auth_success" in kinds or "tmp_exec" in kinds:
@@ -275,6 +310,7 @@ def build_incidents(events, window=None):
         cluster = sorted(d.events, key=lambda e: (d.order[id(e)], KIND_RANK.get(e.kind, 9), e.ts))
         reordered = sum(1 for e in cluster if d.order[id(e)] > e.ts)
         has_ot = any(e.kind == "modbus_write" for e in cluster)
+        blocked = sum(1 for e in cluster if e.kind == "modbus_block")
         hosts, identities = [], []
         for e in cluster:
             # tampilkan host sebagai nama aset bila IP dikenal
@@ -309,10 +345,16 @@ def build_incidents(events, window=None):
             entry_ip=entry_ip,
             techniques=_techniques_in_order(cluster),
             has_ot_impact=has_ot,
+            ot_blocked=blocked > 0,
             severity=_severity(cluster, has_ot),
             steps=_build_steps(cluster),
             notes=list(d.notes),
         )
+        if blocked:
+            inc.notes.append(
+                f"Serangan ke OT digagalkan: {blocked} perintah tulis Modbus dari host tak sah "
+                f"dijatuhkan Suricata (mode IPS) sebelum sampai ke PLC."
+            )
         if reordered:
             inc.notes.append(
                 f"Urutan {reordered} kejadian disesuaikan mengikuti rantai sebab-akibat "

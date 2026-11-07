@@ -13,7 +13,8 @@ dan dibaca langsung oleh mesin korelasi Tameng.
 | pc-staf-07 | 10.10.5.66 | Workstation korban + Wazuh agent + sensor Tameng |
 | srv-file-01 | 10.10.5.7 | Server file korban + Wazuh agent + sensor Tameng |
 | plc-genset-01 | 10.10.5.20 | Simulasi PLC genset (Modbus TCP :502) |
-| suricata | (netns PLC) | IDS OT; memantau trafik Modbus ke PLC |
+| hmi-genset | 10.10.5.30 | HMI operator: satu-satunya pengirim perintah Modbus yang sah |
+| suricata | (netns PLC) | Sensor OT; mode IDS (mencatat) atau IPS (memblokir) |
 | attacker | 10.10.5.90 | Mesin penyerang (kali-ops) |
 
 Semua image **arm64 native** (Wazuh 4.14.9, Suricata 8, python/pymodbus).
@@ -43,6 +44,26 @@ Alurnya: brute force SSH → login dengan kredensial curian (`sertu`) di
 pc-staf-07 → eksekusi payload dari `/tmp` + baca `/etc/shadow` → gerak lateral
 ke srv-file-01 → dari sana perintah Modbus mematikan genset di PLC.
 
+### Mode blokir (IPS) dan demo dua babak
+
+Suricata punya dua mode, dipilih lewat `TAMENG_MODE`:
+
+| Mode | Perilaku | Hasil serangan |
+|---|---|---|
+| `ids` (bawaan) | Memantau pasif dan mencatat setiap perintah tulis Modbus | Genset MATI, Tameng melaporkan insiden kritis |
+| `ips` | Paket Modbus ke PLC lewat NFQUEUE; perintah tulis dari selain HMI (10.10.5.30) dijatuhkan | Genset tetap NYALA, Tameng melaporkan "serangan ke OT digagalkan" |
+
+```bash
+TAMENG_MODE=ips docker compose up -d --force-recreate suricata   # nyalakan blokir
+docker compose up -d --force-recreate suricata                   # kembali ke ids
+docker exec hmi-genset python3 /app/hmi.py status                # on | off | status
+bash scripts/demo-dua-babak.sh   # babak 1 tanpa blokir, babak 2 dengan blokir; laporan di out/
+```
+
+Mode IPS bersifat *fail-closed*: bila Suricata mati, trafik Modbus ke PLC ikut
+terputus (termasuk dari HMI). Saat kembali ke `ids`, entrypoint membersihkan
+aturan NFQUEUE agar trafik normal lagi.
+
 ### Lihat linimasa bukti gabungan (Wazuh + Suricata)
 
 ```bash
@@ -62,7 +83,9 @@ Sinyal utama:
 | Wazuh | 5715 | Login SSH berhasil |
 | Wazuh | 100010 | Eksekusi berkas dari `/tmp` (sensor Tameng) |
 | Wazuh | 100011 | Pembacaan `/etc/shadow` (sensor Tameng) |
-| Suricata | 7000005 | Modbus WRITE single coil (fc5) ke PLC |
+| Wazuh | 40112 | Login berhasil setelah rentetan kegagalan (pengganti 5715) |
+| Suricata | 7000005 | Modbus WRITE single coil (fc5) ke PLC (mode IDS) |
+| Suricata | 7100005 | Modbus WRITE dari host tak sah DIBLOKIR (mode IPS) |
 
 ## Penyederhanaan lab vs produksi
 
@@ -85,6 +108,8 @@ Dipilih agar muat di satu laptop dan tetap jujur; didokumentasikan untuk juri.
 - **Simulator PLC pymodbus menggantikan OpenPLC.** Ringan & arm64-native;
   perilaku Modbus di kabel tetap nyata sehingga Suricata mendeteksinya sama
   seperti PLC fisik. Produksi/alternatif: OpenPLC atau PLC sungguhan.
+- **Pengendali sah diwakili satu HMI.** Tameng mengabaikan perintah tulis dari
+  `config.MODBUS_MASTERS` (bawaan 10.10.5.30); produksi: daftar HMI/SCADA satuan.
 - **Suricata berbagi network namespace PLC** (`network_mode: service:plc-genset-01`)
   karena bridge Docker Desktop tidak bisa port-mirror. Ini membuat Suricata
   melihat tepat trafik OT. Produksi: SPAN/TAP port.

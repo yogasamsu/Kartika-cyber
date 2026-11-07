@@ -30,6 +30,9 @@ SIGNALS = {
                             tactic="Credential Access", tech=["T1110"], domain="it"),
     ("wazuh", "5715"): dict(kind="auth_success", label="Login SSH BERHASIL",
                             tactic="Initial Access / Lateral Movement", tech=["T1078", "T1021.004"], domain="it"),
+    # Wazuh memakai 40112 (bukan 5715) bila login berhasil didahului rentetan kegagalan.
+    ("wazuh", "40112"): dict(kind="auth_success", label="Login SSH BERHASIL setelah rentetan kegagalan",
+                             tactic="Initial Access / Lateral Movement", tech=["T1078", "T1021.004"], domain="it"),
     ("wazuh", "5501"): dict(kind="pam_open", label="Sesi login dibuka (PAM)",
                             tactic="Initial Access", tech=["T1078"], domain="it"),
     ("wazuh", "100010"): dict(kind="tmp_exec", label="Eksekusi berkas dari /tmp",
@@ -45,6 +48,15 @@ SIGNALS = {
                                   tactic="Impair Process Control", tech=["T0855", "T0816"], domain="ot"),
     ("suricata", "7000016"): dict(kind="modbus_write", label="Perintah tulis Modbus (fc16) ke PLC",
                                   tactic="Impair Process Control", tech=["T0855", "T0816"], domain="ot"),
+    # Suricata mode IPS: perintah tulis dari host tak sah DIJATUHKAN sebelum sampai ke PLC.
+    ("suricata", "7100005"): dict(kind="modbus_block", label="Perintah tulis Modbus (fc5) ke PLC DIBLOKIR",
+                                  tactic="Impair Process Control", tech=["T0855"], domain="ot"),
+    ("suricata", "7100006"): dict(kind="modbus_block", label="Perintah tulis Modbus (fc6) ke PLC DIBLOKIR",
+                                  tactic="Impair Process Control", tech=["T0855"], domain="ot"),
+    ("suricata", "7100015"): dict(kind="modbus_block", label="Perintah tulis Modbus (fc15) ke PLC DIBLOKIR",
+                                  tactic="Impair Process Control", tech=["T0855"], domain="ot"),
+    ("suricata", "7100016"): dict(kind="modbus_block", label="Perintah tulis Modbus (fc16) ke PLC DIBLOKIR",
+                                  tactic="Impair Process Control", tech=["T0855"], domain="ot"),
     ("suricata", "7000100"): dict(kind="modbus_connect", label="Koneksi ke port Modbus PLC",
                                   tactic="Discovery", tech=[], domain="ot"),
 }

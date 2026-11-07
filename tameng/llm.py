@@ -35,7 +35,12 @@ def _facts(inc):
     lines = []
     lines.append(f"ID insiden: {inc.id}")
     lines.append(f"Tingkat bahaya (sudah ditetapkan): {inc.severity}")
-    lines.append(f"Dampak OT: {'ya, genset dimatikan' if inc.has_ot_impact else 'tidak'}")
+    if inc.has_ot_impact:
+        lines.append("Dampak OT: ya, genset dimatikan")
+    elif inc.ot_blocked:
+        lines.append("Dampak OT: tidak; perintah ke PLC dicoba tetapi DIBLOKIR, genset tetap menyala")
+    else:
+        lines.append("Dampak OT: tidak")
     lines.append(f"IP masuk penyerang: {inc.entry_ip}")
     lines.append(f"Host terdampak: {', '.join(inc.hosts)}")
     if inc.identities:
@@ -95,6 +100,9 @@ def _fallback(inc):
     if inc.has_ot_impact:
         judul = f"Serangan {inc.severity} IT ke OT: perintah tak sah ke PLC"
         dampak = "mengirim perintah tulis tak sah ke PLC (dampak OT)"
+    elif inc.ot_blocked:
+        judul = f"Serangan {inc.severity} IT ke OT digagalkan: perintah ke PLC diblokir"
+        dampak = "mencoba mengirim perintah tulis tak sah ke PLC, tetapi perintah itu diblokir sehingga genset tetap menyala"
     else:
         judul = f"Insiden {inc.severity}: akses tidak sah ke {hosts}"
         dampak = "melakukan aktivitas tidak sah"
@@ -108,6 +116,9 @@ def _fallback(inc):
     if inc.has_ot_impact:
         rek.append("Periksa PLC dan kembalikan peralatan ke status aman secara manual.")
         rek.append("Batasi akses Modbus ke PLC hanya dari HMI/SCADA yang sah.")
+    elif inc.ot_blocked:
+        rek.append("Pertahankan mode blokir Suricata; tinjau daftar HMI yang diizinkan menulis ke PLC.")
+        rek.append("Selidiki bagaimana penyerang mencapai jaringan kendali OT dan tutup jalurnya (segmentasi).")
     if inc.entry_ip and not config.asset(inc.entry_ip)[3]:
         rek.append(f"Blokir {inc.entry_ip} di perimeter.")
     if any(t[0] == "T1003.008" for t in inc.techniques):
