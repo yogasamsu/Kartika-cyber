@@ -10,10 +10,10 @@ Versi 0.2, 7 November 2026. Disusun untuk Kartika Cyber Hackathon 2026 (submissi
 |---|---|---|
 | Mandiri | Berjalan di dalam satuan tanpa internet (LLM lokal) | Ada |
 | Edukasi | Tiap teknik di insiden dijelaskan: apa yang terjadi, kenapa berbahaya, apa yang dikerjakan sekarang, cara mencegah (F7) | Ada (7 Nov) |
-| Notifikasi | Ribuan alert diringkas jadi satu insiden berprioritas; peringatan aktif ke operator | Ringkasan ada; peringatan aktif belum |
-| Gerak cepat | Langkah respons siap kerja; mode blokir Modbus | Ada |
+| Notifikasi | Ribuan alert diringkas jadi satu insiden; mode pantau mengirim BARU, MEMBURUK, DITANGANI | Ada (7 Nov) |
+| Gerak cepat | Checklist respons; blokir otomatis Modbus (IPS) dan IP penyerang (Wazuh active response) | Ada; blokir IP belum diuji live |
 
-Kata "netralisasi" sengaja tidak dipakai: pemblokiran otomatis baru ada untuk perintah Modbus, belum untuk serangan IT.
+Kata "netralisasi" sengaja tidak dipakai: blokir otomatis IP baru diuji lewat replay, belum di lab live.
 
 Tameng membaca alert Wazuh dan Suricata, merangkainya menjadi insiden berantai dengan aturan deterministik, memetakan tiap langkah ke MITRE ATT&CK (Enterprise dan ICS), lalu meminta LLM lokal menulis ringkasan dan rekomendasi dalam bahasa Indonesia. Semua proses berjalan di satu laptop tanpa internet. Narasi LLM yang menyebut IP, host, waktu, atau teknik di luar bukti ditolak dan diganti ringkasan cadangan.
 
@@ -49,7 +49,7 @@ Masalah yang disebut narasumber dan situs Satsiber/TTIS:
 | Monitoring | Ingest Wazuh + Suricata, korelasi insiden berantai | Ada |
 | Penanganan | Mode blokir Suricata (IPS) untuk perintah Modbus dari host tak sah; rekomendasi langkah respons | Ada |
 | Pendampingan pemulihan | Rekomendasi pemulihan per jenis insiden (isolasi host, reset akun, pulihkan dari backup) | Ada, diperluas untuk deface |
-| Risk analysis | Ringkasan kerentanan dari Wazuh Vulnerability Detection dan SCA, diurutkan prioritasnya | Rencana (F6) |
+| Risk analysis | Ringkasan kerentanan dari Wazuh Vulnerability Detection dan SCA, diurutkan prioritasnya | Ada (F6, data contoh) |
 
 ## 5. Fitur
 
@@ -64,13 +64,15 @@ Masalah yang disebut narasumber dan situs Satsiber/TTIS:
 | F5 | Mode blokir OT | Suricata inline menjatuhkan perintah tulis Modbus dari host selain HMI resmi |
 | F7 | **Edukasi SDM di laporan** (baru, 7 Nov) | Bagian "Pelajari insiden ini" untuk tiap teknik ATT&CK di insiden: apa yang terjadi, kenapa berbahaya, kerjakan sekarang, supaya tidak terulang. Materi ditulis manusia dan disimpan di kode (`mitre.EDUKASI`), bukan dibuat LLM. Ikut juga di JSON (`edukasi`) |
 | F9 | **Dashboard pusat komando gaya militer** (baru, 7 Nov) | `dashboard/`: pembuka HUD yang mengunci perisai Tameng, peta alur serangan IT/OT, kronologi, checklist gerak cepat, panel edukasi. Tanpa CDN atau font daring |
+| F6 | **Ringkasan kerentanan** (baru, 7 Nov) | `--kerentanan`: baca Wazuh VD dan SCA, skor = CVSS + KEV (3) + kritikalitas aset (1–3) + publik (2) + terlibat insiden (2). Alasan ditulis kode. Data demo sintetis di `lab/sample/` |
+| F10 | **Notifikasi aktif** (baru, 7 Nov) | `--watch`: BARU, MEMBURUK, DITANGANI ke terminal (bel), JSONL, desktop macOS, webhook chat internal. Diam bila insiden tidak berubah |
+| F11 | **Blokir otomatis IP** (baru, 7 Nov) | Wazuh active response `firewall-drop` (rule 5712, 100021, 10 menit); alert 651 ditempelkan ke rantai pelaku. Diuji lewat `replay-deface.py --blokir`; konfigurasi lab belum diuji live |
 | F5b | **Skenario deface situs** (baru, 7 Nov) | Unggahan lewat celah plugin, webshell, perintah sistem, halaman berubah. Sinyal: log akses web dan File Integrity Monitoring Wazuh di web root. ATT&CK T1190, T1505.003, T1059.004, T1491.002 |
 
 ### Rencana sampai 15 Nov
 
 | ID | Fitur | Lingkup | Alasan |
 |---|---|---|---|
-| F6 | Ringkasan kerentanan ("scan sistem") | Baca hasil Wazuh Vulnerability Detection dan SCA yang sudah ada; LLM menjelaskan 3 temuan teratas dan alasannya. Tameng **tidak** membuat pemindai sendiri | Menjawab masalah sistem lama: kalau tidak bisa menambal semua, operator perlu urutan |
 | F8 | Mode latihan | Putar ulang skenario lab (IT→OT, blokir, deface) untuk melatih operator baru | Opsional bila waktu cukup |
 
 ### Di luar lingkup
@@ -80,6 +82,28 @@ Masalah yang disebut narasumber dan situs Satsiber/TTIS:
 - Pelatihan kesadaran phishing untuk seluruh personel. Itu produk tersendiri.
 - Lab yang menjalankan eksploitasi web sungguhan. Skenario deface didemokan dengan replay bukti deteksi sintetis.
 
+## 5b. Limitasi
+
+| Limitasi | Langkah berikutnya |
+|---|---|
+| Baru diuji di lab satu laptop (Docker 10.10.5.0/24) | Pilot di satu markas |
+| Skenario deface dan blokir IP masih replay bukti sintetis | Uji dengan server web satuan di lingkungan uji |
+| Sensor IT baru Linux; OT baru Modbus TCP | Katalog sinyal untuk Windows, DNP3, IEC 104 |
+| LLM 7B kadang ditolak validasi (diganti ringkasan kode) | Uji model lebih besar bila ada GPU |
+| Data kerentanan contoh; katalog KEV lokal hanya subset | Sambungkan VD Wazuh satuan; bawa KEV lewat media offline |
+| Belum diuji analis sungguhan; dashboard belum punya login | Uji waktu dan ketepatan bersama TTIS; tambah autentikasi |
+
+## 5c. Integrasi ke sistem TNI
+
+1. **Pasang di segmen SOC**: satu server, tanpa internet. Model dan pembaruan lewat media offline terverifikasi.
+2. **Sambungkan sensor**: Wazuh agent di host; Suricata di port mirror (SPAN) jaringan OT. SIEM lain lewat adaptor JSON atau syslog.
+3. **Isi inventaris**: aset, kritikalitas, dan HMI sah dari daftar aset satuan (`config.ASSETS`, `TAMENG_MODBUS_MASTERS`).
+4. **Arahkan notifikasi**: `TAMENG_WEBHOOK` ke chat on-prem (Mattermost/Rocket.Chat), desktop di konsol jaga, JSONL untuk arsip.
+5. **Sesuaikan SOP**: rekomendasi dan `mitre.EDUKASI` disunting bersama TTIS.
+6. **Pilot satu markas**: ukur waktu dan ketepatan analis, lalu perluas.
+
+Batas peran: hanya aset TNI. Insiden sipil tetap ditangani BSSN, Komdigi, dan Polri.
+
 ## 6. Persyaratan nonfungsional
 
 | Aspek | Syarat |
@@ -87,7 +111,7 @@ Masalah yang disebut narasumber dan situs Satsiber/TTIS:
 | Kedaulatan data | Seluruh proses lokal; tidak ada panggilan ke layanan di luar mesin |
 | Perangkat | Satu laptop (uji: MacBook Air M4, Docker 6 GB); bukti dan model di SSD terenkripsi |
 | Dependensi | Python 3 pustaka standar; Wazuh, Suricata, Ollama (semua open-source) |
-| Ketepatan | Kronologi, severity, dan teknik ditentukan kode; tes regresi wajib lolos (24 tes per 7 Nov) |
+| Ketepatan | Kronologi, severity, dan teknik ditentukan kode; tes regresi wajib lolos (33 tes per 7 Nov) |
 | Keterbacaan | Laporan berbahasa Indonesia yang bisa dikerjakan bintara siber |
 
 ## 7. Skenario demo
@@ -131,7 +155,8 @@ Mengikuti bobot juri:
 |---|---|
 | 7 Nov | Skenario deface di mesin korelasi + tes + replay (selesai) |
 | 7 Nov | F7 edukasi SDM di laporan (selesai) |
-| 8–9 Nov | F6 ringkasan kerentanan; peringatan aktif (notifikasi) |
+| 7 Nov | F6 kerentanan, F10 notifikasi, F11 blokir IP, beranda + pusat komando (selesai) |
+| 8–9 Nov | Uji blokir IP di lab live; uji webhook dengan server chat |
 | 7 Nov | F9 dashboard gaya militer (selesai) |
 | 10–12 Nov | Integrasi dashboard ke video dan deck |
 | 13 Nov | Perbarui video dan deck dengan babak deface |

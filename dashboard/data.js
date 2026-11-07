@@ -286,6 +286,7 @@ window.TAMENG_DATA = {
     "elapsed_s": null
    },
    "defaced": false,
+   "it_blocked": false,
    "edukasi": [
     {
      "id": "T1110",
@@ -649,6 +650,7 @@ window.TAMENG_DATA = {
     "elapsed_s": null
    },
    "defaced": false,
+   "it_blocked": false,
    "edukasi": [
     {
      "id": "T1110",
@@ -893,7 +895,431 @@ window.TAMENG_DATA = {
     "warnings": [],
     "elapsed_s": null
    },
+   "it_blocked": false,
    "skenario": "Babak 3 · Deface situs (replay)"
+  },
+  {
+   "id": "INC-20261107-113637",
+   "severity": "tinggi",
+   "has_ot_impact": false,
+   "ot_blocked": false,
+   "defaced": false,
+   "it_blocked": true,
+   "start": "2026-11-07T11:36:37+00:00",
+   "end": "2026-11-07T11:36:42+00:00",
+   "entry_ip": "10.10.5.90",
+   "hosts": [
+    "web-portal"
+   ],
+   "identities": [],
+   "techniques": [
+    {
+     "id": "T1190",
+     "name": "Exploit Public-Facing Application",
+     "domain": "enterprise",
+     "tactic": "Initial Access"
+    },
+    {
+     "id": "T1505.003",
+     "name": "Server Software Component: Web Shell",
+     "domain": "enterprise",
+     "tactic": "Persistence"
+    },
+    {
+     "id": "T1059.004",
+     "name": "Command and Scripting Interpreter: Unix Shell",
+     "domain": "enterprise",
+     "tactic": "Persistence / Execution"
+    }
+   ],
+   "steps": [
+    {
+     "time": "11:36:37",
+     "text": "Eksploitasi celah unggah berkas di web-portal dari 10.10.5.90 (/wp-admin/admin-ajax.php?action=fm_upload)",
+     "evidence": [
+      "W1"
+     ],
+     "tech": [
+      "T1190"
+     ]
+    },
+    {
+     "time": "11:36:38",
+     "text": "Berkas baru /var/www/html/wp-content/uploads/wp-cache.php muncul di web-portal — webshell ditanam",
+     "evidence": [
+      "W2"
+     ],
+     "tech": [
+      "T1505.003"
+     ]
+    },
+    {
+     "time": "11:36:41",
+     "text": "1 perintah sistem dijalankan lewat webshell di web-portal dari 10.10.5.90: `id`",
+     "evidence": [
+      "W3"
+     ],
+     "tech": [
+      "T1505.003",
+      "T1059.004"
+     ]
+    },
+    {
+     "time": "11:36:42",
+     "text": "IP 10.10.5.90 DIBLOKIR otomatis di web-portal (Wazuh active response) — akses penyerang diputus",
+     "evidence": [
+      "W4"
+     ],
+     "tech": []
+    }
+   ],
+   "events": [
+    {
+     "eid": "W1",
+     "source": "wazuh",
+     "sid": "100020",
+     "label": "Unggahan berkas lewat celah plugin web",
+     "src_ip": "10.10.5.90",
+     "dst_ip": null,
+     "host": "web-portal",
+     "time": "11:36:37",
+     "domain": "it"
+    },
+    {
+     "eid": "W2",
+     "source": "wazuh",
+     "sid": "554",
+     "label": "Berkas baru di direktori situs web",
+     "src_ip": null,
+     "dst_ip": null,
+     "host": "web-portal",
+     "time": "11:36:38",
+     "domain": "it"
+    },
+    {
+     "eid": "W3",
+     "source": "wazuh",
+     "sid": "100021",
+     "label": "Perintah sistem lewat webshell",
+     "src_ip": "10.10.5.90",
+     "dst_ip": null,
+     "host": "web-portal",
+     "time": "11:36:41",
+     "domain": "it"
+    },
+    {
+     "eid": "W4",
+     "source": "wazuh",
+     "sid": "651",
+     "label": "IP penyerang DIBLOKIR otomatis (active response)",
+     "src_ip": "10.10.5.90",
+     "dst_ip": null,
+     "host": "web-portal",
+     "time": "11:36:42",
+     "domain": "it"
+    }
+   ],
+   "notes": [
+    "Netralisasi otomatis: 10.10.5.90 diblokir firewall host oleh Wazuh active response."
+   ],
+   "edukasi": [
+    {
+     "id": "T1190",
+     "name": "Exploit Public-Facing Application",
+     "apa": "Penyerang memanfaatkan celah pada aplikasi yang terbuka ke internet, misalnya plugin situs yang belum diperbarui.",
+     "bahaya": "Situs publik bisa diakses siapa saja, jadi celahnya bisa dipakai tanpa perlu akun.",
+     "tindakan": "Cari tahu aplikasi atau plugin mana yang diserang dari URL di bukti, lalu matikan sementara.",
+     "cegah": "Perbarui CMS dan plugin secara rutin, hapus plugin yang tidak dipakai, dan pasang WAF di depan situs."
+    },
+    {
+     "id": "T1505.003",
+     "name": "Server Software Component: Web Shell",
+     "apa": "Penyerang menaruh webshell: berkas kecil di server web yang menerima perintah lewat alamat situs.",
+     "bahaya": "Selama webshell masih ada, penyerang bisa kembali kapan saja walaupun celah awalnya sudah ditutup.",
+     "tindakan": "Salin berkas webshell ke media bukti dan catat hash-nya, baru hapus. Cari berkas serupa di folder unggahan.",
+     "cegah": "Larang eksekusi skrip di folder unggahan dan pantau berkas baru di direktori situs (FIM)."
+    },
+    {
+     "id": "T1059.004",
+     "name": "Command and Scripting Interpreter: Unix Shell",
+     "apa": "Penyerang menjalankan perintah atau skrip shell di komputer korban, sering dari folder /tmp.",
+     "bahaya": "Ini tanda penyerang sudah memegang kendali dan mulai menjalankan alatnya sendiri.",
+     "tindakan": "Amankan salinan skrip sebagai bukti (catat hash-nya) sebelum dihapus, lalu isolasi host.",
+     "cegah": "Pasang /tmp dengan opsi noexec dan pantau eksekusi dari folder sementara."
+    }
+   ],
+   "summary": {
+    "judul": "Serangan tinggi ke web-portal dihentikan: IP penyerang diblokir otomatis",
+    "ringkasan": "Penyerang dari 10.10.5.90 menyasar web-portal lalu mulai menjalankan perintah, tetapi IP-nya diblokir otomatis sebelum menimbulkan dampak. Teknik yang terlihat: Exploit Public-Facing Application, Server Software Component: Web Shell, Command and Scripting Interpreter: Unix Shell.",
+    "rekomendasi": [
+     "Isolasi host terdampak (web-portal) dari jaringan.",
+     "Salin /var/www/html/wp-content/uploads/wp-cache.php ke media bukti (hash dulu), baru hapus dari server.",
+     "Nonaktifkan atau perbarui plugin yang dieksploitasi; periksa berkas lain di direktori situs yang berubah.",
+     "Blokir otomatis sudah aktif di host; pasang juga di firewall perimeter karena blokir host berbatas waktu."
+    ]
+   },
+   "meta": {
+    "fallback": true,
+    "model": null,
+    "warnings": [],
+    "elapsed_s": null
+   },
+   "skenario": "Babak 4 · Deface dihentikan blokir otomatis (replay)"
+  }
+ ],
+ "notifications": [
+  {
+   "time": "2026-11-07T11:36:42",
+   "jenis": "DITANGANI",
+   "insiden": "INC-20261107-113637",
+   "severity": "tinggi",
+   "teks": "IP penyerang diblokir otomatis",
+   "langkah_pertama": "Isolasi host terdampak (web-portal) dari jaringan."
+  },
+  {
+   "time": "2026-11-07T11:36:37",
+   "jenis": "BARU",
+   "insiden": "INC-20261107-113637",
+   "severity": "tinggi",
+   "teks": "Insiden baru di web-portal dari 10.10.5.90",
+   "langkah_pertama": "Isolasi host terdampak (web-portal) dari jaringan."
+  },
+  {
+   "time": "2026-11-07T11:23:01",
+   "jenis": "MEMBURUK",
+   "insiden": "INC-20261107-112251",
+   "severity": "tinggi",
+   "teks": "Halaman situs publik diubah (deface)",
+   "langkah_pertama": "Isolasi host terdampak (web-portal) dari jaringan."
+  },
+  {
+   "time": "2026-11-07T11:22:51",
+   "jenis": "BARU",
+   "insiden": "INC-20261107-112251",
+   "severity": "tinggi",
+   "teks": "Insiden baru di web-portal dari 10.10.5.90",
+   "langkah_pertama": "Isolasi host terdampak (web-portal) dari jaringan."
+  },
+  {
+   "time": "2026-11-07T05:12:54",
+   "jenis": "DITANGANI",
+   "insiden": "INC-20261107-051245",
+   "severity": "tinggi",
+   "teks": "Perintah Modbus ke PLC diblokir",
+   "langkah_pertama": "Isolasi host terdampak (pc-staf-07, srv-file-01) dari jaringan."
+  },
+  {
+   "time": "2026-11-07T05:12:45",
+   "jenis": "BARU",
+   "insiden": "INC-20261107-051245",
+   "severity": "tinggi",
+   "teks": "Insiden baru di pc-staf-07, srv-file-01, plc-genset-01 dari 10.10.5.90",
+   "langkah_pertama": "Isolasi host terdampak (pc-staf-07, srv-file-01) dari jaringan."
+  },
+  {
+   "time": "2026-11-07T05:12:13",
+   "jenis": "MEMBURUK",
+   "insiden": "INC-20261107-051158",
+   "severity": "kritis",
+   "teks": "Perintah tak sah sampai ke PLC: genset dimatikan",
+   "langkah_pertama": "Isolasi host terdampak (pc-staf-07, srv-file-01) dari jaringan."
+  },
+  {
+   "time": "2026-11-07T05:11:58",
+   "jenis": "BARU",
+   "insiden": "INC-20261107-051158",
+   "severity": "kritis",
+   "teks": "Insiden baru di pc-staf-07, srv-file-01, plc-genset-01 dari 10.10.5.90",
+   "langkah_pertama": "Isolasi host terdampak (pc-staf-07, srv-file-01) dari jaringan."
+  }
+ ],
+ "vulnerabilities": {
+  "total_cve": 6,
+  "total_kev": 2,
+  "prioritas": [
+   {
+    "urutan": 1,
+    "cve": "CVE-2020-25213",
+    "host": "web-portal",
+    "package": "wp-file-manager",
+    "version": "6.8",
+    "cvss": 9.8,
+    "tingkat": "kritis",
+    "kev": true,
+    "skor": 18.8,
+    "alasan": [
+     "CVSS 9.8 (kritis)",
+     "masuk katalog KEV: sudah dieksploitasi di dunia nyata",
+     "aset berkritikalitas tinggi (Portal web satuan (situs publik))",
+     "terbuka ke publik",
+     "host ini terlibat insiden aktif"
+    ],
+    "judul": "WordPress File Manager < 6.9: unggah dan eksekusi berkas tanpa autentikasi"
+   },
+   {
+    "urutan": 2,
+    "cve": "CVE-2021-4034",
+    "host": "srv-file-01",
+    "package": "policykit-1",
+    "version": "0.105-26ubuntu1",
+    "cvss": 7.8,
+    "tingkat": "tinggi",
+    "kev": true,
+    "skor": 14.8,
+    "alasan": [
+     "CVSS 7.8 (tinggi)",
+     "masuk katalog KEV: sudah dieksploitasi di dunia nyata",
+     "aset berkritikalitas tinggi (Server file satuan)",
+     "host ini terlibat insiden aktif"
+    ],
+    "judul": "polkit pkexec (PwnKit): naik hak akses lokal"
+   },
+   {
+    "urutan": 3,
+    "cve": "CVE-2024-6387",
+    "host": "srv-file-01",
+    "package": "openssh-server",
+    "version": "1:8.9p1-3ubuntu0.6",
+    "cvss": 8.1,
+    "tingkat": "tinggi",
+    "kev": false,
+    "skor": 12.1,
+    "alasan": [
+     "CVSS 8.1 (tinggi)",
+     "aset berkritikalitas tinggi (Server file satuan)",
+     "host ini terlibat insiden aktif"
+    ],
+    "judul": "OpenSSH regreSSHion: race condition signal handler sshd"
+   },
+   {
+    "urutan": 4,
+    "cve": "CVE-2024-6387",
+    "host": "pc-staf-07",
+    "package": "openssh-server",
+    "version": "1:8.9p1-3ubuntu0.6",
+    "cvss": 8.1,
+    "tingkat": "tinggi",
+    "kev": false,
+    "skor": 11.1,
+    "alasan": [
+     "CVSS 8.1 (tinggi)",
+     "aset berkritikalitas sedang (Workstation staf)",
+     "host ini terlibat insiden aktif"
+    ],
+    "judul": "OpenSSH regreSSHion: race condition signal handler sshd"
+   },
+   {
+    "urutan": 5,
+    "cve": "CVE-2023-22809",
+    "host": "pc-staf-07",
+    "package": "sudo",
+    "version": "1.9.9-1ubuntu2",
+    "cvss": 7.8,
+    "tingkat": "tinggi",
+    "kev": false,
+    "skor": 10.8,
+    "alasan": [
+     "CVSS 7.8 (tinggi)",
+     "aset berkritikalitas sedang (Workstation staf)",
+     "host ini terlibat insiden aktif"
+    ],
+    "judul": "sudoedit: penyuntingan berkas di luar izin"
+   },
+   {
+    "urutan": 6,
+    "cve": "CVE-2022-0778",
+    "host": "wazuh-manager",
+    "package": "openssl",
+    "version": "3.0.2-0ubuntu1",
+    "cvss": 7.5,
+    "tingkat": "tinggi",
+    "kev": false,
+    "skor": 9.5,
+    "alasan": [
+     "CVSS 7.5 (tinggi)",
+     "aset berkritikalitas tinggi (SOC manager)"
+    ],
+    "judul": "OpenSSL BN_mod_sqrt: perulangan tanpa akhir (DoS)"
+   }
+  ],
+  "tambal_dulu": [
+   "CVE-2020-25213 di web-portal",
+   "CVE-2021-4034 di srv-file-01",
+   "CVE-2024-6387 di srv-file-01"
+  ],
+  "per_host": [
+   {
+    "host": "web-portal",
+    "cve": 1,
+    "kritis": 1,
+    "kev": 1,
+    "sca_gagal": 1
+   },
+   {
+    "host": "pc-staf-07",
+    "cve": 2,
+    "kritis": 0,
+    "kev": 0,
+    "sca_gagal": 2
+   },
+   {
+    "host": "srv-file-01",
+    "cve": 2,
+    "kritis": 0,
+    "kev": 1,
+    "sca_gagal": 1
+   },
+   {
+    "host": "wazuh-manager",
+    "cve": 1,
+    "kritis": 0,
+    "kev": 0
+   }
+  ],
+  "sca_gagal": {
+   "pc-staf-07": [
+    "Ensure SSH PermitRootLogin is disabled",
+    "Ensure password expiration is 365 days or less"
+   ],
+   "srv-file-01": [
+    "Ensure SSH MaxAuthTries is set to 4 or less"
+   ],
+   "web-portal": [
+    "Ensure /tmp is a separate partition with noexec"
+   ]
+  },
+  "catatan": "Perangkat OT (PLC) tidak dipindai aktif; kerentanannya dinilai dari inventaris dan pemantauan pasif."
+ },
+ "status": [
+  {
+   "nama": "Wazuh manager",
+   "peran": "Sensor IT: log, FIM, active response",
+   "status": "aktif"
+  },
+  {
+   "nama": "Suricata",
+   "peran": "Sensor OT: Modbus, mode blokir (IPS)",
+   "status": "aktif"
+  },
+  {
+   "nama": "Mesin korelasi",
+   "peran": "Merangkai alert jadi insiden",
+   "status": "aktif"
+  },
+  {
+   "nama": "LLM lokal qwen2.5:7b",
+   "peran": "Narasi tervalidasi, tanpa internet",
+   "status": "aktif"
+  },
+  {
+   "nama": "Notifikasi",
+   "peran": "Terminal, desktop, chat internal",
+   "status": "aktif"
+  },
+  {
+   "nama": "Internet",
+   "peran": "Tidak dibutuhkan (air-gapped)",
+   "status": "terputus"
   }
  ],
  "assets": {

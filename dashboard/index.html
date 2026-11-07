@@ -3,29 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Tameng Pusat Komando</title>
-<!-- Tanpa CDN dan tanpa font daring: dashboard harus jalan di laptop air-gapped. -->
+<title>Tameng</title>
+<meta name="description" content="Tameng: Tangkal Ancaman Mandiri lewat Edukasi, Notifikasi, dan Gerak cepat. Pendamping analis insiden IT/OT untuk satuan siber, berjalan tanpa internet.">
+<link rel="stylesheet" href="tameng.css">
 <style>
-:root{
-  --bg:#07090a; --bg2:#0c0f0c; --panel:#0f130f; --line:#25301f; --line2:#3a4a2c;
-  --acc:#d4f74b; --acc-dim:rgba(212,247,75,.14); --cream:#ece8d4; --muted:#8c947c; --olive:#5f6b45;
-  --kritis:#ff4b3e; --tinggi:#ff9f1c; --sedang:#e9d84a; --rendah:#8fbf6a; --it:#5ad1e6;
-  --disp:"DIN Condensed","Avenir Next Condensed","Arial Narrow","Roboto Condensed",sans-serif;
-  --mono:"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;
-}
-*{box-sizing:border-box;margin:0;padding:0}
-html,body{background:var(--bg);color:var(--cream);font-family:var(--mono);font-size:13px;line-height:1.5}
-body{overflow-x:hidden}
-button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
-.grid-bg{position:fixed;inset:0;pointer-events:none;z-index:0;
-  background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
-  background-size:64px 64px;opacity:.28;mask-image:radial-gradient(ellipse at center,#000 30%,transparent 85%)}
-.lbl{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
-.lbl b{color:var(--acc);font-weight:500}
-.disp{font-family:var(--disp);font-weight:700;letter-spacing:.02em;text-transform:uppercase}
-
-/* ================= BOOT / HERO ================= */
-#boot{position:relative;min-height:100vh;display:grid;place-items:center;overflow:hidden;z-index:1;
+/* ===== HERO ===== */
+#boot{position:relative;min-height:calc(100vh - 56px);display:grid;place-items:center;overflow:hidden;z-index:1;
   background:radial-gradient(ellipse at 50% 45%,#141a10 0%,var(--bg) 62%)}
 #boot .frame{position:absolute;inset:18px;border:1px solid var(--line);pointer-events:none;
   clip-path:polygon(0 0,38% 0,40% 22px,60% 22px,62% 0,100% 0,100% 100%,62% 100%,60% calc(100% - 22px),40% calc(100% - 22px),38% 100%,0 100%)}
@@ -33,7 +16,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .corner b{color:var(--acc);font-weight:500}
 .c-tl{top:40px;left:44px}.c-tr{top:40px;right:44px;text-align:right}
 .c-bl{bottom:40px;left:44px}.c-br{bottom:40px;right:44px;text-align:right}
-.ruler-x{position:absolute;top:62px;left:50%;transform:translateX(-50%);display:flex;gap:0;width:min(720px,70vw);justify-content:space-between}
+.ruler-x{position:absolute;top:62px;left:50%;transform:translateX(-50%);display:flex;width:min(720px,70vw);justify-content:space-between}
 .ruler-x i{display:block;width:1px;height:8px;background:var(--line2);position:relative}
 .ruler-x i.big{height:14px;background:var(--muted)}
 .ruler-x i.big::after{content:attr(data-v);position:absolute;top:16px;left:50%;transform:translateX(-50%);font-size:8.5px;color:var(--olive);font-style:normal}
@@ -41,185 +24,142 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .ruler-y i{display:block;height:1px;width:8px;background:var(--line2)}
 .ruler-y i.big{width:16px;background:var(--acc)}
 .ruler-y.r{left:auto;right:12%;align-items:flex-end}
-.hero{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;padding:90px 16px 70px;width:100%}
-.hud{width:min(560px,86vw);aspect-ratio:1;position:relative}
+.hero{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;padding:80px 16px 70px;width:100%}
+.hud{width:min(520px,84vw);aspect-ratio:1;position:relative}
 .hud svg{width:100%;height:100%;overflow:visible}
 .hud .spin{transform-origin:300px 300px;animation:spin 40s linear infinite}
 .hud .spin-r{transform-origin:300px 300px;animation:spin 26s linear infinite reverse}
 .hud .spin-f{transform-origin:300px 300px;animation:spin 9s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
 .hud .sweep{transform-origin:300px 300px;animation:spin 5.5s linear infinite}
 .hud .draw{stroke-dasharray:var(--len);stroke-dashoffset:var(--len);animation:draw 2.2s cubic-bezier(.6,.1,.2,1) forwards}
-@keyframes draw{to{stroke-dashoffset:0}}
 .hud .fadein{opacity:0;animation:fade .9s ease forwards}
-@keyframes fade{to{opacity:1}}
 .hud .lock{transform-origin:300px 300px;animation:lock 1.6s cubic-bezier(.2,.8,.2,1) forwards;opacity:0}
-@keyframes lock{0%{transform:scale(1.9) rotate(-30deg);opacity:0}60%{opacity:1}100%{transform:scale(1) rotate(0);opacity:1}}
 .hud .pulse{animation:pulse 2.4s ease-in-out infinite}
-@keyframes pulse{50%{opacity:.35}}
 .tag-ready{position:absolute;font-family:var(--disp);font-size:15px;letter-spacing:.08em;color:var(--acc);
-  padding:4px 10px;background:var(--acc-dim);border:1px solid rgba(212,247,75,.45);opacity:0;white-space:nowrap;
-  animation:fade .5s ease forwards}
+  padding:4px 10px;background:var(--acc-dim);border:1px solid rgba(212,247,75,.45);opacity:0;white-space:nowrap;animation:fade .5s ease forwards}
 .tag-ready::before{content:"";position:absolute;top:50%;width:28px;height:1px;background:var(--acc)}
 .tag-ready.l::before{right:100%;margin-right:6px}.tag-ready.r::before{left:100%;margin-left:6px}
 .brand{font-family:var(--disp);font-weight:700;font-size:clamp(64px,11vw,150px);line-height:.85;letter-spacing:.04em;color:var(--cream);
   text-shadow:0 0 40px rgba(212,247,75,.12);margin-top:-30px;opacity:0;animation:fade 1s ease 2.6s forwards}
 .akronim{font-size:11.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--muted);text-align:center;opacity:0;animation:fade 1s ease 3s forwards}
 .akronim b{color:var(--acc);font-weight:600}
-.cta{margin-top:26px;display:flex;gap:12px;flex-wrap:wrap;justify-content:center;opacity:0;animation:fade .8s ease 3.6s forwards}
-.btn{font-family:var(--disp);font-size:17px;letter-spacing:.12em;text-transform:uppercase;padding:11px 22px 9px;border:1px solid var(--acc);color:var(--bg);background:var(--acc);
-  clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px);transition:filter .2s}
-.btn:hover{filter:brightness(1.12)}
-.btn.ghost{background:transparent;color:var(--acc)}
-.bootlog{position:absolute;left:44px;bottom:110px;font-size:10.5px;color:var(--muted);line-height:1.8;letter-spacing:.06em;max-width:380px}
+.lead{max-width:620px;text-align:center;color:var(--text);font-size:14px;margin-top:16px;opacity:0;animation:fade 1s ease 3.3s forwards}
+.cta{margin-top:24px;display:flex;gap:12px;flex-wrap:wrap;justify-content:center;opacity:0;animation:fade .8s ease 3.6s forwards}
+.bootlog{position:absolute;left:44px;bottom:100px;font-size:10.5px;color:var(--muted);line-height:1.8;letter-spacing:.06em;max-width:380px}
 .bootlog div{opacity:0;animation:fade .25s ease forwards}
 .bootlog .ok{color:var(--acc)}
-.scroll-hint{position:absolute;bottom:30px;left:50%;transform:translateX(-50%);font-size:10px;letter-spacing:.3em;color:var(--olive);animation:pulse 2s infinite}
 
-/* ================= PUSAT KOMANDO ================= */
-#cmd{position:relative;z-index:1;padding:0 20px 40px;max-width:1560px;margin:0 auto}
-.topbar{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:18px;padding:14px 4px;background:linear-gradient(var(--bg) 70%,transparent);flex-wrap:wrap}
-.topbar .logo{display:flex;align-items:center;gap:10px}
-.topbar .logo svg{width:26px;height:30px}
-.topbar .logo .disp{font-size:26px;line-height:1;padding-top:3px}
-.pills{display:flex;gap:8px;flex-wrap:wrap;margin-left:auto}
-.pill{font-size:10px;letter-spacing:.14em;text-transform:uppercase;padding:5px 9px;border:1px solid var(--line2);color:var(--muted);display:flex;align-items:center;gap:7px}
-.pill i{width:6px;height:6px;border-radius:50%;background:var(--acc);box-shadow:0 0 8px var(--acc)}
-.pill.warn i{background:var(--tinggi);box-shadow:0 0 8px var(--tinggi)}
-.clock{font-size:12px;color:var(--cream);letter-spacing:.1em}
+/* ===== BAGIAN ===== */
+section.sec{position:relative;z-index:1;padding:96px 0 40px}
+.sec-head{display:grid;grid-template-columns:120px 1fr;gap:24px;margin-bottom:36px;align-items:start}
+.sec-no{font-family:var(--disp);font-size:64px;line-height:.8;color:var(--line2)}
+.sec-kick{font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--acc);margin-bottom:8px}
+.sec-head h2{font-family:var(--disp);font-size:clamp(34px,4.6vw,56px);line-height:.98;text-transform:uppercase;letter-spacing:.01em;max-width:900px}
+.sec-head p{color:var(--text);font-size:14px;max-width:760px;margin-top:14px}
+.cards{display:grid;gap:14px}
+.c4{grid-template-columns:repeat(4,1fr)}.c3{grid-template-columns:repeat(3,1fr)}.c2{grid-template-columns:repeat(2,1fr)}
+.card{border:1px solid var(--line);background:var(--panel);padding:20px;position:relative}
+.card .big{font-family:var(--disp);font-size:46px;line-height:.9;color:var(--acc)}
+.card .big.r{color:var(--kritis)}
+.card h4{font-family:var(--disp);font-size:22px;line-height:1.05;text-transform:uppercase;margin:10px 0 8px;letter-spacing:.02em}
+.card p{color:var(--text);font-size:12.5px}
+.card .src{margin-top:12px;font-size:10px;color:var(--olive);letter-spacing:.06em}
+.card .ic{width:34px;height:34px;color:var(--acc)}
 
-.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:6px 0 14px}
-.stat{border:1px solid var(--line);background:var(--panel);padding:10px 14px;position:relative}
-.stat .v{font-family:var(--disp);font-size:34px;line-height:1;color:var(--cream);margin-top:4px}
-.stat .v.k{color:var(--kritis)}.stat .v.a{color:var(--acc)}
+table.cmp{width:100%;border-collapse:collapse;font-size:12.5px}
+.cmp th,.cmp td{text-align:left;padding:14px 16px;border-bottom:1px solid var(--line);vertical-align:top}
+.cmp th{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:500}
+.cmp td:first-child{font-family:var(--disp);font-size:19px;text-transform:uppercase;color:var(--cream);width:22%}
+.cmp td:nth-child(2){color:var(--text);width:30%}
+.cmp td:nth-child(3){color:#f0b9a3}
+.cmp tr.us td{background:rgba(212,247,75,.05);color:var(--cream)}
+.cmp tr.us td:first-child{color:var(--acc)}
+.cmp-wrap{overflow-x:auto;border:1px solid var(--line);background:var(--panel)}
 
-.layout{display:grid;grid-template-columns:300px minmax(0,1fr) 360px;gap:14px;align-items:start}
-.panel{border:1px solid var(--line);background:var(--panel);position:relative}
-.panel>h3{display:flex;justify-content:space-between;align-items:center;padding:9px 14px;border-bottom:1px solid var(--line);
-  font-family:var(--mono);font-size:10.5px;font-weight:500;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
-.panel>h3 b{color:var(--acc);font-weight:500}
-.bracket::before,.bracket::after{content:"";position:absolute;width:12px;height:12px;border:1px solid var(--acc);pointer-events:none}
-.bracket::before{top:-1px;left:-1px;border-right:0;border-bottom:0}
-.bracket::after{bottom:-1px;right:-1px;border-left:0;border-top:0}
-.col{display:flex;flex-direction:column;gap:14px}
+.what{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center}
+.what p{color:var(--text);font-size:17px;line-height:1.6}
+.what p strong{color:var(--cream)}
+.letters{display:flex;flex-direction:column;gap:8px}
+.letter{display:grid;grid-template-columns:54px 1fr;gap:14px;align-items:center;border:1px solid var(--line);background:var(--panel);padding:10px 14px}
+.letter .L{font-family:var(--disp);font-size:40px;line-height:1;color:var(--acc);text-align:center}
+.letter .w{font-family:var(--disp);font-size:20px;text-transform:uppercase}
+.letter .d{font-size:11.5px;color:var(--muted)}
 
-.inc-list{display:flex;flex-direction:column}
-.inc{display:block;width:100%;text-align:left;padding:12px 14px 12px 18px;border-bottom:1px solid var(--line);position:relative;transition:background .15s}
-.inc:hover{background:rgba(212,247,75,.04)}
-.inc.on{background:rgba(212,247,75,.07)}
-.inc.on::after{content:"";position:absolute;right:10px;top:50%;width:0;height:0;border:6px solid transparent;border-right-color:var(--acc);transform:translateY(-50%)}
-.inc .bar{position:absolute;left:0;top:0;bottom:0;width:4px}
-.inc .sk{font-size:10px;letter-spacing:.14em;color:var(--olive);text-transform:uppercase}
-.inc .t{font-family:var(--disp);font-size:18px;line-height:1.1;margin:4px 0 6px;color:var(--cream);padding-right:14px}
-.inc .m{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.sev{font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;padding:2px 6px;border:1px solid currentColor;font-weight:600}
-.sev.kritis{color:var(--kritis)}.sev.tinggi{color:var(--tinggi)}.sev.sedang{color:var(--sedang)}.sev.rendah{color:var(--rendah)}
+.flow{display:grid;grid-template-columns:repeat(5,1fr);gap:0;position:relative}
+.flow .st{border:1px solid var(--line);background:var(--panel);padding:18px;position:relative;margin-right:-1px}
+.flow .st .n{font-family:var(--disp);font-size:13px;letter-spacing:.2em;color:var(--acc)}
+.flow .st h4{font-family:var(--disp);font-size:21px;text-transform:uppercase;line-height:1.05;margin:8px 0}
+.flow .st p{font-size:12px;color:var(--text)}
+.flow .st .who{margin-top:12px;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--olive)}
+.flow .st .who.ai{color:#b9a7ff}
+.flow .st:not(:last-child)::after{content:"";position:absolute;right:-9px;top:50%;width:16px;height:16px;background:var(--bg);border:1px solid var(--acc);transform:translateY(-50%) rotate(45deg);z-index:2}
+.flow-note{margin-top:14px;display:flex;gap:18px;flex-wrap:wrap;font-size:11.5px;color:var(--muted)}
+.flow-note b{color:var(--acc);font-weight:500}
 
-.map-wrap{position:relative;padding:8px 10px 4px}
-.map{width:100%;height:auto;display:block}
-.map .zone{fill:none;stroke:var(--line2);stroke-dasharray:3 5}
-.map .zl{fill:var(--olive);font-size:10px;letter-spacing:.2em;font-family:var(--mono)}
-.map .edge{fill:none;stroke:var(--line2);stroke-width:1}
-.map .atk{stroke:var(--kritis);stroke-width:1.8;stroke-dasharray:6 6;animation:flow 1s linear infinite}
-.map .blk{stroke:var(--tinggi);stroke-width:1.8;stroke-dasharray:2 5}
-@keyframes flow{to{stroke-dashoffset:-12}}
-.map .node rect{fill:var(--bg2);stroke:var(--line2)}
-.map .node text{fill:var(--cream);font-family:var(--mono);font-size:11px}
-.map .node .r{fill:var(--muted);font-size:9px}
-.map .node.hit rect{stroke:var(--kritis);fill:#1c0e0c}
-.map .node.ok rect{stroke:var(--acc)}
-.map .node.src rect{stroke:var(--kritis);stroke-dasharray:3 3}
-.map .ret{fill:none;stroke:var(--acc);stroke-width:1.4}
-.map .ret.k{stroke:var(--kritis)}
-.map .ret-g{animation:pulse 1.6s ease-in-out infinite}
-.map .xb{stroke:var(--tinggi);stroke-width:2.4}
-.map .xbl{fill:var(--tinggi);font-family:var(--disp);font-size:13px;letter-spacing:.1em}
-.legend{display:flex;gap:16px;flex-wrap:wrap;padding:4px 14px 12px}
-.legend span{display:flex;align-items:center;gap:6px;font-size:10px;letter-spacing:.1em;color:var(--muted);text-transform:uppercase}
-.legend i{width:18px;height:0;border-top:2px dashed var(--kritis)}
-.legend i.b{border-top-color:var(--tinggi);border-top-style:dotted}
-.legend i.n{border:1px solid var(--acc);height:10px;width:10px}
+.lim{list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.lim li{border:1px solid var(--line);border-left:3px solid var(--tinggi);background:var(--panel);padding:14px 16px}
+.lim li b{display:block;font-family:var(--disp);font-size:18px;text-transform:uppercase;letter-spacing:.02em;margin-bottom:4px}
+.lim li span{font-size:12px;color:var(--text)}
+.lim li em{display:block;margin-top:6px;font-style:normal;font-size:11px;color:var(--acc)}
 
-.tl{padding:6px 14px 14px}
-.step{display:grid;grid-template-columns:70px 18px minmax(0,1fr);gap:10px;padding:10px 0;border-bottom:1px dashed var(--line)}
-.step:last-child{border-bottom:0}
-.step .tm{color:var(--acc);font-size:12px;padding-top:1px}
-.step .dot{position:relative}
-.step .dot::before{content:"";position:absolute;left:4px;top:5px;width:9px;height:9px;border:1px solid var(--acc);transform:rotate(45deg)}
-.step.x .dot::before{background:var(--kritis);border-color:var(--kritis)}
-.step.b .dot::before{background:var(--tinggi);border-color:var(--tinggi)}
-.step .tx{color:var(--cream);font-size:12.5px}
-.step .tx code{background:#1a2015;color:var(--acc);padding:0 4px}
-.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
-.chip{font-size:9.5px;letter-spacing:.08em;padding:2px 6px;border:1px solid var(--line2);color:var(--muted)}
-.chip.t{border-color:rgba(212,247,75,.4);color:var(--acc)}
+.steps{counter-reset:s;display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.steps .card{padding-left:74px}
+.steps .card h4{margin-top:2px}
+.steps .card::before{counter-increment:s;content:counter(s,decimal-leading-zero);position:absolute;left:20px;top:18px;font-family:var(--disp);font-size:34px;color:var(--line2);line-height:1}
+.steps .card code{color:var(--acc);background:#1a2015;padding:0 4px;font-size:11.5px}
+.boundary{margin-top:14px;border:1px dashed var(--line2);padding:14px 18px;font-size:12.5px;color:var(--text)}
+.boundary b{color:var(--acc);font-weight:500}
 
-.sum{padding:14px}
-.sum .h{font-family:var(--disp);font-size:24px;line-height:1.05;margin-bottom:10px}
-.sum p{color:#cfd2bf;font-size:12.5px}
-.facts{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;margin-top:12px;font-size:11.5px}
-.facts dt{color:var(--olive);letter-spacing:.1em;text-transform:uppercase;font-size:10px;padding-top:2px}
-.facts dd{color:var(--cream)}
-.impact{margin-top:12px;padding:8px 10px;border:1px solid;font-size:11.5px;letter-spacing:.06em}
-.impact.k{border-color:var(--kritis);color:var(--kritis);background:rgba(255,75,62,.07)}
-.impact.b{border-color:var(--tinggi);color:var(--tinggi);background:rgba(255,159,28,.07)}
-.impact.p{border-color:var(--sedang);color:var(--sedang);background:rgba(233,216,74,.06)}
-.todo{list-style:none;padding:8px 14px 14px}
-.todo li{display:grid;grid-template-columns:22px 1fr;gap:8px;padding:7px 0;border-bottom:1px dashed var(--line);font-size:12.5px;color:#d9dbc8;cursor:pointer}
-.todo li:last-child{border-bottom:0}
-.todo li .bx{width:14px;height:14px;border:1px solid var(--acc);margin-top:2px;position:relative}
-.todo li.done{color:var(--olive);text-decoration:line-through}
-.todo li.done .bx::after{content:"";position:absolute;inset:2px;background:var(--acc)}
-.edu{padding:4px 0 6px}
-.edu details{border-bottom:1px solid var(--line)}
-.edu details:last-child{border-bottom:0}
-.edu summary{list-style:none;cursor:pointer;padding:10px 14px;display:flex;gap:10px;align-items:baseline}
-.edu summary::-webkit-details-marker{display:none}
-.edu summary .id{color:var(--acc);font-size:11px;min-width:72px}
-.edu summary .nm{font-size:12px;color:var(--cream)}
-.edu summary::after{content:"+";margin-left:auto;color:var(--acc)}
-.edu details[open] summary::after{content:"−"}
-.edu dl{padding:0 14px 12px 96px;display:flex;flex-direction:column;gap:8px}
-.edu dt{font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--olive)}
-.edu dd{font-size:12px;color:#d2d4c2}
-.note{padding:10px 14px;font-size:11.5px;color:var(--muted);border-top:1px solid var(--line)}
-.note li{margin-left:16px;margin-bottom:4px}
-.foot{margin-top:18px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;color:var(--olive);font-size:10px;letter-spacing:.14em;text-transform:uppercase}
+.final{position:relative;z-index:1;margin:80px 0 0;padding:70px 24px;text-align:center;border-top:1px solid var(--line);
+  background:radial-gradient(ellipse at 50% 0%,#141a10 0%,var(--bg) 70%)}
+.final h2{font-family:var(--disp);font-size:clamp(36px,5vw,64px);text-transform:uppercase;line-height:.95;margin-bottom:14px}
+.final p{color:var(--text);max-width:560px;margin:0 auto 26px}
+footer{position:relative;z-index:1;border-top:1px solid var(--line);padding:22px 0;color:var(--olive);font-size:10px;letter-spacing:.14em;text-transform:uppercase}
+footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
 
-@media (max-width:1180px){
-  .layout{grid-template-columns:280px minmax(0,1fr)}
-  .layout>.col:last-child{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr}
+@media (max-width:1000px){
+  .c4{grid-template-columns:repeat(2,1fr)} .c3{grid-template-columns:repeat(2,1fr)}
+  .flow{grid-template-columns:1fr}
+  .flow .st{margin-right:0;margin-bottom:-1px}
+  .flow .st:not(:last-child)::after{right:auto;left:50%;top:auto;bottom:-9px;transform:translateX(-50%) rotate(45deg)}
+  .what{grid-template-columns:1fr}
 }
-@media (max-width:760px){
-  #cmd{padding:0 16px 32px}
-  .layout,.layout>.col:last-child{grid-template-columns:1fr;display:flex;flex-direction:column;align-items:stretch}
-  .stats{grid-template-columns:repeat(2,1fr)}
-  .stat:last-child{grid-column:1/-1}
+@media (max-width:700px){
+  .wrap{padding:0 16px}
+  .c4,.c3,.c2,.lim,.steps{grid-template-columns:1fr}
+  .sec-head{grid-template-columns:1fr;gap:6px}
+  .sec-no{font-size:40px}
+  section.sec{padding:64px 0 24px}
   .ruler-y,.bootlog,.c-bl,.c-br{display:none}
   .c-tl,.c-tr{top:30px}.c-tl{left:26px}.c-tr{right:26px}
   .corner{font-size:9px}
   .ruler-x{top:92px}
-  .edu dl{padding-left:14px}
-  .step{grid-template-columns:58px 14px minmax(0,1fr);gap:8px}
-  .pills{margin-left:0}
-  .topbar{position:static}
-  .panel>h3{flex-wrap:wrap;gap:4px 12px}
-  .map-wrap{overflow-x:auto}
-  .map{min-width:620px}
-}
-@media (prefers-reduced-motion:reduce){
-  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;animation-delay:0s!important}
+  .cmp td:first-child{width:auto}
 }
 </style>
 </head>
 <body>
 <div class="grid-bg"></div>
 
-<!-- ================= BOOT / HERO ================= -->
+<nav class="nav">
+  <div class="wrap">
+    <a class="logo" href="#">
+      <svg viewBox="0 0 26 30"><path d="M13 1 L25 5 V15 C25 22 20 27 13 29 C6 27 1 22 1 15 V5 Z" fill="none" stroke="#ece8d4" stroke-width="1.5"/><path d="M7 12 L13 15 L19 12 M7 17 L13 20 L19 17" fill="none" stroke="#d4f74b" stroke-width="2"/></svg>
+      <span class="disp">Tameng</span>
+    </a>
+    <div class="links">
+      <a href="#masalah">Masalah</a><a href="#solusi">Solusi saat ini</a><a href="#tameng">Tameng</a>
+      <a href="#cara-kerja">Cara kerja</a><a href="#keunggulan">Keunggulan</a><a href="#limitasi">Limitasi</a><a href="#integrasi">Integrasi</a>
+    </div>
+    <a class="btn" href="komando.html">Pusat komando</a>
+  </div>
+</nav>
+
+<!-- ================= HERO ================= -->
 <section id="boot" aria-label="Pembuka Tameng">
   <div class="frame"></div>
   <div class="corner c-tl">Sistem: <b>Tameng</b><br>Satuan: Lab Siber<br>Jaringan: 10.10.5.0/24</div>
-  <div class="corner c-tr">Koneksi internet: <b>Tidak ada</b><br>Model: <b id="mdl">qwen2.5:7b</b> lokal<br>Mode OT: <b>Blokir (IPS)</b></div>
+  <div class="corner c-tr">Koneksi internet: <b>Tidak ada</b><br>Model: <b class="mdl">qwen2.5:7b</b> lokal<br>Mode OT: <b>Blokir (IPS)</b></div>
   <div class="corner c-bl">Kartika Cyber Hackathon 2026</div>
   <div class="corner c-br">Defensive Shield</div>
   <div class="ruler-x" id="rx"></div>
@@ -228,55 +168,32 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
   <div class="bootlog" id="bootlog"></div>
 
   <div class="hero">
-    <div class="hud" id="hud">
+    <div class="hud">
       <svg viewBox="0 0 600 600" aria-hidden="true">
         <defs>
-          <radialGradient id="glow" cx="50%" cy="50%" r="50%">
-            <stop offset="0" stop-color="#d4f74b" stop-opacity=".22"/>
-            <stop offset="1" stop-color="#d4f74b" stop-opacity="0"/>
-          </radialGradient>
-          <linearGradient id="shieldFill" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stop-color="#d4f74b" stop-opacity=".22"/>
-            <stop offset="1" stop-color="#d4f74b" stop-opacity=".03"/>
-          </linearGradient>
-          <linearGradient id="sweepG" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0" stop-color="#d4f74b" stop-opacity="0"/>
-            <stop offset="1" stop-color="#d4f74b" stop-opacity=".28"/>
-          </linearGradient>
+          <radialGradient id="glow" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#d4f74b" stop-opacity=".22"/><stop offset="1" stop-color="#d4f74b" stop-opacity="0"/></radialGradient>
+          <linearGradient id="shieldFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d4f74b" stop-opacity=".22"/><stop offset="1" stop-color="#d4f74b" stop-opacity=".03"/></linearGradient>
+          <linearGradient id="sweepG" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#d4f74b" stop-opacity="0"/><stop offset="1" stop-color="#d4f74b" stop-opacity=".28"/></linearGradient>
         </defs>
         <circle cx="300" cy="300" r="250" fill="url(#glow)"/>
-        <!-- cincin luar putus-putus -->
         <g class="spin"><circle cx="300" cy="300" r="270" fill="none" stroke="#3a4a2c" stroke-dasharray="2 10"/></g>
-        <!-- cincin skala derajat -->
         <g class="spin-r" id="ticks"></g>
-        <!-- busur sorot -->
         <g class="spin-f">
           <circle cx="300" cy="300" r="205" fill="none" stroke="#d4f74b" stroke-width="2" stroke-dasharray="80 1208" opacity=".85"/>
           <circle cx="300" cy="300" r="205" fill="none" stroke="#d4f74b" stroke-width="2" stroke-dasharray="30 1258" stroke-dashoffset="-640" opacity=".6"/>
         </g>
         <circle cx="300" cy="300" r="190" fill="none" stroke="#25301f"/>
-        <!-- radar sapu -->
         <g class="sweep"><path d="M300 300 L300 112 A188 188 0 0 1 432.9 167.1 Z" fill="url(#sweepG)" opacity=".5"/></g>
-        <!-- garis silang -->
-        <g stroke="#3a4a2c">
-          <line x1="20" y1="300" x2="150" y2="300"/><line x1="450" y1="300" x2="580" y2="300"/>
-          <line x1="300" y1="20" x2="300" y2="110"/><line x1="300" y1="490" x2="300" y2="580"/>
-        </g>
-        <!-- segitiga kunci sasaran -->
+        <g stroke="#3a4a2c"><line x1="20" y1="300" x2="150" y2="300"/><line x1="450" y1="300" x2="580" y2="300"/><line x1="300" y1="20" x2="300" y2="110"/><line x1="300" y1="490" x2="300" y2="580"/></g>
         <g class="lock" style="animation-delay:1.7s">
           <path d="M300 78 L492 410 L108 410 Z" fill="none" stroke="#d4f74b" stroke-width="1" opacity=".55"/>
           <path d="M290 74 L300 90 L310 74 Z M486 420 L470 414 L482 400 Z M114 420 L130 414 L118 400 Z" fill="#d4f74b"/>
         </g>
-        <!-- kurung sudut -->
-        <g class="lock" style="animation-delay:2s" fill="none" stroke="#d4f74b" stroke-width="2">
-          <path d="M200 190 v-22 h22 M400 190 v-22 h-22 M200 420 v22 h22 M400 420 v22 h-22"/>
-        </g>
-        <!-- PERISAI TAMENG -->
-        <g id="shield">
+        <g class="lock" style="animation-delay:2s" fill="none" stroke="#d4f74b" stroke-width="2"><path d="M200 190 v-22 h22 M400 190 v-22 h-22 M200 420 v22 h22 M400 420 v22 h-22"/></g>
+        <g>
           <path class="fadein" style="animation-delay:1.9s" d="M300 168 L388 200 V292 C388 352 352 396 300 420 C248 396 212 352 212 292 V200 Z" fill="url(#shieldFill)"/>
           <path class="draw" style="--len:820" d="M300 168 L388 200 V292 C388 352 352 396 300 420 C248 396 212 352 212 292 V200 Z" fill="none" stroke="#ece8d4" stroke-width="2.4" stroke-linejoin="round"/>
           <path class="draw" style="--len:680;animation-delay:.4s" d="M300 188 L370 213 V290 C370 340 341 376 300 397 C259 376 230 340 230 290 V213 Z" fill="none" stroke="#d4f74b" stroke-width="1" opacity=".7"/>
-          <!-- chevron pangkat -->
           <path class="draw" style="--len:210;animation-delay:1.1s" d="M254 262 L300 286 L346 262" fill="none" stroke="#d4f74b" stroke-width="5" stroke-linecap="square"/>
           <path class="draw" style="--len:210;animation-delay:1.3s" d="M254 292 L300 316 L346 292" fill="none" stroke="#d4f74b" stroke-width="5" stroke-linecap="square"/>
           <path class="draw" style="--len:210;animation-delay:1.5s" d="M254 322 L300 346 L346 322" fill="none" stroke="#d4f74b" stroke-width="5" stroke-linecap="square" opacity=".55"/>
@@ -290,267 +207,180 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
     </div>
     <h1 class="brand">Tameng</h1>
     <div class="akronim"><b>T</b>angkal <b>A</b>ncaman <b>M</b>andiri lewat <b>E</b>dukasi, <b>N</b>otifikasi, dan <b>G</b>erak cepat</div>
+    <p class="lead">Ribuan alert IT dan OT jadi satu insiden yang jelas, lengkap dengan langkah pertama. Berjalan offline di satu laptop.</p>
     <div class="cta">
-      <button class="btn" id="go">Masuk pusat komando</button>
-      <button class="btn ghost" id="replay">Ulang animasi</button>
+      <a class="btn" href="komando.html">Masuk pusat komando</a>
+      <a class="btn ghost" href="#masalah">Lihat masalahnya</a>
     </div>
   </div>
-  <div class="scroll-hint">▼ GULIR</div>
 </section>
 
-<!-- ================= PUSAT KOMANDO ================= -->
-<main id="cmd">
-  <div class="topbar">
-    <div class="logo">
-      <svg viewBox="0 0 26 30"><path d="M13 1 L25 5 V15 C25 22 20 27 13 29 C6 27 1 22 1 15 V5 Z" fill="none" stroke="#ece8d4" stroke-width="1.5"/><path d="M7 12 L13 15 L19 12 M7 17 L13 20 L19 17" fill="none" stroke="#d4f74b" stroke-width="2"/></svg>
-      <span class="disp">Tameng</span>
-      <span class="lbl">Pusat komando insiden IT/OT</span>
-    </div>
-    <div class="pills">
-      <span class="pill"><i></i>Air-gapped</span>
-      <span class="pill"><i></i>LLM <span id="mdl2"></span></span>
-      <span class="pill warn"><i></i>OT: mode blokir</span>
-      <span class="pill clock" id="clock">--:--:-- UTC</span>
-    </div>
-  </div>
-
-  <div class="stats" id="stats"></div>
-
-  <div class="layout">
-    <div class="col">
-      <section class="panel bracket">
-        <h3>Daftar insiden <b id="nInc"></b></h3>
-        <div class="inc-list" id="incList"></div>
-      </section>
-    </div>
-
-    <div class="col">
-      <section class="panel bracket">
-        <h3>Peta alur serangan <b id="mapId"></b></h3>
-        <div class="map-wrap"><svg class="map" id="map" viewBox="0 0 820 340"></svg></div>
-        <div class="legend">
-          <span><i></i>Jalur serangan</span>
-          <span><i class="b"></i>Diblokir</span>
-          <span><i class="n"></i>Aset terdampak</span>
-        </div>
-      </section>
-      <section class="panel">
-        <h3>Kronologi <b>Dirangkai kode, bukan tebakan AI</b></h3>
-        <div class="tl" id="tl"></div>
-      </section>
-    </div>
-
-    <div class="col">
-      <section class="panel bracket">
-        <h3>Ringkasan <b id="sevTag"></b></h3>
-        <div class="sum" id="sum"></div>
-      </section>
-      <section class="panel">
-        <h3>Gerak cepat <b id="todoN"></b></h3>
-        <ul class="todo" id="todo"></ul>
-      </section>
-      <section class="panel">
-        <h3>Edukasi · pelajari insiden ini</h3>
-        <div class="edu" id="edu"></div>
-      </section>
+<!-- ================= 1 MASALAH ================= -->
+<section class="sec" id="masalah">
+  <div class="wrap">
+    <div class="sec-head"><div class="sec-no">01</div><div>
+      <div class="sec-kick">Masalah</div>
+      <h2>Alert datang lebih cepat dari analis</h2>
+    </div></div>
+    <div class="cards c4">
+      <div class="card bracket"><div class="big">654</div><h4>Alert dalam 4 menit</h4><p>Dari satu serangan di lab.</p><div class="src">Uji lab Tameng, 6 Nov 2026</div></div>
+      <div class="card bracket"><div class="big r">&lt;10%</div><h4>Trafik terpantau</h4><p>Kapasitas pantau nasional.</p><div class="src">BSSN, 2025</div></div>
+      <div class="card bracket"><div class="big">SDM</div><h4>Analis senior sedikit</h4><p>Yang berjaga sering bintara baru.</p><div class="src">Narasumber Satsiber</div></div>
+      <div class="card bracket"><div class="big r">mil.id</div><h4>Situs pernah di-deface</h4><p>Lewat celah plugin WordPress.</p><div class="src">Narasumber Satsiber</div></div>
     </div>
   </div>
+</section>
 
-  <div class="foot">
-    <span>Data: keluaran Tameng (dashboard/data.js) · semua proses lokal</span>
-    <span>Fakta dari kode · narasi dari LLM tervalidasi · edukasi ditulis manusia</span>
+<!-- ================= 2 SOLUSI SAAT INI ================= -->
+<section class="sec" id="solusi">
+  <div class="wrap">
+    <div class="sec-head"><div class="sec-no">02</div><div>
+      <div class="sec-kick">Solusi saat ini</div>
+      <h2>Alatnya ada, tapi tidak cocok untuk satuan</h2>
+    </div></div>
+    <div class="cmp-wrap">
+      <table class="cmp">
+        <thead><tr><th>Solusi</th><th>Masalahnya</th></tr></thead>
+        <tbody>
+          <tr><td>SIEM dan IDS</td><td>Alert membanjir, perlu analis senior</td></tr>
+          <tr><td>Copilot AI cloud</td><td>Data militer harus dikirim ke server asing</td></tr>
+          <tr><td>Platform OT komersial</td><td>Mahal, dan terpisah dari sisi IT</td></tr>
+          <tr><td>AI SOC open-source</td><td>Hanya IT, untuk analis yang sudah ahli</td></tr>
+          <tr class="us"><td>Tameng</td><td>IT dan OT dalam satu insiden, offline, berbahasa Indonesia</td></tr>
+        </tbody>
+      </table>
+    </div>
   </div>
-</main>
+</section>
+
+<!-- ================= 3 APA ITU TAMENG ================= -->
+<section class="sec" id="tameng">
+  <div class="wrap">
+    <div class="sec-head"><div class="sec-no">03</div><div>
+      <div class="sec-kick">Apa itu Tameng</div>
+      <h2>Pendamping analis jaga, bukan pengganti</h2>
+    </div></div>
+    <div class="what">
+      <p>Tameng membaca alert Wazuh dan Suricata, merangkainya jadi satu insiden, lalu menyiapkan ringkasan, langkah respons, dan materi belajar. <strong>Keputusan tetap di tangan analis.</strong></p>
+      <div class="letters">
+        <div class="letter"><div class="L">T·A</div><div><div class="w">Tangkal ancaman</div><div class="d">Rantai serangan IT sampai OT</div></div></div>
+        <div class="letter"><div class="L">M</div><div><div class="w">Mandiri</div><div class="d">Offline, data tetap di satuan</div></div></div>
+        <div class="letter"><div class="L">E</div><div><div class="w">Edukasi</div><div class="d">Tiap teknik serangan dijelaskan</div></div></div>
+        <div class="letter"><div class="L">N</div><div><div class="w">Notifikasi</div><div class="d">Kabar saat insiden baru atau memburuk</div></div></div>
+        <div class="letter"><div class="L">G</div><div><div class="w">Gerak cepat</div><div class="d">Checklist respons dan blokir otomatis</div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 4 CARA KERJA ================= -->
+<section class="sec" id="cara-kerja">
+  <div class="wrap">
+    <div class="sec-head"><div class="sec-no">04</div><div>
+      <div class="sec-kick">Cara kerja</div>
+      <h2>Fakta dari kode, kalimat dari AI</h2>
+      <p>Narasi AI ditolak bila menyebut fakta di luar bukti.</p>
+    </div></div>
+    <div class="flow">
+      <div class="st"><div class="n">01</div><h4>Baca</h4><p>Alert Wazuh (IT) dan Suricata (OT)</p></div>
+      <div class="st"><div class="n">02</div><h4>Rangkai</h4><p>Per pelaku, derau dibuang</p></div>
+      <div class="st"><div class="n">03</div><h4>Nilai</h4><p>Teknik ATT&amp;CK dan tingkat bahaya</p></div>
+      <div class="st"><div class="n">04</div><h4>Tulis</h4><p>LLM lokal, dicek ke bukti</p></div>
+      <div class="st"><div class="n">05</div><h4>Bertindak</h4><p>Notifikasi, checklist, blokir</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 5 KEUNGGULAN ================= -->
+<section class="sec" id="keunggulan">
+  <div class="wrap">
+    <div class="sec-head"><div class="sec-no">05</div><div>
+      <div class="sec-kick">Keunggulan</div>
+      <h2>Kenapa Tameng</h2>
+    </div></div>
+    <div class="cards c3">
+      <div class="card"><h4>Satu insiden, IT sampai OT</h4><p>Bukan ratusan baris terpisah.</p></div>
+      <div class="card"><h4>AI tidak bisa mengarang</h4><p>Setiap narasi dicek ke bukti.</p></div>
+      <div class="card"><h4>Offline penuh</h4><p>Data insiden tidak keluar satuan.</p></div>
+      <div class="card"><h4>Bahasa bintara</h4><p>Laporan dan edukasi berbahasa Indonesia.</p></div>
+      <div class="card"><h4>Blokir otomatis</h4><p>Perintah ke PLC dan IP penyerang.</p></div>
+      <div class="card"><h4>Cukup satu laptop</h4><p>Open-source, dijaga 33 tes otomatis.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 6 LIMITASI ================= -->
+<section class="sec" id="limitasi">
+  <div class="wrap">
+    <div class="sec-head"><div class="sec-no">06</div><div>
+      <div class="sec-kick">Limitasi</div>
+      <h2>Yang belum bisa</h2>
+    </div></div>
+    <ul class="lim">
+      <li><b>Baru diuji di lab</b><span>Belum di jaringan satuan.</span></li>
+      <li><b>Deface masih replay</b><span>Bukti sintetis, bukan serangan live.</span></li>
+      <li><b>Sensor terbatas</b><span>Linux dan Modbus TCP saja.</span></li>
+      <li><b>LLM 7B kadang ditolak</b><span>Diganti ringkasan dari kode.</span></li>
+      <li><b>Data kerentanan contoh</b><span>CVE nyata, pemetaan host contoh.</span></li>
+      <li><b>Belum diuji analis</b><span>Dashboard belum punya login.</span></li>
+    </ul>
+  </div>
+</section>
+
+<!-- ================= 7 INTEGRASI ================= -->
+<section class="sec" id="integrasi">
+  <div class="wrap">
+    <div class="sec-head"><div class="sec-no">07</div><div>
+      <div class="sec-kick">Integrasi ke sistem TNI</div>
+      <h2>Masuk lewat sensor yang sudah ada</h2>
+    </div></div>
+    <div class="steps">
+      <div class="card"><h4>Pasang di segmen SOC</h4><p>Satu server, tanpa internet.</p></div>
+      <div class="card"><h4>Sambungkan sensor</h4><p>Wazuh, plus Suricata di port mirror OT.</p></div>
+      <div class="card"><h4>Isi inventaris</h4><p>Aset dan HMI sah dari daftar satuan.</p></div>
+      <div class="card"><h4>Arahkan notifikasi</h4><p>Ke chat internal satuan lewat webhook.</p></div>
+      <div class="card"><h4>Sesuaikan SOP</h4><p>Rekomendasi dan edukasi bersama TTIS.</p></div>
+      <div class="card"><h4>Pilot satu markas</h4><p>Ukur hasilnya, lalu perluas.</p></div>
+    </div>
+    <div class="boundary"><b>Batas peran:</b> hanya untuk aset TNI. Insiden sipil tetap ditangani BSSN, Komdigi, dan Polri.</div>
+  </div>
+</section>
+
+<!-- ================= 8 MASUK ================= -->
+<div class="final">
+  <h2>Lihat Tameng bekerja</h2>
+  <p>Empat skenario dari lab, termasuk serangan yang diblokir otomatis.</p>
+  <a class="btn" href="komando.html">Masuk pusat komando</a>
+</div>
+
+<footer><div class="wrap"><span>Tameng · Kartika Cyber Hackathon 2026 · Defensive Shield</span><span>Semua proses lokal · tanpa CDN · tanpa font daring</span></div></footer>
 
 <script src="data.js"></script>
 <script>
 (function(){
 "use strict";
-const D = window.TAMENG_DATA || {incidents:[],assets:{},model:"?"};
-const $ = (s, r=document) => r.querySelector(s);
-const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-const fmtTx = s => esc(s).replace(/`([^`]+)`/g, "<code>$1</code>");
+const D = window.TAMENG_DATA || {incidents:[],model:"qwen2.5:7b"};
+const $ = s => document.querySelector(s);
 const NS = "http://www.w3.org/2000/svg";
-const SEV_RANK = {kritis:0,tinggi:1,sedang:2,rendah:3};
-
-/* ---------- hero: penggaris, cincin skala, log boot ---------- */
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+document.querySelectorAll(".mdl").forEach(e => e.textContent = D.model);
 const rx = $("#rx");
 for (let i=-60;i<=60;i+=5){ const t=document.createElement("i"); if(i%20===0){t.className="big";t.dataset.v=i;} rx.appendChild(t); }
 ["#ryl","#ryr"].forEach(id => { const el=$(id); for(let i=0;i<22;i++){ const t=document.createElement("i"); if(i%5===0)t.className="big"; el.appendChild(t);} });
 const ticks = $("#ticks");
 for (let a=0;a<360;a+=5){
-  const big = a%30===0, r1 = 232, r2 = big?246:240, rad=a*Math.PI/180;
-  const l = document.createElementNS(NS,"line");
+  const big=a%30===0, r1=232, r2=big?246:240, rad=a*Math.PI/180, l=document.createElementNS(NS,"line");
   l.setAttribute("x1",300+r1*Math.sin(rad)); l.setAttribute("y1",300-r1*Math.cos(rad));
   l.setAttribute("x2",300+r2*Math.sin(rad)); l.setAttribute("y2",300-r2*Math.cos(rad));
-  l.setAttribute("stroke", big?"#d4f74b":"#3a4a2c"); l.setAttribute("stroke-width", big?1.4:1);
-  ticks.appendChild(l);
+  l.setAttribute("stroke",big?"#d4f74b":"#3a4a2c"); l.setAttribute("stroke-width",big?1.4:1); ticks.appendChild(l);
 }
-$("#mdl").textContent = D.model; $("#mdl2").textContent = D.model;
-
-const inc = D.incidents;
+const inc = D.incidents || [];
 const nEv = inc.reduce((n,i)=>n+i.events.length,0);
 const nTech = new Set(inc.flatMap(i=>i.techniques.map(t=>t.id))).size;
-const BOOT = [
-  ["Memuat bukti Wazuh dan Suricata dari SSD terenkripsi", `${nEv} event`],
-  ["Membuang derau login PAM", "ok"],
-  ["Merangkai insiden berdasarkan entitas", `${inc.length} insiden`],
-  ["Memetakan MITRE ATT&CK (Enterprise + ICS)", `${nTech} teknik`],
-  ["Memvalidasi narasi LLM lokal", "ok"],
-  ["Tameng siaga", "◆"],
-];
-function bootlog(){
-  const box = $("#bootlog"); box.innerHTML = "";
-  BOOT.forEach(([t,v],k) => { const d=document.createElement("div"); d.style.animationDelay=(0.4+k*0.45)+"s";
-    d.innerHTML = `&gt; ${esc(t)} … <span class="ok">[${esc(v)}]</span>`; box.appendChild(d); });
-}
-bootlog();
-function wireHero(){
-  $("#go").onclick = () => $("#cmd").scrollIntoView({behavior:"smooth"});
-  $("#replay").onclick = () => {         // klon ulang hero agar semua animasi CSS mulai dari awal
-    const hero = $("#boot"); hero.replaceWith(hero.cloneNode(true));
-    wireHero(); bootlog();
-  };
-}
-wireHero();
-
-/* ---------- jam ---------- */
-const tick = () => { $("#clock").textContent = new Date().toISOString().slice(11,19)+" UTC"; };
-tick(); setInterval(tick, 1000);
-
-/* ---------- statistik ---------- */
-const sevCount = s => inc.filter(i=>i.severity===s).length;
-const blocked = inc.reduce((n,i)=>n+i.events.filter(e=>/DIBLOKIR/.test(e.label)).length,0);
-$("#stats").innerHTML = [
-  ["Insiden", inc.length, ""],
-  ["Kritis", sevCount("kritis"), "k"],
-  ["Bukti dirangkai", nEv, ""],
-  ["Teknik ATT&CK", nTech, ""],
-  ["Perintah OT diblokir", blocked, "a"],
-].map(([l,v,c]) => `<div class="stat bracket"><div class="lbl">${esc(l)}</div><div class="v ${c}">${v}</div></div>`).join("");
-$("#nInc").textContent = inc.length;
-
-/* ---------- daftar insiden ---------- */
-const sevColor = s => `var(--${s})`;
-const sorted = inc.map((x,i)=>[x,i]);
-$("#incList").innerHTML = sorted.map(([x,i]) => `
-  <button class="inc" data-i="${i}">
-    <span class="bar" style="background:${sevColor(x.severity)}"></span>
-    <div class="sk">${esc(x.skenario || x.id)}</div>
-    <div class="t">${esc(x.summary.judul)}</div>
-    <div class="m"><span class="sev ${esc(x.severity)}">${esc(x.severity)}</span>
-      <span class="lbl">${esc(x.start.slice(11,19))} · ${x.events.length} bukti</span></div>
-  </button>`).join("");
-$("#incList").addEventListener("click", e => { const b=e.target.closest(".inc"); if(b) show(+b.dataset.i); });
-
-/* ---------- peta aset ---------- */
-const POS = {   // posisi tetap per peran aset di lab
-  "kali-ops":[70,170], "pc-staf-07":[270,90], "web-portal":[270,250], "srv-file-01":[470,90],
-  "wazuh-manager":[470,250], "hmi-genset":[700,250], "plc-genset-01":[700,90],
-};
-const byName = {}; Object.entries(D.assets).forEach(([ip,a]) => byName[a.name] = Object.assign({ip}, a));
-const nameOf = v => !v ? null : (D.assets[v] ? D.assets[v].name : v);
-
-function el(tag, attrs, parent, text){
-  const n = document.createElementNS(NS, tag);
-  for (const k in attrs) n.setAttribute(k, attrs[k]);
-  if (text != null) n.textContent = text;
-  if (parent) parent.appendChild(n); return n;
-}
-function drawMap(x){
-  const svg = $("#map"); svg.innerHTML = "";
-  // zona
-  el("rect",{x:8,y:24,width:130,height:300,class:"zone"},svg); el("text",{x:16,y:18,class:"zl"},svg,"LUAR");
-  el("rect",{x:170,y:24,width:400,height:300,class:"zone"},svg); el("text",{x:178,y:18,class:"zl"},svg,"JARINGAN IT SATUAN");
-  el("rect",{x:600,y:24,width:212,height:300,class:"zone"},svg); el("text",{x:608,y:18,class:"zl"},svg,"JARINGAN KENDALI OT");
-  // tepi latar (topologi)
-  const base = [["kali-ops","pc-staf-07"],["kali-ops","web-portal"],["pc-staf-07","srv-file-01"],["srv-file-01","plc-genset-01"],["hmi-genset","plc-genset-01"],["pc-staf-07","wazuh-manager"]];
-  const line = (a,b,cls) => { const [x1,y1]=POS[a],[x2,y2]=POS[b]; return el("path",{d:`M${x1} ${y1} C${(x1+x2)/2} ${y1} ${(x1+x2)/2} ${y2} ${x2} ${y2}`,class:cls},svg); };
-  base.forEach(([a,b]) => line(a,b,"edge"));
-  // jalur serangan dari bukti
-  const hit = new Set(), src = new Set(), atk = new Map(), blk = new Map();
-  x.events.forEach(e => {
-    const to = nameOf(e.dst_ip) || nameOf(e.host), from = nameOf(e.src_ip);
-    if (to && POS[to]) hit.add(to);
-    if (from && to && from !== to && POS[from] && POS[to]) {
-      const key = from+">"+to;
-      (/DIBLOKIR/.test(e.label) ? blk : atk).set(key,[from,to]);
-      if (!byName[from] || !byName[from].internal) src.add(from);
-    }
-  });
-  atk.forEach(([a,b]) => line(a,b,"edge atk"));
-  blk.forEach(([a,b]) => {
-    line(a,b,"edge blk");
-    const [x1,y1]=POS[a],[x2,y2]=POS[b], mx=(x1+x2)/2+30, my=(y1+y2)/2;
-    el("path",{d:`M${mx-8} ${my-8} L${mx+8} ${my+8} M${mx+8} ${my-8} L${mx-8} ${my+8}`,class:"xb"},svg);
-    el("text",{x:mx+14,y:my+5,class:"xbl"},svg,"DIBLOKIR");
-    hit.delete(b);
-  });
-  // simpul
-  Object.entries(POS).forEach(([name,[cx,cy]]) => {
-    const a = byName[name] || {role:""};
-    const g = el("g",{class:"node"+(src.has(name)?" src":hit.has(name)?" hit":"")},svg);
-    if (blk.size && name==="plc-genset-01") g.classList.add("ok");
-    el("rect",{x:cx-58,y:cy-22,width:116,height:44},g);
-    el("text",{x:cx-50,y:cy-4},g,name);
-    const role = (a.role||"").replace(/\s*\(.*\)$/, "");
-    el("text",{x:cx-50,y:cy+11,class:"r"},g,role.length > 17 ? role.slice(0,16)+"…" : role);
-    el("title",{},g,`${name} · ${a.role||""}`);
-  });
-  // reticle pada sasaran terakhir
-  const last = [...x.events].reverse().map(e => nameOf(e.dst_ip)||nameOf(e.host)).find(n => n && POS[n]);
-  if (last){
-    const [cx,cy] = POS[last], k = x.severity==="kritis" ? " k" : "";
-    const g = el("g",{class:"ret-g"},svg);
-    el("circle",{cx,cy,r:44,class:"ret"+k,"stroke-dasharray":"10 8"},g);
-    el("path",{d:`M${cx-76} ${cy} h16 M${cx+60} ${cy} h16 M${cx} ${cy-44} v-10 M${cx} ${cy+44} v10`,class:"ret"+k},g);
-  }
-  $("#mapId").textContent = x.id;
-}
-
-/* ---------- panel kanan + kronologi ---------- */
-function show(i){
-  const x = inc[i];
-  document.querySelectorAll(".inc").forEach(b => b.classList.toggle("on", +b.dataset.i === i));
-  drawMap(x);
-  $("#tl").innerHTML = x.steps.map(s => {
-    const cls = /DIBLOKIR/.test(s.text) ? "b" : /DAMPAK OT|DEFACE/.test(s.text) ? "x" : "";
-    return `<div class="step ${cls}"><div class="tm">${esc(s.time)}</div><div class="dot"></div><div>
-      <div class="tx">${fmtTx(s.text)}</div>
-      <div class="chips">${s.tech.map(t=>`<span class="chip t">${esc(t)}</span>`).join("")}${s.evidence.map(b=>`<span class="chip">${esc(b)}</span>`).join("")}</div>
-    </div></div>`; }).join("");
-  const impact = x.has_ot_impact ? `<div class="impact k">◆ DAMPAK OT: genset dimatikan perintah tak sah</div>`
-    : x.ot_blocked ? `<div class="impact b">◆ SERANGAN OT DIGAGALKAN: perintah ke PLC diblokir, genset tetap menyala</div>`
-    : x.defaced ? `<div class="impact p">◆ DAMPAK PUBLIK: halaman situs diubah (deface)</div>` : "";
-  $("#sevTag").textContent = x.severity.toUpperCase();
-  $("#sevTag").style.color = sevColor(x.severity);
-  $("#sum").innerHTML = `<div class="h">${esc(x.summary.judul)}</div><p>${esc(x.summary.ringkasan)}</p>${impact}
-    <dl class="facts">
-      <dt>Insiden</dt><dd>${esc(x.id)}</dd>
-      <dt>Waktu</dt><dd>${esc(x.start.slice(0,19).replace("T"," "))} – ${esc(x.end.slice(11,19))} UTC</dd>
-      <dt>IP masuk</dt><dd>${esc(x.entry_ip)}</dd>
-      <dt>Host</dt><dd>${esc(x.hosts.join(", "))}</dd>
-      ${x.identities.length ? `<dt>Akun</dt><dd>${esc(x.identities.join(", "))}</dd>` : ""}
-      <dt>Narasi</dt><dd>${x.meta && x.meta.fallback ? "ringkasan cadangan deterministik" : "LLM lokal, lolos validasi"}</dd>
-    </dl>
-    ${x.notes.length ? `<ul class="note">${x.notes.map(n=>`<li>${esc(n)}</li>`).join("")}</ul>` : ""}`;
-  $("#todo").innerHTML = x.summary.rekomendasi.map(r => `<li><span class="bx"></span><span>${esc(r)}</span></li>`).join("");
-  const upd = () => { const all=$("#todo").children.length, d=$("#todo").querySelectorAll(".done").length; $("#todoN").textContent = `${d}/${all} selesai`; };
-  $("#todo").onclick = e => { const li=e.target.closest("li"); if(li){ li.classList.toggle("done"); upd(); } };
-  upd();
-  $("#edu").innerHTML = (x.edukasi||[]).map((e,k) => `<details ${k===0?"open":""}>
-    <summary><span class="id">${esc(e.id)}</span><span class="nm">${esc(e.name)}</span></summary>
-    <dl><div><dt>Apa yang terjadi</dt><dd>${esc(e.apa)}</dd></div>
-        <div><dt>Kenapa berbahaya</dt><dd>${esc(e.bahaya)}</dd></div>
-        <div><dt>Kerjakan sekarang</dt><dd>${esc(e.tindakan)}</dd></div>
-        <div><dt>Supaya tidak terulang</dt><dd>${esc(e.cegah)}</dd></div></dl></details>`).join("");
-}
-if (inc.length){
-  const first = inc.map((x,i)=>[SEV_RANK[x.severity]??9,i]).sort((a,b)=>a[0]-b[0])[0][1];
-  show(first);
-} else {
-  $("#incList").innerHTML = `<div class="note">Belum ada data. Jalankan: python3 dashboard/build.py</div>`;
-}
+[["Memuat bukti Wazuh dan Suricata",`${nEv} event`],["Membuang derau login PAM","ok"],["Merangkai insiden per pelaku",`${inc.length} insiden`],
+ ["Memetakan MITRE ATT&CK",`${nTech} teknik`],["Memvalidasi narasi LLM lokal","ok"],["Tameng siaga","◆"]]
+.forEach(([t,v],k) => { const d=document.createElement("div"); d.style.animationDelay=(0.4+k*0.45)+"s";
+  d.innerHTML=`&gt; ${esc(t)} … <span class="ok">[${esc(v)}]</span>`; $("#bootlog").appendChild(d); });
 })();
 </script>
 </body>

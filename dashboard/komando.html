@@ -1,0 +1,453 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tameng Pusat Komando</title>
+<link rel="stylesheet" href="tameng.css">
+<style>
+main{position:relative;z-index:1}
+.head{padding:34px 0 18px;display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap}
+.head .k{font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--acc)}
+.head h1{font-family:var(--disp);font-size:clamp(38px,5vw,60px);text-transform:uppercase;line-height:.95;margin-top:6px}
+.head p{color:var(--text);max-width:620px;margin-top:8px}
+.pills{display:flex;gap:8px;flex-wrap:wrap}
+.clock{color:var(--cream)}
+.blk{margin-bottom:14px}
+.sub{font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);margin:30px 0 10px;display:flex;align-items:center;gap:12px}
+.sub::after{content:"";flex:1;height:1px;background:var(--line)}
+.sub b{color:var(--acc);font-weight:500}
+
+/* cara kerja */
+.how{display:grid;grid-template-columns:repeat(5,1fr);border:1px solid var(--line);background:var(--panel)}
+.how div{padding:12px 14px;border-right:1px solid var(--line);position:relative}
+.how div:last-child{border-right:0}
+.how .n{font-family:var(--disp);font-size:13px;letter-spacing:.2em;color:var(--acc)}
+.how .t{font-family:var(--disp);font-size:17px;text-transform:uppercase;line-height:1.1;margin:3px 0}
+.how .d{font-size:11px;color:var(--muted)}
+.how div:not(:last-child)::after{content:"›";position:absolute;right:-6px;top:50%;transform:translateY(-50%);color:var(--acc);background:var(--panel);font-size:16px;line-height:1}
+
+/* status */
+.status{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
+.st{border:1px solid var(--line);background:var(--panel);padding:10px 12px}
+.st .s{display:flex;align-items:center;gap:7px;font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--acc)}
+.st .s i{width:7px;height:7px;border-radius:50%;background:var(--acc);box-shadow:0 0 8px var(--acc);animation:pulse 2.4s infinite}
+.st.off .s{color:var(--muted)}.st.off .s i{background:var(--olive);box-shadow:none;animation:none}
+.st .nm{font-family:var(--disp);font-size:17px;text-transform:uppercase;margin-top:4px;line-height:1.1}
+.st .pr{font-size:10.5px;color:var(--muted)}
+.stats{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
+.stat{border:1px solid var(--line);background:var(--panel);padding:10px 14px;position:relative}
+.stat .v{font-family:var(--disp);font-size:34px;line-height:1;color:var(--cream);margin-top:4px}
+.stat .v.k{color:var(--kritis)}.stat .v.a{color:var(--acc)}
+
+/* tindakan + notifikasi */
+.two{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:14px;align-items:start}
+.todo{list-style:none;padding:6px 14px 12px}
+.todo li{display:grid;grid-template-columns:22px 1fr auto;gap:10px;padding:9px 0;border-bottom:1px dashed var(--line);font-size:12.5px;color:#d9dbc8;cursor:pointer;align-items:start}
+.todo li:last-child{border-bottom:0}
+.todo li .bx{width:14px;height:14px;border:1px solid var(--acc);margin-top:3px;position:relative}
+.todo li.done{color:var(--olive);text-decoration:line-through}
+.todo li.done .bx::after{content:"";position:absolute;inset:2px;background:var(--acc)}
+.todo li .why{display:block;font-size:10.5px;color:var(--muted);margin-top:2px;text-decoration:none}
+.feed{max-height:420px;overflow:auto}
+.nt{display:grid;grid-template-columns:70px 1fr;gap:10px;padding:10px 14px;border-bottom:1px solid var(--line)}
+.nt .tm{font-size:11.5px;color:var(--muted)}
+.nt .j{font-size:9.5px;letter-spacing:.16em;font-weight:600;padding:1px 6px;border:1px solid currentColor;margin-right:6px}
+.nt .j.BARU{color:var(--acc)}.nt .j.MEMBURUK{color:var(--kritis)}.nt .j.DITANGANI{color:var(--rendah)}
+.nt .tx{font-size:12px;color:var(--cream);margin-top:4px}
+.nt .lp{font-size:11px;color:var(--muted);margin-top:3px}
+.feed-note{padding:10px 14px;font-size:10.5px;color:var(--olive);border-top:1px solid var(--line)}
+.feed-note code{color:var(--acc)}
+
+/* insiden */
+.layout{display:grid;grid-template-columns:290px minmax(0,1fr) 350px;gap:14px;align-items:start}
+.col{display:flex;flex-direction:column;gap:14px}
+.inc{display:block;width:100%;text-align:left;padding:12px 14px 12px 18px;border-bottom:1px solid var(--line);position:relative;transition:background .15s}
+.inc:hover{background:rgba(212,247,75,.04)}
+.inc.on{background:rgba(212,247,75,.07)}
+.inc.on::after{content:"";position:absolute;right:10px;top:50%;border:6px solid transparent;border-right-color:var(--acc);transform:translateY(-50%)}
+.inc .bar{position:absolute;left:0;top:0;bottom:0;width:4px}
+.inc .sk{font-size:10px;letter-spacing:.12em;color:var(--olive);text-transform:uppercase}
+.inc .t{font-family:var(--disp);font-size:18px;line-height:1.1;margin:4px 0 6px;color:var(--cream);padding-right:14px}
+.inc .m{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.map-wrap{padding:8px 10px 4px}
+.map{width:100%;height:auto;display:block}
+.map .zone{fill:none;stroke:var(--line2);stroke-dasharray:3 5}
+.map .zl{fill:var(--olive);font-size:10px;letter-spacing:.2em;font-family:var(--mono)}
+.map .edge{fill:none;stroke:var(--line2);stroke-width:1}
+.map .atk{stroke:var(--kritis);stroke-width:1.8;stroke-dasharray:6 6;animation:flow 1s linear infinite}
+.map .blk{stroke:var(--tinggi);stroke-width:1.8;stroke-dasharray:2 5}
+.map .node rect{fill:var(--bg2);stroke:var(--line2)}
+.map .node text{fill:var(--cream);font-family:var(--mono);font-size:11px}
+.map .node .r{fill:var(--muted);font-size:9px}
+.map .node.hit rect{stroke:var(--kritis);fill:#1c0e0c}
+.map .node.ok rect{stroke:var(--acc)}
+.map .node.src rect{stroke:var(--kritis);stroke-dasharray:3 3}
+.map .ret{fill:none;stroke:var(--acc);stroke-width:1.4}
+.map .ret.k{stroke:var(--kritis)}
+.map .ret-g{animation:pulse 1.6s ease-in-out infinite}
+.map .xb{stroke:var(--tinggi);stroke-width:2.4}
+.map .xbl{fill:var(--tinggi);font-family:var(--disp);font-size:13px;letter-spacing:.1em}
+.legend{display:flex;gap:16px;flex-wrap:wrap;padding:4px 14px 12px}
+.legend span{display:flex;align-items:center;gap:6px;font-size:10px;letter-spacing:.1em;color:var(--muted);text-transform:uppercase}
+.legend i{width:18px;height:0;border-top:2px dashed var(--kritis)}
+.legend i.b{border-top-color:var(--tinggi);border-top-style:dotted}
+.legend i.n{border:1px solid var(--acc);height:10px;width:10px}
+.tl{padding:6px 14px 14px}
+.step{display:grid;grid-template-columns:70px 18px minmax(0,1fr);gap:10px;padding:10px 0;border-bottom:1px dashed var(--line)}
+.step:last-child{border-bottom:0}
+.step .tm{color:var(--acc);font-size:12px;padding-top:1px}
+.step .dot{position:relative}
+.step .dot::before{content:"";position:absolute;left:4px;top:5px;width:9px;height:9px;border:1px solid var(--acc);transform:rotate(45deg)}
+.step.x .dot::before{background:var(--kritis);border-color:var(--kritis)}
+.step.b .dot::before{background:var(--rendah);border-color:var(--rendah)}
+.step .tx{color:var(--cream);font-size:12.5px}
+.step .tx code{background:#1a2015;color:var(--acc);padding:0 4px}
+.sum{padding:14px}
+.sum .h{font-family:var(--disp);font-size:24px;line-height:1.05;margin-bottom:10px}
+.sum p{color:var(--text);font-size:12.5px}
+.facts{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;margin-top:12px;font-size:11.5px}
+.facts dt{color:var(--olive);letter-spacing:.1em;text-transform:uppercase;font-size:10px;padding-top:2px}
+.impact{margin-top:12px;padding:8px 10px;border:1px solid;font-size:11.5px;letter-spacing:.04em}
+.impact.k{border-color:var(--kritis);color:var(--kritis);background:rgba(255,75,62,.07)}
+.impact.b{border-color:var(--rendah);color:var(--rendah);background:rgba(143,191,106,.07)}
+.impact.p{border-color:var(--sedang);color:var(--sedang);background:rgba(233,216,74,.06)}
+.note{padding:10px 14px;font-size:11.5px;color:var(--muted);border-top:1px solid var(--line)}
+.note li{margin-left:16px;margin-bottom:4px}
+.edu details{border-bottom:1px solid var(--line)}
+.edu details:last-child{border-bottom:0}
+.edu summary{list-style:none;cursor:pointer;padding:10px 14px;display:flex;gap:10px;align-items:baseline}
+.edu summary::-webkit-details-marker{display:none}
+.edu summary .id{color:var(--acc);font-size:11px;min-width:72px}
+.edu summary .nm{font-size:12px;color:var(--cream)}
+.edu summary::after{content:"+";margin-left:auto;color:var(--acc)}
+.edu details[open] summary::after{content:"−"}
+.edu dl{padding:0 14px 12px 96px;display:flex;flex-direction:column;gap:8px}
+.edu dt{font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--olive)}
+.edu dd{font-size:12px;color:var(--text)}
+
+/* kerentanan */
+.vtop{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;padding:14px}
+.vc{border:1px solid var(--line2);padding:14px;position:relative;background:var(--bg2)}
+.vc .rk{position:absolute;top:10px;right:12px;font-family:var(--disp);font-size:34px;color:var(--line2);line-height:1}
+.vc .cve{font-family:var(--disp);font-size:22px;color:var(--cream)}
+.vc .h{font-size:11.5px;color:var(--acc);margin:2px 0 8px}
+.vc ul{list-style:none;font-size:11.5px;color:var(--text)}
+.vc li::before{content:"› ";color:var(--acc)}
+.kev{font-size:9px;letter-spacing:.14em;color:var(--kritis);border:1px solid var(--kritis);padding:1px 5px;margin-left:6px;vertical-align:middle}
+.vt{width:100%;border-collapse:collapse;font-size:12px}
+.vt th,.vt td{text-align:left;padding:8px 14px;border-top:1px solid var(--line)}
+.vt th{font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:500}
+.vt td.n{color:var(--acc)}
+.vwrap{overflow-x:auto}
+.sca{padding:10px 14px 14px;font-size:11.5px;color:var(--text);border-top:1px solid var(--line)}
+.sca b{color:var(--cream);font-weight:500}
+
+/* fitur */
+.feat{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.ft{border:1px solid var(--line);background:var(--panel);padding:14px;display:flex;flex-direction:column;gap:6px}
+.ft .top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.ft .nm{font-family:var(--disp);font-size:19px;text-transform:uppercase;line-height:1.05}
+.ft .tag{font-size:9px;letter-spacing:.16em;text-transform:uppercase;padding:2px 6px;border:1px solid var(--acc);color:var(--acc);white-space:nowrap}
+.ft .tag.lab{border-color:var(--sedang);color:var(--sedang)}
+.ft p{font-size:11.5px;color:var(--text)}
+.ft .w{font-size:10px;color:var(--olive);letter-spacing:.08em}
+.foot{margin:30px 0 30px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;color:var(--olive);font-size:10px;letter-spacing:.14em;text-transform:uppercase}
+
+@media (max-width:1180px){
+  .layout{grid-template-columns:270px minmax(0,1fr)}
+  .layout>.col:last-child{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr}
+  .status,.stats{grid-template-columns:repeat(3,1fr)}
+  .feat{grid-template-columns:repeat(2,1fr)}
+}
+@media (max-width:860px){
+  .two{grid-template-columns:1fr}
+  .how{grid-template-columns:1fr}
+  .how div{border-right:0;border-bottom:1px solid var(--line)}
+  .how div:not(:last-child)::after{content:none}
+  .vtop{grid-template-columns:1fr}
+}
+@media (max-width:760px){
+  .wrap{padding:0 16px}
+  .layout,.layout>.col:last-child{display:flex;flex-direction:column;align-items:stretch}
+  .status,.stats,.feat{grid-template-columns:repeat(2,1fr)}
+  .map-wrap{overflow-x:auto}
+  .map{min-width:620px}
+  .edu dl{padding-left:14px}
+  .step{grid-template-columns:58px 14px minmax(0,1fr);gap:8px}
+  .todo li{grid-template-columns:22px 1fr}
+  .todo li .sev{grid-column:2;justify-self:start}
+}
+</style>
+</head>
+<body>
+<div class="grid-bg"></div>
+<nav class="nav">
+  <div class="wrap">
+    <a class="logo" href="index.html">
+      <svg viewBox="0 0 26 30"><path d="M13 1 L25 5 V15 C25 22 20 27 13 29 C6 27 1 22 1 15 V5 Z" fill="none" stroke="#ece8d4" stroke-width="1.5"/><path d="M7 12 L13 15 L19 12 M7 17 L13 20 L19 17" fill="none" stroke="#d4f74b" stroke-width="2"/></svg>
+      <span class="disp">Tameng</span>
+    </a>
+    <div class="links">
+      <a href="#status">Status</a><a href="#tindakan">Tindakan</a><a href="#insiden">Insiden</a><a href="#kerentanan">Kerentanan</a><a href="#fitur">Fitur</a>
+    </div>
+    <a class="btn ghost" href="index.html">← Beranda</a>
+  </div>
+</nav>
+
+<main class="wrap">
+  <div class="head">
+    <div>
+      <div class="k">Pusat komando · data uji lab 7 Nov 2026</div>
+      <h1>Situasi saat ini</h1>
+      <p>Apa yang terjadi, dan apa yang dikerjakan lebih dulu.</p>
+    </div>
+    <div class="pills">
+      <span class="pill"><i></i>Air-gapped</span>
+      <span class="pill warn"><i></i>OT: mode blokir</span>
+      <span class="pill clock" id="clock">--:--:-- UTC</span>
+    </div>
+  </div>
+
+  <div class="sub">Cara kerja <b>alert → insiden → tindakan</b></div>
+  <div class="how">
+    <div><div class="n">01</div><div class="t">Baca sensor</div><div class="d">Wazuh (IT) dan Suricata (OT)</div></div>
+    <div><div class="n">02</div><div class="t">Rangkai per pelaku</div><div class="d">Derau dibuang, serangan tak terkait dipisah</div></div>
+    <div><div class="n">03</div><div class="t">Nilai bahaya</div><div class="d">MITRE ATT&amp;CK IT + ICS oleh kode</div></div>
+    <div><div class="n">04</div><div class="t">Tulis narasi</div><div class="d">LLM lokal, dicek ke bukti</div></div>
+    <div><div class="n">05</div><div class="t">Beri tahu dan bertindak</div><div class="d">Notifikasi, checklist, blokir otomatis</div></div>
+  </div>
+
+  <div class="sub" id="status">Status sistem</div>
+  <div class="status" id="statusBox"></div>
+  <div class="stats" id="stats" style="margin-top:10px"></div>
+
+  <div class="sub" id="tindakan">Rekomendasi tindakan <b>urut dari yang paling mendesak</b></div>
+  <div class="two">
+    <section class="panel bracket">
+      <h3>Tindakan prioritas <b id="todoN"></b></h3>
+      <ul class="todo" id="prio"></ul>
+    </section>
+    <section class="panel">
+      <h3>Notifikasi <b id="notifN"></b></h3>
+      <div class="feed" id="feed"></div>
+      <div class="feed-note">Mode pantau: <code>python3 -m tameng --watch</code> · dikirim ke terminal, desktop, dan chat internal</div>
+    </section>
+  </div>
+
+  <div class="sub" id="insiden">Insiden <b>pilih untuk melihat rantai serangan</b></div>
+  <div class="layout">
+    <div class="col">
+      <section class="panel bracket"><h3>Daftar insiden <b id="nInc"></b></h3><div id="incList"></div></section>
+    </div>
+    <div class="col">
+      <section class="panel bracket">
+        <h3>Peta alur serangan <b id="mapId"></b></h3>
+        <div class="map-wrap"><svg class="map" id="map" viewBox="0 0 820 340"></svg></div>
+        <div class="legend"><span><i></i>Jalur serangan</span><span><i class="b"></i>Diblokir</span><span><i class="n"></i>Aset terdampak</span></div>
+      </section>
+      <section class="panel"><h3>Kronologi <b>Dirangkai kode, bukan tebakan AI</b></h3><div class="tl" id="tl"></div></section>
+    </div>
+    <div class="col">
+      <section class="panel bracket"><h3>Ringkasan <b id="sevTag"></b></h3><div class="sum" id="sum"></div></section>
+      <section class="panel"><h3>Gerak cepat insiden ini <b id="incTodoN"></b></h3><ul class="todo" id="todo"></ul></section>
+      <section class="panel"><h3>Edukasi · pelajari insiden ini</h3><div class="edu" id="edu"></div></section>
+    </div>
+  </div>
+
+  <div class="sub" id="kerentanan">Ringkasan kerentanan <b>tambal yang ini dulu</b></div>
+  <section class="panel bracket">
+    <h3>Prioritas tambalan <b id="vSum"></b></h3>
+    <div class="vtop" id="vtop"></div>
+    <div class="vwrap"><table class="vt" id="vt"></table></div>
+    <div class="sca" id="sca"></div>
+  </section>
+
+  <div class="sub" id="fitur">Fitur Tameng</div>
+  <div class="feat" id="feat"></div>
+
+  <div class="foot"><span>Data: keluaran Tameng (data.js) · semua proses lokal</span><span>Fakta dari kode · narasi LLM tervalidasi · edukasi ditulis manusia</span></div>
+</main>
+
+<script src="data.js"></script>
+<script>
+(function(){
+"use strict";
+const D = window.TAMENG_DATA || {incidents:[],assets:{},notifications:[],status:[],vulnerabilities:null,model:"?"};
+const $ = (s, r=document) => r.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fmtTx = s => esc(s).replace(/`([^`]+)`/g, "<code>$1</code>");
+const NS = "http://www.w3.org/2000/svg";
+const SEV_RANK = {kritis:0,tinggi:1,sedang:2,rendah:3};
+const sevColor = s => `var(--${s})`;
+const inc = D.incidents || [];
+const V = D.vulnerabilities;
+
+const tick = () => { $("#clock").textContent = new Date().toISOString().slice(11,19)+" UTC"; };
+tick(); setInterval(tick, 1000);
+
+/* ---------- status ---------- */
+$("#statusBox").innerHTML = (D.status||[]).map(s => `<div class="st ${s.status==="aktif"?"":"off"}">
+  <div class="s"><i></i>${esc(s.status)}</div><div class="nm">${esc(s.nama)}</div><div class="pr">${esc(s.peran)}</div></div>`).join("");
+const nEv = inc.reduce((n,i)=>n+i.events.length,0);
+const nTech = new Set(inc.flatMap(i=>i.techniques.map(t=>t.id))).size;
+const blocked = inc.reduce((n,i)=>n+i.events.filter(e=>/DIBLOKIR/.test(e.label)).length,0);
+$("#stats").innerHTML = [
+  ["Insiden", inc.length, ""], ["Kritis", inc.filter(i=>i.severity==="kritis").length, "k"],
+  ["Bukti dirangkai", nEv, ""], ["Teknik ATT&CK", nTech, ""],
+  ["Serangan diblokir", blocked, "a"], ["CVE prioritas KEV", V ? V.total_kev : 0, "k"],
+].map(([l,v,c]) => `<div class="stat bracket"><div class="lbl">${esc(l)}</div><div class="v ${c}">${v}</div></div>`).join("");
+
+/* ---------- tindakan prioritas (gabungan semua insiden + kerentanan) ---------- */
+const prio = [];
+[...inc].sort((a,b)=>(SEV_RANK[a.severity]??9)-(SEV_RANK[b.severity]??9)).forEach(x => {
+  x.summary.rekomendasi.slice(0,2).forEach(r => prio.push({sev:x.severity, text:r, why:x.skenario || x.id}));
+});
+if (V) V.prioritas.slice(0,3).forEach(p => prio.push({sev:p.tingkat, text:`Tambal ${p.cve} (${p.package}) di ${p.host}.`,
+  why:`Kerentanan · CVSS ${p.cvss.toFixed(1)}${p.kev ? " · sudah dieksploitasi (KEV)" : ""}`}));
+prio.sort((a,b)=>(SEV_RANK[a.sev]??9)-(SEV_RANK[b.sev]??9));
+const seen = new Set();
+const prioUniq = prio.filter(p => !seen.has(p.text) && seen.add(p.text)).slice(0,6);
+function checklist(ul, items, counter){
+  ul.innerHTML = items.map(p => `<li><span class="bx"></span><span>${esc(p.text)}${p.why?`<span class="why">${esc(p.why)}</span>`:""}</span>${p.sev?`<span class="sev ${esc(p.sev)}">${esc(p.sev)}</span>`:""}</li>`).join("");
+  const upd = () => { counter.textContent = `${ul.querySelectorAll(".done").length}/${items.length} selesai`; };
+  ul.onclick = e => { const li=e.target.closest("li"); if(li){ li.classList.toggle("done"); upd(); } };
+  upd();
+}
+checklist($("#prio"), prioUniq, $("#todoN"));
+
+/* ---------- notifikasi ---------- */
+const notifs = D.notifications || [];
+$("#notifN").textContent = notifs.length;
+$("#feed").innerHTML = notifs.map(n => `<div class="nt"><div class="tm">${esc(n.time.slice(11,19))}</div><div>
+  <span class="j ${esc(n.jenis)}">${esc(n.jenis)}</span><span class="sev ${esc(n.severity)}">${esc(n.severity)}</span>
+  <div class="tx">${esc(n.teks)}</div><div class="lp">${esc(n.insiden)} · langkah pertama: ${esc(n.langkah_pertama)}</div></div></div>`).join("");
+
+/* ---------- daftar insiden ---------- */
+$("#nInc").textContent = inc.length;
+$("#incList").innerHTML = inc.map((x,i) => `<button class="inc" data-i="${i}">
+  <span class="bar" style="background:${sevColor(x.severity)}"></span>
+  <div class="sk">${esc(x.skenario || x.id)}</div><div class="t">${esc(x.summary.judul)}</div>
+  <div class="m"><span class="sev ${esc(x.severity)}">${esc(x.severity)}</span><span class="lbl">${esc(x.start.slice(11,19))} · ${x.events.length} bukti</span></div>
+</button>`).join("");
+$("#incList").addEventListener("click", e => { const b=e.target.closest(".inc"); if(b) show(+b.dataset.i); });
+
+/* ---------- peta ---------- */
+const POS = {"kali-ops":[70,170],"pc-staf-07":[270,90],"web-portal":[270,250],"srv-file-01":[470,90],
+  "wazuh-manager":[470,250],"hmi-genset":[700,250],"plc-genset-01":[700,90]};
+const byName = {}; Object.entries(D.assets||{}).forEach(([ip,a]) => byName[a.name] = Object.assign({ip}, a));
+const nameOf = v => !v ? null : (D.assets[v] ? D.assets[v].name : v);
+function el(tag, attrs, parent, text){
+  const n = document.createElementNS(NS, tag);
+  for (const k in attrs) n.setAttribute(k, attrs[k]);
+  if (text != null) n.textContent = text;
+  if (parent) parent.appendChild(n); return n;
+}
+function drawMap(x){
+  const svg = $("#map"); svg.innerHTML = "";
+  el("rect",{x:8,y:24,width:130,height:300,class:"zone"},svg); el("text",{x:16,y:18,class:"zl"},svg,"LUAR");
+  el("rect",{x:170,y:24,width:400,height:300,class:"zone"},svg); el("text",{x:178,y:18,class:"zl"},svg,"JARINGAN IT SATUAN");
+  el("rect",{x:600,y:24,width:212,height:300,class:"zone"},svg); el("text",{x:608,y:18,class:"zl"},svg,"JARINGAN KENDALI OT");
+  const line = (a,b,cls) => { const [x1,y1]=POS[a],[x2,y2]=POS[b]; return el("path",{d:`M${x1} ${y1} C${(x1+x2)/2} ${y1} ${(x1+x2)/2} ${y2} ${x2} ${y2}`,class:cls},svg); };
+  [["kali-ops","pc-staf-07"],["kali-ops","web-portal"],["pc-staf-07","srv-file-01"],["srv-file-01","plc-genset-01"],["hmi-genset","plc-genset-01"],["pc-staf-07","wazuh-manager"]].forEach(([a,b]) => line(a,b,"edge"));
+  const hit = new Set(), src = new Set(), atk = new Map(), blk = new Map();
+  let ipBlocked = null;
+  x.events.forEach(e => {
+    const to = nameOf(e.dst_ip) || nameOf(e.host), from = nameOf(e.src_ip);
+    if (/active response/.test(e.label)) { ipBlocked = [from, to]; return; }
+    if (to && POS[to]) hit.add(to);
+    if (from && to && from !== to && POS[from] && POS[to]) {
+      (/DIBLOKIR/.test(e.label) ? blk : atk).set(from+">"+to,[from,to]);
+      if (!byName[from] || !byName[from].internal) src.add(from);
+    }
+  });
+  if (ipBlocked && ipBlocked[0] && POS[ipBlocked[0]] && POS[ipBlocked[1]]) blk.set("ar", ipBlocked);
+  atk.forEach(([a,b]) => { if (!blk.has("ar") || a+">"+b !== ipBlocked.join(">")) line(a,b,"edge atk"); });
+  blk.forEach(([a,b]) => {
+    line(a,b,"edge blk");
+    const [x1,y1]=POS[a],[x2,y2]=POS[b], mx=(x1+x2)/2+20, my=(y1+y2)/2-6;
+    el("path",{d:`M${mx-8} ${my-8} L${mx+8} ${my+8} M${mx+8} ${my-8} L${mx-8} ${my+8}`,class:"xb"},svg);
+    el("text",{x:mx+14,y:my+5,class:"xbl"},svg,"DIBLOKIR");
+    if (b === "plc-genset-01") hit.delete(b);
+  });
+  Object.entries(POS).forEach(([name,[cx,cy]]) => {
+    const a = byName[name] || {role:""};
+    const g = el("g",{class:"node"+(src.has(name)?" src":hit.has(name)?" hit":"")},svg);
+    if (x.ot_blocked && name==="plc-genset-01") g.classList.add("ok");
+    el("rect",{x:cx-58,y:cy-22,width:116,height:44},g);
+    el("text",{x:cx-50,y:cy-4},g,name);
+    const role = (a.role||"").replace(/\s*\(.*\)$/, "");
+    el("text",{x:cx-50,y:cy+11,class:"r"},g,role.length>17 ? role.slice(0,16)+"…" : role);
+    el("title",{},g,`${name} · ${a.role||""}`);
+  });
+  const last = [...x.events].reverse().filter(e=>!/active response/.test(e.label)).map(e => nameOf(e.dst_ip)||nameOf(e.host)).find(n => n && POS[n]);
+  if (last){
+    const [cx,cy]=POS[last], k = x.severity==="kritis" ? " k" : "", g = el("g",{class:"ret-g"},svg);
+    el("circle",{cx,cy,r:44,class:"ret"+k,"stroke-dasharray":"10 8"},g);
+    el("path",{d:`M${cx-76} ${cy} h16 M${cx+60} ${cy} h16 M${cx} ${cy-44} v-10 M${cx} ${cy+44} v10`,class:"ret"+k},g);
+  }
+  $("#mapId").textContent = x.id;
+}
+
+function show(i){
+  const x = inc[i];
+  document.querySelectorAll(".inc").forEach(b => b.classList.toggle("on", +b.dataset.i === i));
+  drawMap(x);
+  $("#tl").innerHTML = x.steps.map(s => {
+    const cls = /DIBLOKIR/.test(s.text) ? "b" : /DAMPAK OT|DEFACE/.test(s.text) ? "x" : "";
+    return `<div class="step ${cls}"><div class="tm">${esc(s.time)}</div><div class="dot"></div><div>
+      <div class="tx">${fmtTx(s.text)}</div>
+      <div class="chips">${s.tech.map(t=>`<span class="chip t">${esc(t)}</span>`).join("")}${s.evidence.map(b=>`<span class="chip">${esc(b)}</span>`).join("")}</div></div></div>`; }).join("");
+  const impact = x.has_ot_impact ? `<div class="impact k">◆ DAMPAK OT: genset dimatikan perintah tak sah</div>`
+    : x.ot_blocked ? `<div class="impact b">◆ SERANGAN OT DIGAGALKAN: perintah ke PLC diblokir, genset tetap menyala</div>`
+    : x.defaced ? `<div class="impact p">◆ DAMPAK PUBLIK: halaman situs diubah (deface)</div>`
+    : x.it_blocked ? `<div class="impact b">◆ DIHENTIKAN: IP penyerang diblokir otomatis sebelum menimbulkan dampak</div>` : "";
+  $("#sevTag").textContent = x.severity.toUpperCase(); $("#sevTag").style.color = sevColor(x.severity);
+  $("#sum").innerHTML = `<div class="h">${esc(x.summary.judul)}</div><p>${esc(x.summary.ringkasan)}</p>${impact}
+    <dl class="facts"><dt>Insiden</dt><dd>${esc(x.id)}</dd>
+      <dt>Waktu</dt><dd>${esc(x.start.slice(0,19).replace("T"," "))} – ${esc(x.end.slice(11,19))} UTC</dd>
+      <dt>IP masuk</dt><dd>${esc(x.entry_ip)}</dd><dt>Host</dt><dd>${esc(x.hosts.join(", "))}</dd>
+      ${x.identities.length ? `<dt>Akun</dt><dd>${esc(x.identities.join(", "))}</dd>` : ""}
+      <dt>Narasi</dt><dd>${x.meta && x.meta.fallback ? "ringkasan cadangan deterministik" : "LLM lokal, lolos validasi"}</dd></dl>
+    ${x.notes.length ? `<ul class="note">${x.notes.map(n=>`<li>${esc(n)}</li>`).join("")}</ul>` : ""}`;
+  checklist($("#todo"), x.summary.rekomendasi.map(r => ({text:r})), $("#incTodoN"));
+  $("#edu").innerHTML = (x.edukasi||[]).map((e,k) => `<details ${k===0?"open":""}>
+    <summary><span class="id">${esc(e.id)}</span><span class="nm">${esc(e.name)}</span></summary>
+    <dl><div><dt>Apa yang terjadi</dt><dd>${esc(e.apa)}</dd></div><div><dt>Kenapa berbahaya</dt><dd>${esc(e.bahaya)}</dd></div>
+        <div><dt>Kerjakan sekarang</dt><dd>${esc(e.tindakan)}</dd></div><div><dt>Supaya tidak terulang</dt><dd>${esc(e.cegah)}</dd></div></dl></details>`).join("");
+}
+if (inc.length) show(inc.map((x,i)=>[SEV_RANK[x.severity]??9,i]).sort((a,b)=>a[0]-b[0])[0][1]);
+
+/* ---------- kerentanan ---------- */
+if (V){
+  $("#vSum").textContent = `${V.total_cve} CVE · ${V.total_kev} KEV`;
+  $("#vtop").innerHTML = V.prioritas.slice(0,3).map(p => `<div class="vc"><div class="rk">0${p.urutan}</div>
+    <div class="cve">${esc(p.cve)}${p.kev?`<span class="kev">KEV</span>`:""}</div>
+    <div class="h">${esc(p.host)} · ${esc(p.package)} ${esc(p.version)}</div>
+    <ul>${p.alasan.map(a=>`<li>${esc(a)}</li>`).join("")}</ul></div>`).join("");
+  $("#vt").innerHTML = `<thead><tr><th>#</th><th>CVE</th><th>Host</th><th>Paket</th><th>CVSS</th><th>KEV</th><th>Skor</th></tr></thead><tbody>` +
+    V.prioritas.map(p => `<tr><td class="n">${p.urutan}</td><td>${esc(p.cve)}</td><td>${esc(p.host)}</td><td>${esc(p.package)}</td>
+      <td><span class="sev ${esc(p.tingkat)}">${p.cvss.toFixed(1)}</span></td><td>${p.kev?"ya":"-"}</td><td>${p.skor}</td></tr>`).join("") + "</tbody>";
+  const sca = Object.entries(V.sca_gagal||{});
+  $("#sca").innerHTML = (sca.length ? `<b>Konfigurasi gagal cek (SCA):</b> ` + sca.map(([h,c]) => `${esc(h)}: ${c.map(esc).join("; ")}`).join(" · ") + "<br>" : "")
+    + `<span style="color:var(--olive)">${esc(V.catatan)} Data kerentanan di demo ini adalah contoh sintetis.</span>`;
+}
+
+/* ---------- fitur ---------- */
+const FITUR = [
+  ["Korelasi IT/OT","aktif","Ribuan alert jadi satu insiden per pelaku, IT sampai OT.","Monitoring"],
+  ["Peta MITRE ATT&CK","aktif","Teknik IT dan ICS dipetakan kode, bukan tebakan.","Monitoring"],
+  ["Narasi LLM tervalidasi","aktif","Ringkasan bahasa Indonesia; ditolak bila keluar dari bukti.","Mandiri"],
+  ["Notifikasi aktif","aktif","BARU, MEMBURUK, DITANGANI ke terminal, desktop, chat internal.","Notifikasi"],
+  ["Blokir Modbus (IPS)","aktif","Perintah tulis dari host tak sah dijatuhkan sebelum sampai PLC.","Gerak cepat"],
+  ["Blokir IP otomatis","lab","Wazuh active response memutus IP penyerang web dan brute force.","Gerak cepat"],
+  ["Checklist gerak cepat","aktif","Langkah respons spesifik per insiden, bisa dicentang.","Gerak cepat"],
+  ["Edukasi per teknik","aktif","Apa, kenapa berbahaya, kerjakan sekarang, cara mencegah.","Edukasi"],
+  ["Ringkasan kerentanan","lab","Urutan tambal dari CVSS, KEV, kritikalitas, dan insiden aktif.","Risk analysis"],
+];
+$("#feat").innerHTML = FITUR.map(([n,s,d,w]) => `<div class="ft"><div class="top"><div class="nm">${esc(n)}</div>
+  <span class="tag ${s==="lab"?"lab":""}">${s==="lab"?"perlu uji live":"berjalan"}</span></div><p>${esc(d)}</p><div class="w">${esc(w)}</div></div>`).join("");
+})();
+</script>
+</body>
+</html>

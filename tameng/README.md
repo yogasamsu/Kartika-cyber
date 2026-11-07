@@ -104,6 +104,22 @@ python3 lab/scripts/replay-deface.py --out lab/out
 Rule 100020/100021 disiapkan untuk log akses server web satuan; di lab hanya
 dipakai lewat replay.
 
+## Notifikasi, kerentanan, dan blokir otomatis IP
+
+```bash
+python3 -m tameng --watch --no-llm                       # mode pantau
+python3 -m tameng --kerentanan lab/sample/kerentanan-alerts.json
+python3 lab/scripts/replay-deface.py --blokir            # deface dihentikan blokir IP
+```
+
+- **Notifikasi** (`notify.py`): BARU, MEMBURUK (tingkat bahaya naik, dampak OT,
+  deface), DITANGANI (blokir Modbus atau IP). Saluran: terminal, `TAMENG_NOTIF_LOG`
+  (JSONL), `TAMENG_NOTIF_DESKTOP=1` (macOS), `TAMENG_WEBHOOK` (chat internal).
+- **Kerentanan** (`vuln.py`): skor = CVSS + KEV + kritikalitas aset + publik +
+  terlibat insiden. OT tidak dipindai aktif.
+- **Blokir IP**: alert 651 (Wazuh active response) ditempelkan ke rantai pelaku
+  yang sama; blokir tanpa rantai bukan insiden, `command: delete` diabaikan.
+
 ## Edukasi SDM
 
 Laporan memuat bagian **Pelajari insiden ini**: untuk tiap teknik ATT&CK di

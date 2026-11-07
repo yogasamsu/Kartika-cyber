@@ -1,0 +1,69 @@
+/* Gaya bersama Tameng (beranda + pusat komando). Tanpa font daring: harus jalan air-gapped. */
+:root{
+  --bg:#07090a; --bg2:#0c0f0c; --panel:#0f130f; --line:#25301f; --line2:#3a4a2c;
+  --acc:#d4f74b; --acc-dim:rgba(212,247,75,.14); --cream:#ece8d4; --text:#cfd2bf; --muted:#8c947c; --olive:#5f6b45;
+  --kritis:#ff4b3e; --tinggi:#ff9f1c; --sedang:#e9d84a; --rendah:#8fbf6a;
+  --disp:"DIN Condensed","Avenir Next Condensed","Arial Narrow","Roboto Condensed",sans-serif;
+  --mono:"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+html,body{background:var(--bg);color:var(--cream);font-family:var(--mono);font-size:13px;line-height:1.55}
+body{overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+.grid-bg{position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
+  background-size:64px 64px;opacity:.28;mask-image:radial-gradient(ellipse at center,#000 30%,transparent 85%)}
+.lbl{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.lbl b{color:var(--acc);font-weight:500}
+.disp{font-family:var(--disp);font-weight:700;letter-spacing:.02em;text-transform:uppercase}
+[id]{scroll-margin-top:64px}
+.wrap{position:relative;z-index:1;max-width:1240px;margin:0 auto;padding:0 24px}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes fade{to{opacity:1}}
+@keyframes pulse{50%{opacity:.35}}
+@keyframes draw{to{stroke-dashoffset:0}}
+@keyframes lock{0%{transform:scale(1.9) rotate(-30deg);opacity:0}60%{opacity:1}100%{transform:scale(1) rotate(0);opacity:1}}
+@keyframes flow{to{stroke-dashoffset:-12}}
+
+/* tombol */
+.btn{display:inline-block;font-family:var(--disp);font-size:17px;letter-spacing:.12em;text-transform:uppercase;padding:11px 22px 9px;border:1px solid var(--acc);color:var(--bg);background:var(--acc);
+  clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px);transition:filter .2s}
+.btn:hover{filter:brightness(1.12)}
+.btn.ghost{background:transparent;color:var(--acc)}
+
+/* panel */
+.panel{border:1px solid var(--line);background:var(--panel);position:relative}
+.panel>h3{display:flex;justify-content:space-between;align-items:center;gap:4px 12px;flex-wrap:wrap;padding:9px 14px;border-bottom:1px solid var(--line);
+  font-family:var(--mono);font-size:10.5px;font-weight:500;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+.panel>h3 b{color:var(--acc);font-weight:500}
+.bracket::before,.bracket::after{content:"";position:absolute;width:12px;height:12px;border:1px solid var(--acc);pointer-events:none}
+.bracket::before{top:-1px;left:-1px;border-right:0;border-bottom:0}
+.bracket::after{bottom:-1px;right:-1px;border-left:0;border-top:0}
+.sev{font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;padding:2px 6px;border:1px solid currentColor;font-weight:600;white-space:nowrap}
+.sev.kritis{color:var(--kritis)}.sev.tinggi{color:var(--tinggi)}.sev.sedang{color:var(--sedang)}.sev.rendah{color:var(--rendah)}
+.chip{font-size:9.5px;letter-spacing:.08em;padding:2px 6px;border:1px solid var(--line2);color:var(--muted);white-space:nowrap}
+.chip.t{border-color:rgba(212,247,75,.4);color:var(--acc)}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+
+/* bar navigasi atas */
+.nav{position:sticky;top:0;z-index:20;background:rgba(7,9,10,.88);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
+.nav .wrap{display:flex;align-items:center;gap:22px;height:56px}
+.logo{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.logo svg{width:24px;height:28px}
+.logo .disp{font-size:24px;line-height:1;padding-top:3px}
+.nav .links{display:flex;gap:18px;margin-left:auto}
+.nav .links a{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.nav .links a:hover{color:var(--acc)}
+.nav .btn{font-size:14px;padding:8px 14px 6px}
+.pill{font-size:10px;letter-spacing:.14em;text-transform:uppercase;padding:5px 9px;border:1px solid var(--line2);color:var(--muted);display:flex;align-items:center;gap:7px;white-space:nowrap}
+.pill i{width:6px;height:6px;border-radius:50%;background:var(--acc);box-shadow:0 0 8px var(--acc)}
+.pill.warn i{background:var(--tinggi);box-shadow:0 0 8px var(--tinggi)}
+.pill.off i{background:var(--olive);box-shadow:none}
+
+@media (max-width:900px){ .nav .links{display:none} .nav .btn{margin-left:auto} }
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;animation-delay:0s!important}
+}
