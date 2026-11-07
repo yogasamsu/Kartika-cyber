@@ -8,7 +8,10 @@ import html, json, os, re, sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
-ALERTS = sys.argv[1] if len(sys.argv) > 1 else "/Volumes/Prika-Tameng/lab-data/wazuh/alerts/alerts.json"
+# Wazuh merotasi alerts.json tiap hari; bukti uji 6 Nov ada di arsip harian.
+ARSIP = "/Volumes/Prika-Tameng/lab-data/wazuh/alerts/2026/Nov/ossec-alerts-06.json"
+ALERTS = sys.argv[1] if len(sys.argv) > 1 else (ARSIP if os.path.exists(ARSIP) else
+                                                 "/Volumes/Prika-Tameng/lab-data/wazuh/alerts/alerts.json")
 
 # ---------- log ----------
 rows = []
@@ -45,40 +48,48 @@ body{{margin:0;background:#06090d;color:#7f93a3;font:15px/1.55 "SF Mono",Menlo,m
 {''.join(out)}""")
 
 # ---------- laporan ----------
-md = open(os.path.join(ROOT, "artifacts", "laporan-tameng-20261106.md"), encoding="utf-8").read()
 def inline(s):
     s = html.escape(s)
     s = re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", s)
     s = re.sub(r"`(.+?)`", r"<code>\1</code>", s)
     s = re.sub(r"\*(.+?)\*", r"<i>\1</i>", s)
     return s
-parts, table, ul = [], None, False
-for ln in md.splitlines() + [""]:
-    if ln.startswith("|"):
-        cells = [c.strip() for c in ln.strip("|").split("|")]
-        if set("".join(cells)) <= set("-: "):
+
+
+def laporan(md_name, out_name):
+    md = open(os.path.join(ROOT, "artifacts", md_name), encoding="utf-8").read()
+    parts, table, ul = [], None, False
+    for ln in md.splitlines() + [""]:
+        if ln.startswith("|"):
+            cells = [c.strip() for c in ln.strip("|").split("|")]
+            if set("".join(cells)) <= set("-: "):
+                continue
+            if table is None:
+                table = ["<table><tr>" + "".join(f"<th>{inline(c)}</th>" for c in cells) + "</tr>"]
+            else:
+                table.append("<tr>" + "".join(f"<td>{inline(c)}</td>" for c in cells) + "</tr>")
             continue
-        if table is None:
-            table = ["<table><tr>" + "".join(f"<th>{inline(c)}</th>" for c in cells) + "</tr>"]
-        else:
-            table.append("<tr>" + "".join(f"<td>{inline(c)}</td>" for c in cells) + "</tr>")
-        continue
-    if table is not None:
-        parts.append("".join(table) + "</table>"); table = None
-    if ln.startswith("- "):
-        if not ul: parts.append("<ul>"); ul = True
-        parts.append(f"<li>{inline(ln[2:])}</li>"); continue
-    if ul: parts.append("</ul>"); ul = False
-    if ln.startswith("# "): parts.append(f"<h1>{inline(ln[2:])}</h1>")
-    elif ln.startswith("## "): parts.append(f"<h2>{inline(ln[3:])}</h2>")
-    elif ln.strip() == "---": parts.append("<hr>")
-    elif ln.strip(): parts.append(f"<p>{inline(ln)}</p>")
-open(os.path.join(HERE, "sources", "laporan.html"), "w").write("""<!doctype html><meta charset="utf-8">
-<style>
-body{margin:0;background:#fff;color:#1b2733;font:17px/1.6 -apple-system,"SF Pro Text",sans-serif;width:1600px;padding:48px 64px;box-sizing:border-box}
-h1{font-size:34px;margin:0 0 14px} h2{font-size:23px;margin:30px 0 10px;border-bottom:1px solid #e3e8ee;padding-bottom:6px}
-p{margin:6px 0} code{font:15px "SF Mono",Menlo,monospace;background:#eef2f6;padding:1px 6px;border-radius:4px}
-table{border-collapse:collapse;width:100%;font-size:15.5px;margin:8px 0} th,td{border:1px solid #dde4ea;padding:7px 10px;text-align:left;vertical-align:top}
-th{background:#f3f6f9} ul{margin:6px 0;padding-left:24px} hr{border:0;border-top:1px solid #e3e8ee;margin:24px 0} i{color:#6b7c8c}
-</style>""" + "\n".join(parts))
-print("sources/log.html", len(rows), "baris; sources/laporan.html")
+        if table is not None:
+            parts.append("".join(table) + "</table>"); table = None
+        if ln.startswith("- "):
+            if not ul: parts.append("<ul>"); ul = True
+            parts.append(f"<li>{inline(ln[2:])}</li>"); continue
+        if ul: parts.append("</ul>"); ul = False
+        if ln.startswith("# "): parts.append(f"<h1>{inline(ln[2:])}</h1>")
+        elif ln.startswith("## "): parts.append(f"<h2>{inline(ln[3:])}</h2>")
+        elif ln.strip() == "---": parts.append("<hr>")
+        elif ln.strip(): parts.append(f"<p>{inline(ln)}</p>")
+    open(os.path.join(HERE, "sources", out_name), "w").write("""<!doctype html><meta charset="utf-8">
+    <style>
+    body{margin:0;background:#fff;color:#1b2733;font:17px/1.6 -apple-system,"SF Pro Text",sans-serif;width:1600px;padding:48px 64px;box-sizing:border-box}
+    h1{font-size:34px;margin:0 0 14px} h2{font-size:23px;margin:30px 0 10px;border-bottom:1px solid #e3e8ee;padding-bottom:6px}
+    p{margin:6px 0} code{font:15px "SF Mono",Menlo,monospace;background:#eef2f6;padding:1px 6px;border-radius:4px}
+    table{border-collapse:collapse;width:100%;font-size:15.5px;margin:8px 0} th,td{border:1px solid #dde4ea;padding:7px 10px;text-align:left;vertical-align:top}
+    th{background:#f3f6f9} ul{margin:6px 0;padding-left:24px} hr{border:0;border-top:1px solid #e3e8ee;margin:24px 0} i{color:#6b7c8c}
+    </style>""" + "\n".join(parts))
+
+
+
+laporan("laporan-tameng-20261106.md", "laporan.html")                 # uji lab 6 Nov (mode IDS)
+laporan("laporan-tameng-20261107-ips.md", "laporan-ips.html")         # babak 2: mode blokir
+print("sources/log.html", len(rows), "baris; sources/laporan.html; sources/laporan-ips.html")

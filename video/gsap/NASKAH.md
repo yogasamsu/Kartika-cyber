@@ -1,11 +1,11 @@
-# Naskah video Tameng (gaya AgMon), ±5 menit
+# Naskah video Tameng (gaya AgMon), ±6 menit
 
 > **Versi tanpa VO.** Video final tidak memakai suara narator. Isi VO di bawah
 > sudah dipadatkan menjadi teks layar (`COPY` di `index.html`) yang muncul di
 > bagian bawah layar. Bagian VO di dokumen ini tetap berguna sebagai naskah
 > presentasi lisan di babak final.
 
-Batas panitia 10 menit. Target 5 menit 10 detik: cukup untuk tujuh bagian
+Batas panitia 10 menit. Durasi 5 menit 50 detik: cukup untuk tujuh bagian
 termasuk demo, tanpa membuat juri bosan. VO sekitar 480 kata, dibaca tenang
 (±2,2 kata per detik, ±3,5 menit bicara); sisa waktunya jeda supaya footage
 demo dan angka di layar sempat terbaca. Semua angka di layar punya sumber: riset BSSN dan
@@ -93,7 +93,7 @@ belakangnya memperlihatkan kelemahan; ikon awan dengan gembok merah.
 > Suricata yang sudah dipakai, merangkai alert menjadi insiden, dan menulis
 > laporannya dalam bahasa Indonesia. Semuanya di satu laptop, tanpa internet.
 
-## 5. Proses kerja dan demo (2:45–4:15)
+## 5. Proses kerja dan demo (2:45–4:45)
 
 ### 5a. Lab yang kami bangun (2:45–3:05)
 **Visual [grafis]:** topologi lab: kali-ops (penyerang), pc-staf-07,
@@ -133,7 +133,19 @@ Lalu contoh uji: narasi AI yang menyebut IP palsu, disorot merah, stempel
 > menyebut IP, waktu, atau host yang tidak ada di bukti, narasinya ditolak dan
 > diganti ringkasan dari kode.
 
-## 6. Manfaat (4:15–4:45)
+### 5e. Babak 2: mode blokir (4:15–4:45)
+**Visual [asli]:** dua kartu berdampingan: *Babak 1 · tanpa blokir: GENSET MATI*
+dan *Babak 2 · mode blokir: GENSET NYALA* dengan output asli demo (Suricata
+mode IPS, perintah Modbus tidak dijawab PLC, `7100005: blocked`). Lalu laporan
+Tameng babak 2 (uji lab 7 Nov), kamera menyorot baris kronologi *DIBLOKIR*.
+**Label:** *Laporan Tameng · babak 2 · uji lab 7 Nov 2026*
+
+> **VO:** Sekarang serangan yang sama, dengan mode blokir Tameng. Perintah Modbus
+> dari host yang tidak sah dijatuhkan sebelum sampai ke PLC, dan genset tetap
+> menyala. Tameng tetap mencatat seluruh rantai dan melaporkannya sebagai
+> serangan ke OT yang digagalkan. Hanya HMI resmi yang boleh mengendalikan PLC.
+
+## 6. Manfaat (4:45–5:15)
 
 **Visual [grafis]:** empat angka besar bergantian.
 - *654 → 1* alert mentah menjadi satu insiden dengan 13 bukti
@@ -147,7 +159,7 @@ Lalu contoh uji: narasi AI yang menyebut IP palsu, disorot merah, stempel
 > Tidak ada data yang keluar, dan biayanya sebatas satu laptop dengan
 > perangkat lunak open-source.
 
-## 7. Mengapa Tameng (4:45–5:10)
+## 7. Mengapa Tameng (5:15–5:40)
 
 **Visual [grafis]:** tabel perbandingan singkat; kolom Tameng menyala.
 
@@ -162,7 +174,7 @@ Lalu contoh uji: narasi AI yang menyebut IP palsu, disorot merah, stempel
 > data tetap di satuan, membaca IT dan OT sekaligus, dengan biaya yang
 > terjangkau satuan. Langkah berikutnya: pilot di satu markas.
 
-## Penutup (5:10–5:20)
+## Penutup (5:40–5:50)
 
 **Visual [grafis]:** logo, *Tameng*, *Kartika Cyber Hackathon 2026 ·
 Defensive Shield*, nama tim.

@@ -1,0 +1,36 @@
+<!doctype html><meta charset="utf-8">
+    <style>
+    body{margin:0;background:#fff;color:#1b2733;font:17px/1.6 -apple-system,"SF Pro Text",sans-serif;width:1600px;padding:48px 64px;box-sizing:border-box}
+    h1{font-size:34px;margin:0 0 14px} h2{font-size:23px;margin:30px 0 10px;border-bottom:1px solid #e3e8ee;padding-bottom:6px}
+    p{margin:6px 0} code{font:15px "SF Mono",Menlo,monospace;background:#eef2f6;padding:1px 6px;border-radius:4px}
+    table{border-collapse:collapse;width:100%;font-size:15.5px;margin:8px 0} th,td{border:1px solid #dde4ea;padding:7px 10px;text-align:left;vertical-align:top}
+    th{background:#f3f6f9} ul{margin:6px 0;padding-left:24px} hr{border:0;border-top:1px solid #e3e8ee;margin:24px 0} i{color:#6b7c8c}
+    </style><h1>Serangan tinggi IT ke OT digagalkan: perintah ke PLC diblokir</h1>
+<p><b>Insiden</b> <code>INC-20261107-051245</code> · <b>Tingkat bahaya</b> 🟠 TINGGI · <b>Dampak OT</b> Dicoba, DIBLOKIR</p>
+<p><b>Waktu</b> 2026-11-07 05:12:45 – 05:12:54 UTC · <b>IP masuk</b> 10.10.5.90 · <b>Host</b> pc-staf-07, srv-file-01, plc-genset-01</p>
+<p><b>Akun disalahgunakan</b> sertu</p>
+<h2>Ringkasan</h2>
+<p>Penyerang dari 10.10.5.90 menyasar pc-staf-07, srv-file-01, plc-genset-01 lalu mencoba mengirim perintah tulis tak sah ke PLC, tetapi perintah itu diblokir sehingga genset tetap menyala. Teknik yang terlihat: Brute Force, Valid Accounts, Remote Services: SSH, Command and Scripting Interpreter: Unix Shell.</p>
+<h2>Kronologi</h2>
+<table><tr><th>Waktu</th><th>Kejadian</th><th>Bukti</th><th>ATT&amp;CK</th></tr><tr><td>05:12:45</td><td>4 percobaan login SSH gagal ke pc-staf-07 dari 10.10.5.90 (kali-ops) — pola brute force</td><td>W1, W2, W4, W5</td><td>T1110</td></tr><tr><td>05:12:52</td><td>Login SSH BERHASIL ke pc-staf-07 sebagai &#x27;sertu&#x27; dari 10.10.5.90 (akses awal dari luar jaringan)</td><td>W7</td><td>T1078, T1021.004</td></tr><tr><td>05:12:52</td><td>Login SSH BERHASIL ke pc-staf-07 sebagai &#x27;sertu&#x27; dari 10.10.5.90 (akses awal dari luar jaringan)</td><td>W12</td><td>T1078, T1021.004</td></tr><tr><td>05:12:52</td><td>Login SSH BERHASIL ke srv-file-01 sebagai &#x27;sertu&#x27; dari 10.10.5.66 (gerak lateral dari pc-staf-07)</td><td>W16</td><td>T1078, T1021.004</td></tr><tr><td>05:12:52</td><td>Eksekusi berkas dari /tmp di pc-staf-07 (pengguna &#x27;?&#x27;) — payload penyerang</td><td>W15</td><td>T1059.004</td></tr><tr><td>05:12:52</td><td>Pembacaan /etc/shadow di pc-staf-07 — pencurian hash kredensial</td><td>W9, W10, W13, W14</td><td>T1003.008</td></tr><tr><td>05:12:54</td><td>Perintah tulis Modbus dari 10.10.5.7 (srv-file-01) ke PLC plc-genset-01 DIBLOKIR — genset tetap menyala (serangan OT digagalkan)</td><td>S2</td><td>T0855</td></tr></table>
+<h2>Teknik MITRE ATT&amp;CK</h2>
+<p><b>Enterprise:</b> T1110 (Brute Force), T1078 (Valid Accounts), T1021.004 (Remote Services: SSH), T1059.004 (Command and Scripting Interpreter: Unix Shell), T1003.008 (OS Credential Dumping: /etc/passwd and /etc/shadow)</p>
+<p><b>ICS:</b> T0855 (Unauthorized Command Message)</p>
+<h2>Rekomendasi</h2>
+<ul>
+<li>Isolasi host terdampak (pc-staf-07, srv-file-01) dari jaringan.</li>
+<li>Reset kata sandi akun sertu dan cabut sesi SSH yang aktif.</li>
+<li>Pertahankan mode blokir Suricata; tinjau daftar HMI yang diizinkan menulis ke PLC.</li>
+<li>Selidiki bagaimana penyerang mencapai jaringan kendali OT dan tutup jalurnya (segmentasi).</li>
+<li>Blokir 10.10.5.90 di perimeter.</li>
+<li>Anggap seluruh hash kata sandi di host terdampak bocor; ganti kata sandi akun lokal.</li>
+</ul>
+<h2>Bukti</h2>
+<table><tr><th>ID</th><th>Sumber</th><th>Sinyal</th><th>Host/Alur</th><th>Waktu</th></tr><tr><td>W1</td><td>wazuh (5710)</td><td>Login SSH gagal (indikasi brute force)</td><td>10.10.5.90 → pc-staf-07</td><td>05:12:45</td></tr><tr><td>W2</td><td>wazuh (5710)</td><td>Login SSH gagal (indikasi brute force)</td><td>10.10.5.90 → pc-staf-07</td><td>05:12:47</td></tr><tr><td>W4</td><td>wazuh (5710)</td><td>Login SSH gagal (indikasi brute force)</td><td>10.10.5.90 → pc-staf-07</td><td>05:12:50</td></tr><tr><td>W5</td><td>wazuh (5712)</td><td>Brute force SSH (banyak kegagalan beruntun)</td><td>10.10.5.90 → pc-staf-07</td><td>05:12:51</td></tr><tr><td>W7</td><td>wazuh (40112)</td><td>Login SSH BERHASIL setelah rentetan kegagalan</td><td>10.10.5.90 → pc-staf-07</td><td>05:12:52</td></tr><tr><td>W12</td><td>wazuh (40112)</td><td>Login SSH BERHASIL setelah rentetan kegagalan</td><td>10.10.5.90 → pc-staf-07</td><td>05:12:52</td></tr><tr><td>W16</td><td>wazuh (5715)</td><td>Login SSH BERHASIL</td><td>10.10.5.66 → srv-file-01</td><td>05:12:52</td></tr><tr><td>W15</td><td>wazuh (100010)</td><td>Eksekusi berkas dari /tmp</td><td>pc-staf-07</td><td>05:12:52</td></tr><tr><td>W9</td><td>wazuh (100011)</td><td>Pembacaan /etc/shadow</td><td>pc-staf-07</td><td>05:12:52</td></tr><tr><td>W10</td><td>wazuh (100011)</td><td>Pembacaan /etc/shadow</td><td>pc-staf-07</td><td>05:12:52</td></tr><tr><td>W13</td><td>wazuh (100011)</td><td>Pembacaan /etc/shadow</td><td>pc-staf-07</td><td>05:12:52</td></tr><tr><td>W14</td><td>wazuh (100011)</td><td>Pembacaan /etc/shadow</td><td>pc-staf-07</td><td>05:12:52</td></tr><tr><td>S2</td><td>suricata (7100005)</td><td>Perintah tulis Modbus (fc5) ke PLC DIBLOKIR</td><td>10.10.5.7 → 10.10.5.20</td><td>05:12:54</td></tr></table>
+<h2>Catatan analisis</h2>
+<ul>
+<li>Serangan ke OT digagalkan: 1 perintah tulis Modbus dari host tak sah dijatuhkan Suricata (mode IPS) sebelum sampai ke PLC.</li>
+<li>3 pembacaan /etc/shadow diabaikan sebagai derau (login PAM atau pemindaian agen Wazuh), karena tidak terjadi sesaat setelah eksekusi /tmp.</li>
+</ul>
+<hr>
+<p><i>Dihasilkan lokal (air-gapped) oleh Tameng · narasi: ringkasan cadangan (LLM tidak dipakai).</i></p>
