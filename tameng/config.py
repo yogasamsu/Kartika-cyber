@@ -34,8 +34,14 @@ ASSETS = {
     "10.10.5.7":  ("srv-file-01", "Server file satuan", "tinggi", True),
     "10.10.5.20": ("plc-genset-01", "PLC pengendali genset (OT, kritis)", "kritis", True),
     "10.10.5.30": ("hmi-genset", "HMI operator genset (pengendali sah)", "tinggi", True),
+    "10.10.5.40": ("web-portal", "Portal web satuan (situs publik)", "tinggi", True),
     "10.10.5.90": ("kali-ops", "Host tak terdaftar (indikasi penyerang)", "-", False),
 }
+
+
+# Direktori situs web yang dipantau FIM. Perubahan berkas di luar sini (mis. /etc)
+# bukan sinyal deface dan diabaikan oleh Tameng.
+WEB_ROOTS = tuple(os.environ.get("TAMENG_WEB_ROOTS", "/var/www/html").split(","))
 
 
 # Pengirim perintah Modbus yang sah (HMI/SCADA). Perintah tulis dari sini bukan serangan.

@@ -203,6 +203,80 @@ class SourceTime(unittest.TestCase):
         self.assertFalse(any("disesuaikan" in n for n in inc.notes))
 
 
+def web(t, rid, url, src=ATK, method="GET"):
+    return {"timestamp": f"2026-10-28T{t}.000+0000", "rule": {"id": rid, "level": 12},
+            "agent": {"name": "web-portal"},
+            "data": {"srcip": src, "url": url, "method": method, "time": f"2026-10-28T{t}"}, "id": t}
+
+
+def fim(t, rid, path, diff=""):
+    return {"timestamp": f"2026-10-28T{t}.000+0000", "rule": {"id": rid, "level": 7},
+            "agent": {"name": "web-portal"}, "syscheck": {"path": path, "diff": diff}, "id": t}
+
+
+SHELL = "/var/www/html/wp-content/uploads/wp-cache.php"
+DEFACE_WAZUH = [
+    web("11:00:01", "100020", "/wp-admin/admin-ajax.php?action=fm_upload", method="POST"),
+    fim("11:00:02", "554", SHELL),
+    web("11:00:05", "100021", "/wp-content/uploads/wp-cache.php?cmd=id"),
+    web("11:00:07", "100021", "/wp-content/uploads/wp-cache.php?cmd=cp /tmp/h.html /var/www/html/index.html"),
+    fim("11:00:08", "550", "/var/www/html/index.html", diff="> HACKED"),
+]
+
+
+class Deface(unittest.TestCase):
+    """Skenario deface situs (mirip kasus mil.id): celah plugin -> webshell -> halaman diubah."""
+
+    def setUp(self):
+        with Evidence(DEFACE_WAZUH, []) as evs:
+            self.incs = correlate.build_incidents(evs)
+
+    def test_satu_insiden_rantai_lengkap(self):
+        inc, = self.incs
+        self.assertTrue(inc.defaced)
+        self.assertEqual(inc.severity, "tinggi")
+        self.assertEqual(inc.entry_ip, ATK)
+        self.assertEqual(inc.hosts, ["web-portal"])
+        self.assertEqual([e.kind for e in inc.events],
+                         ["web_exploit", "web_file_added", "webshell_cmd", "webshell_cmd", "web_file_changed"])
+        self.assertEqual([t[0] for t in inc.techniques],
+                         ["T1190", "T1505.003", "T1059.004", "T1491.002"])
+
+    def test_langkah_kronologi(self):
+        steps = self.incs[0].steps
+        self.assertEqual(len(steps), 4)        # dua perintah webshell digabung
+        self.assertIn("webshell ditanam", steps[1].text)
+        self.assertIn("`id`", steps[2].text)
+        self.assertIn("DEFACE", steps[3].text)
+
+    def test_cadangan_deface(self):
+        fb = llm._fallback(self.incs[0])
+        self.assertIn("Deface", fb["judul"])
+        rek = " ".join(fb["rekomendasi"])
+        self.assertIn("backup bersih", rek)
+        self.assertIn(SHELL, rek)
+        self.assertNotIn("genset", (fb["judul"] + fb["ringkasan"] + rek).lower())
+
+    def test_fakta_llm_menyebut_dampak_publik(self):
+        self.assertIn("deface", llm._facts(self.incs[0]))
+
+    def test_fim_di_luar_web_root_diabaikan(self):
+        with Evidence([fim("11:00:00", "550", "/etc/hosts")], []) as evs:
+            self.assertEqual(evs, [])
+
+    def test_perubahan_tanpa_eksploitasi_tetap_dilaporkan(self):
+        with Evidence([fim("11:00:00", "550", "/var/www/html/index.html")], []) as evs:
+            inc, = correlate.build_incidents(evs)
+        self.assertTrue(inc.defaced)
+        self.assertEqual(inc.severity, "sedang")
+        self.assertTrue(any("pembaruan resmi" in n for n in inc.notes))
+
+    def test_deface_tidak_bergabung_dengan_serangan_ssh(self):
+        with Evidence(DEMO_WAZUH + DEFACE_WAZUH, DEMO_EVE) as evs:
+            incs = correlate.build_incidents(evs)
+        self.assertEqual(len(incs), 2)
+
+
 class Narration(unittest.TestCase):
     def setUp(self):
         with Evidence(DEMO_WAZUH, DEMO_EVE) as evs:

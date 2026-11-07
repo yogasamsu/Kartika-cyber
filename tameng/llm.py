@@ -41,6 +41,8 @@ def _facts(inc):
         lines.append("Dampak OT: tidak; perintah ke PLC dicoba tetapi DIBLOKIR, genset tetap menyala")
     else:
         lines.append("Dampak OT: tidak")
+    if inc.defaced:
+        lines.append("Dampak publik: ya, halaman situs web diubah penyerang (deface)")
     lines.append(f"IP masuk penyerang: {inc.entry_ip}")
     lines.append(f"Host terdampak: {', '.join(inc.hosts)}")
     if inc.identities:
@@ -103,6 +105,14 @@ def _fallback(inc):
     elif inc.ot_blocked:
         judul = f"Serangan {inc.severity} IT ke OT digagalkan: perintah ke PLC diblokir"
         dampak = "mencoba mengirim perintah tulis tak sah ke PLC, tetapi perintah itu diblokir sehingga genset tetap menyala"
+    elif inc.defaced:
+        judul = f"Deface situs {hosts}: halaman publik diubah penyerang"
+        dampak = "mengubah halaman situs publik (deface)"
+        if any(e.kind == "webshell_cmd" for e in inc.events):
+            dampak = "menanam webshell dan mengubah halaman situs publik (deface)"
+    elif any(e.kind in ("web_exploit", "webshell_cmd") for e in inc.events):
+        judul = f"Insiden {inc.severity}: eksploitasi aplikasi web di {hosts}"
+        dampak = "mengeksploitasi aplikasi web"
     else:
         judul = f"Insiden {inc.severity}: akses tidak sah ke {hosts}"
         dampak = "melakukan aktivitas tidak sah"
@@ -119,6 +129,16 @@ def _fallback(inc):
     elif inc.ot_blocked:
         rek.append("Pertahankan mode blokir Suricata; tinjau daftar HMI yang diizinkan menulis ke PLC.")
         rek.append("Selidiki bagaimana penyerang mencapai jaringan kendali OT dan tutup jalurnya (segmentasi).")
+    kinds = {e.kind for e in inc.events}
+    if inc.defaced:
+        rek.append("Ganti situs ke halaman pemeliharaan, lalu pulihkan berkas dari backup bersih yang sudah diverifikasi.")
+    shells = [e.raw.get("path") for e in inc.events
+              if e.kind == "web_file_added" and (e.raw or {}).get("path", "").endswith((".php", ".phtml", ".jsp", ".aspx"))]
+    if shells or "webshell_cmd" in kinds:
+        target = ", ".join(shells) if shells else "webshell"
+        rek.append(f"Salin {target} ke media bukti (hash dulu), baru hapus dari server.")
+    if "web_exploit" in kinds:
+        rek.append("Nonaktifkan atau perbarui plugin yang dieksploitasi; periksa berkas lain di direktori situs yang berubah.")
     if inc.entry_ip and not config.asset(inc.entry_ip)[3]:
         rek.append(f"Blokir {inc.entry_ip} di perimeter.")
     if any(t[0] == "T1003.008" for t in inc.techniques):

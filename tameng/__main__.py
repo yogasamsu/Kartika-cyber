@@ -21,6 +21,7 @@ def incident_to_dict(inc, summary):
         "severity": inc.severity,
         "has_ot_impact": inc.has_ot_impact,
         "ot_blocked": inc.ot_blocked,
+        "defaced": inc.defaced,
         "start": inc.start.isoformat(),
         "end": inc.end.isoformat(),
         "entry_ip": inc.entry_ip,

@@ -34,6 +34,7 @@ class Incident:
     severity: str
     steps: list             # list[Step]
     notes: list = field(default_factory=list)
+    defaced: bool = False   # halaman situs publik diubah penyerang
 
     def evidence_ids(self):
         return [e.eid for e in self.events]
@@ -41,7 +42,11 @@ class Incident:
 
 # Pembacaan /etc/shadow oleh proses login (PAM) adalah derau, bukan pencurian.
 # Urutan rantai bila waktu urutnya sama: akses dulu, baru aksi di host, lalu OT.
-KIND_RANK = {"brute_force": 0, "auth_success": 1, "tmp_exec": 2, "shadow_read": 3, "modbus_write": 4, "modbus_block": 4}
+KIND_RANK = {"brute_force": 0, "auth_success": 1, "tmp_exec": 2, "shadow_read": 3, "modbus_write": 4, "modbus_block": 4,
+             "web_exploit": 1, "web_file_added": 2, "webshell_cmd": 3, "web_file_changed": 4}
+
+# Sinyal berkas dari FIM web root: ditempelkan ke rantai yang menguasai host web.
+WEB_FILE_KINDS = ("web_file_added", "web_file_changed")
 
 PAM_CMD_RE = re.compile(r"^(\S*/)?(sshd|unix_chkpwd|login)\b")
 
@@ -148,6 +153,15 @@ def _assemble(events, window):
                 d.actors.add(actor)
                 drafts.append(d)
             own(d, e)
+        elif e.kind in ("web_exploit", "webshell_cmd"):
+            # Permintaan HTTP penyerang: pelaku = IP sumber; host web dianggap dikuasai.
+            actor = _actor(e.src_ip)
+            d = _find_by_actor(drafts, actor, e.ts, window)
+            if d is None:
+                d = _Draft()
+                d.actors.add(actor)
+                drafts.append(d)
+            own(d, e)
 
     # Ulangi login internal yang tertunda sampai tidak ada yang bertambah. Bukti
     # berpresisi detik: login lateral bisa tercatat sebelum login penyerang ke host
@@ -189,7 +203,27 @@ def _assemble(events, window):
                     d.notes.append("Sumber perintah Modbus tidak terhubung ke rantai serangan IT yang terdeteksi.")
             d.add(e, d.owned.get(host))
 
+    for e in events:
+        if e.kind not in WEB_FILE_KINDS:
+            continue
+        d = _find_owner(drafts, e.host, e.ts, window)
+        if d is None:
+            d = _Draft()
+            drafts.append(d)
+            d.notes.append(
+                "Perubahan berkas situs tanpa jejak eksploitasi yang terdeteksi. Pastikan ke "
+                "pengelola situs apakah ini pembaruan resmi; bila bukan, periksa jalur masuk lain "
+                "(FTP, panel hosting, akun admin CMS).")
+        d.add(e, d.owned.get(e.host))
+
     return drafts, benign
+
+
+def _cmd_param(url):
+    """Ambil nilai parameter cmd dari URL webshell (sudah di-decode)."""
+    from urllib.parse import parse_qs, urlsplit
+    q = parse_qs(urlsplit(url or "").query)
+    return (q.get("cmd") or [""])[0].strip()
 
 
 def _hhmmss(ts):
@@ -256,6 +290,50 @@ def _build_steps(events):
             ))
             i = j
             continue
+        elif e.kind == "web_exploit":
+            url = (e.raw or {}).get("url", "")
+            steps.append(Step(
+                time=_hhmmss(e.ts),
+                text=f"Eksploitasi celah unggah berkas di {e.host} dari {e.src_ip} ({url})",
+                evidence=[e.eid],
+                tech=["T1190"],
+            ))
+        elif e.kind == "web_file_added":
+            path = (e.raw or {}).get("path", "")
+            shell = path.endswith((".php", ".phtml", ".jsp", ".aspx"))
+            steps.append(Step(
+                time=_hhmmss(e.ts),
+                text=f"Berkas baru {path} muncul di {e.host}"
+                     + (" — webshell ditanam" if shell else ""),
+                evidence=[e.eid],
+                tech=["T1505.003"],
+            ))
+        elif e.kind == "webshell_cmd":
+            # gabungkan perintah webshell beruntun dari sumber sama
+            j = i
+            grp = []
+            while j < n and events[j].kind == "webshell_cmd" and events[j].src_ip == e.src_ip:
+                grp.append(events[j])
+                j += 1
+            cmds = [c for c in (_cmd_param((x.raw or {}).get("url")) for x in grp) if c]
+            shown = "; ".join(f"`{c[:60]}`" for c in cmds[:3])
+            steps.append(Step(
+                time=_hhmmss(e.ts),
+                text=f"{len(grp)} perintah sistem dijalankan lewat webshell di {e.host} dari {e.src_ip}"
+                     + (f": {shown}" if shown else ""),
+                evidence=[x.eid for x in grp],
+                tech=["T1505.003", "T1059.004"],
+            ))
+            i = j
+            continue
+        elif e.kind == "web_file_changed":
+            path = (e.raw or {}).get("path", "")
+            steps.append(Step(
+                time=_hhmmss(e.ts),
+                text=f"Isi {path} di {e.host} diubah — DEFACE halaman situs publik",
+                evidence=[e.eid],
+                tech=["T1491.002"],
+            ))
         elif e.kind == "modbus_write":
             tgt = config.asset(e.dst_ip)[0]
             src_name = config.asset(e.src_ip)[0]
@@ -284,9 +362,13 @@ def _severity(events, has_ot):
     kinds = {e.kind for e in events}
     if "modbus_block" in kinds:
         return "tinggi"       # penyerang sudah sampai ke jaringan kendali, walau diblokir
+    if "web_file_changed" in kinds and kinds & {"web_exploit", "webshell_cmd"}:
+        return "tinggi"       # situs publik diubah lewat eksploitasi
+    if "webshell_cmd" in kinds:
+        return "tinggi"       # penyerang sudah bisa menjalankan perintah di server
     if "shadow_read" in kinds or ("auth_success" in kinds and "brute_force" in kinds):
         return "tinggi"
-    if "auth_success" in kinds or "tmp_exec" in kinds:
+    if kinds & {"auth_success", "tmp_exec", "web_exploit", "web_file_changed"}:
         return "sedang"
     return "rendah"
 
@@ -349,6 +431,7 @@ def build_incidents(events, window=None):
             severity=_severity(cluster, has_ot),
             steps=_build_steps(cluster),
             notes=list(d.notes),
+            defaced=any(e.kind == "web_file_changed" for e in cluster),
         )
         if blocked:
             inc.notes.append(

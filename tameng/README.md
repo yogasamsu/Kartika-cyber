@@ -67,6 +67,37 @@ Lokasi bukti & model bisa diatur lewat env (lihat `config.py`):
   nama host. Satu saja yang di luar bukti membuat narasi ditolak dan diganti
   ringkasan cadangan.
 
+## Skenario deface situs (IT, tanpa OT)
+
+Menjawab kasus yang disebut narasumber Satsiber: deface situs mil.id lewat celah
+plugin web. Tameng merangkai empat sinyal Wazuh menjadi satu insiden:
+
+| Sinyal | Rule Wazuh | Kind | ATT&CK |
+|---|---|---|---|
+| Unggahan berkas lewat celah plugin (log akses) | 100020 | `web_exploit` | T1190 |
+| Berkas baru di web root (FIM) | 554 | `web_file_added` | T1505.003 |
+| Perintah lewat webshell (log akses `?cmd=`) | 100021 | `webshell_cmd` | T1505.003, T1059.004 |
+| Isi halaman berubah (FIM) | 550 | `web_file_changed` | T1491.002 |
+
+- Rantai dibentuk per IP penyerang. Perubahan berkas (FIM) ditempelkan ke
+  rantai yang sudah menguasai host web itu.
+- FIM di luar `TAMENG_WEB_ROOTS` (default `/var/www/html`) diabaikan, supaya
+  perubahan `/etc` dan sejenisnya tidak dibaca sebagai deface.
+- Perubahan halaman tanpa jejak eksploitasi tetap dilaporkan (severity
+  `sedang`) dengan catatan untuk memastikan ke pengelola situs apakah itu
+  pembaruan resmi.
+- Rekomendasi cadangan: halaman pemeliharaan, pulihkan dari backup bersih,
+  amankan salinan webshell sebagai bukti sebelum dihapus, perbarui plugin.
+
+Demo memakai replay bukti sintetis (tidak ada serangan yang dijalankan):
+
+```bash
+python3 lab/scripts/replay-deface.py --out lab/out
+```
+
+Rule 100020/100021 disiapkan untuk log akses server web satuan; di lab hanya
+dipakai lewat replay.
+
 ## Tes
 
 ```bash

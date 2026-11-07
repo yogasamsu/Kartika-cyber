@@ -97,6 +97,10 @@ def load_wazuh(since=None):
         meta = mitre.lookup("wazuh", sid)
         if not meta:
             continue
+        if meta["kind"] in ("web_file_added", "web_file_changed"):
+            path = (a.get("syscheck") or {}).get("path", "")
+            if not path.startswith(config.WEB_ROOTS):
+                continue
         ts, received = _source_ts(a)
         if not ts or (since and ts < since):
             continue
@@ -112,7 +116,9 @@ def load_wazuh(since=None):
             user=d.get("dstuser") or d.get("srcuser") or d.get("user"),
             native_id=a.get("id"),
             raw={"full_log": a.get("full_log", ""), "rule_desc": a.get("rule", {}).get("description", ""),
-                 "cmd": d.get("cmd", ""),
+                 "cmd": d.get("cmd", ""), "url": d.get("url", ""), "method": d.get("method", ""),
+                 "path": (a.get("syscheck") or {}).get("path", ""),
+                 "diff": (a.get("syscheck") or {}).get("diff", ""),
                  "received": received.isoformat() if received else ""},
         ))
     return out
