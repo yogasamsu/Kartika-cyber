@@ -1,33 +1,33 @@
-# Video Tameng gaya AgMon (GSAP, ±5:50, tanpa VO)
+# Video Tameng v4 (GSAP, ±2:34, VO ElevenLabs)
 
-Satu halaman `index.html` berisi satu timeline GSAP yang dijeda. Footage asli
-(dashboard, log Wazuh, laporan) digerakkan kamera; cerita dibawa teks layar.
-Render dilakukan bingkai demi bingkai (30 fps) sehingga gerak selalu mulus.
+Satu halaman `index.html` berisi satu timeline GSAP yang dijeda, dengan gaya HUD
+yang sama seperti banner tameng.yogency.work. Waktu tiap adegan mengikuti VO:
+setiap kalimat VO memicu satu gerak.
 
 ```bash
 cd video && npm install          # sekali: gsap, playwright-core
 cd gsap
-open index.html                  # pratinjau: Spasi putar/jeda, ← → 5 dtk, ?t=212 lompat
-node render.mjs still 50 214     # gambar diam di detik tertentu -> out/still-*.jpg
-node render.mjs --from 210 --to 235   # render sebagian
-node render.mjs                  # render penuh -> out/tameng-video-tanpa-suara.mp4
+open index.html                  # pratinjau: Spasi putar/jeda, ← → 5 dtk, ?t=60 lompat
+node render.mjs still 50 100     # gambar diam -> out/still-*.jpg
+node render.mjs                  # render penuh -> out/tameng-video.mp4 (dengan VO)
 ```
 
-Musik latar (opsional): taruh di `audio/audio.mp3` (atau `.m4a`/`.wav`), lalu
-render ulang. Hasilnya `out/tameng-video.mp4`, dengan fade-out 3 detik di akhir.
+## Alur VO
+
+1. Teks VO ada di `VO-elevenlabs.txt` (ejaan fonetik untuk mesin) dan
+   `NASKAH.md` (naskah dengan arahan layar).
+2. Hasil ElevenLabs disimpan sebagai `audio/vo-1.mp3` sampai `audio/vo-7.mp3`.
+3. Waktu tiap kalimat diukur dari jeda di audio (`vo-timing.json`), lalu
+   disusun menjadi jadwal `vo-plan.js` dan trek gabungan `audio/audio.m4a`
+   (jeda awal 1,2 dtk, antarbabak 0,9 dtk).
+4. Subtitle di `index.html` (`CAP`) memakai ejaan asli, bukan ejaan fonetik.
+
+## Berkas
 
 | Berkas | Isi |
 |---|---|
-| `NASKAH.md` | Storyboard tujuh bagian (dimulai dari masalah analis) dan naskah lisan (dipakai juga untuk presentasi final) |
-| `index.html` | Adegan, teks layar (`COPY`), gerak kamera, nama tim (`TIM`) |
-| `render.mjs` | Render per bingkai dengan Chrome headless + ffmpeg |
-| `capture.mjs` | Ambil ulang footage dashboard (`artifacts/tameng-replay.html?step=N`) dan halaman sumber |
-| `build_sources.py` | Susun `sources/log.html` (log Wazuh asli dari SSD) dan `sources/laporan.html` |
-| `assets/` | Footage hasil tangkapan (PNG 3200 px) |
-
-Ambil ulang footage setelah uji lab baru:
-
-```bash
-python3 build_sources.py /Volumes/Prika-Tameng/lab-data/wazuh/alerts/alerts.json
-node capture.mjs sources/log.html sources/laporan.html
-```
+| `index.html` | Adegan, gerak HUD, subtitle, nama tim (`TIM`) |
+| `vo-plan.js`, `vo-timing.json` | Jadwal babak dan kalimat dari VO |
+| `capture-situs.mjs` | Ambil footage pusat komando (`dashboard/komando.html`) |
+| `render.mjs` | Render per bingkai (Chrome headless + ffmpeg), audio digabung otomatis |
+| `assets/` | Footage: log Wazuh asli, Dashboard, Temuan, Rekomendasi |

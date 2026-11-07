@@ -381,9 +381,9 @@ function drawMap(x){
   atk.forEach(([a,b]) => line(a,b,"edge atk"));
   blk.forEach(([a,b]) => {
     line(a,b,"edge blk");
-    const [x1,y1]=POS[a],[x2,y2]=POS[b], mx=(x1+x2)/2+20, my=(y1+y2)/2-6;
+    const [x1,y1]=POS[a],[x2,y2]=POS[b], mx=(x1+x2)/2+10, my=(y1+y2)/2;
     el("path",{d:`M${mx-8} ${my-8} L${mx+8} ${my+8} M${mx+8} ${my-8} L${mx-8} ${my+8}`,class:"xb"},svg);
-    el("text",{x:mx+14,y:my+5,class:"xbl"},svg,"DIBLOKIR");
+    el("text",{x:mx,y:my-16,class:"xbl","text-anchor":"middle"},svg,"DIBLOKIR");
     if (b === "plc-genset-01") hit.delete(b);
   });
   Object.entries(POS).forEach(([name,[cx,cy]]) => {

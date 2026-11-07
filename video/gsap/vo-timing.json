@@ -1,0 +1,117 @@
+{
+ "1": {
+  "dur": 27.48,
+  "start": [
+   0.0,
+   5.12,
+   7.39,
+   15.03,
+   19.34,
+   22.32
+  ],
+  "text": [
+   "Setiap malam, satuan siber Te En I menjaga jaringan militer.",
+   "Semuanya menghasilkan temuan.",
+   "Di uji lab kami, satu serangan saja memunculkan enam ratus lima puluh empat temuan dalam empat menit.",
+   "Dan bisa saja yang berjaga adalah analis baru.",
+   "Banyak sistem lama yang sulit diperbarui.",
+   "Dan data militer tidak boleh dibawa ke layanan A I di internet."
+  ]
+ },
+ "2": {
+  "dur": 29.96,
+  "start": [
+   0.0,
+   1.93,
+   9.78,
+   13.58,
+   19.22,
+   25.2
+  ],
+  "text": [
+   "Ancaman ini nyata.",
+   "Sepanjang dua ribu dua puluh lima, Be Es Es En mencatat lima koma dua miliar anomali trafik ke Indonesia.",
+   "Kemampuan pantaunya belum sampai sepuluh persen.",
+   "Juni dua ribu dua puluh empat, ransomware melumpuhkan Pusat Data Nasional.",
+   "Di bulan yang sama, data yang diklaim milik BAIS Te En I dijual di forum gelap.",
+   "Situs mil titik id juga pernah diretas dan diubah tampilannya."
+  ]
+ },
+ "3": {
+  "dur": 20.35,
+  "start": [
+   0.0,
+   3.28,
+   8.91,
+   14.68
+  ],
+  "text": [
+   "Alat keamanannya sebenarnya sudah ada.",
+   "Wazuh dan Surikata bisa mendeteksi, tapi temuannya membanjir.",
+   "Kopilot A I bisa merangkum, tapi datanya harus dikirim ke server asing.",
+   "Platform keamanan O Te ada, tapi mahal dan terpisah dari I Te."
+  ]
+ },
+ "4": {
+  "dur": 14.21,
+  "start": [
+   0.0,
+   2.94,
+   8.43,
+   10.92
+  ],
+  "text": [
+   "Karena itu kami membuat Tameng.",
+   "Tangkal Ancaman Mandiri lewat Edukasi, Notifikasi, dan Gerak cepat.",
+   "Tameng tidak menggantikan analis.",
+   "Tameng menjadi pendamping analis yang berjaga."
+  ]
+ },
+ "5": {
+  "dur": 27.87,
+  "start": [
+   0.0,
+   4.4,
+   8.16,
+   12.29,
+   17.72,
+   22.84
+  ],
+  "text": [
+   "Tameng membaca semua temuan dari Wazuh dan Surikata.",
+   "Kode merangkainya menjadi satu cerita serangan.",
+   "A I lokal menulis ringkasannya dalam bahasa Indonesia.",
+   "Kalau A I menyebut fakta yang tidak ada di bukti, ringkasannya ditolak.",
+   "Hasilnya, enam ratus lima puluh empat temuan menjadi satu insiden.",
+   "Dan kalau penyerang mencoba mematikan genset, perintahnya diblokir."
+  ]
+ },
+ "6": {
+  "dur": 15.07,
+  "start": [
+   0.0,
+   4.2,
+   7.89,
+   11.45
+  ],
+  "text": [
+   "Analis langsung tahu langkah pertama yang harus dikerjakan.",
+   "Analis baru ikut belajar dari setiap insiden.",
+   "Data tidak pernah keluar dari jaringan satuan.",
+   "Dan semuanya cukup berjalan di satu laptop."
+  ]
+ },
+ "7": {
+  "dur": 9.72,
+  "start": [
+   0.0,
+   2.54,
+   6.69
+  ],
+  "text": [
+   "Tameng sudah bisa dicoba sekarang.",
+   "Buka tameng titik yogensi titik work.",
+   "Tameng. Siaga dari dalam satuan."
+  ]
+ }
+}

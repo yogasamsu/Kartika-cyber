@@ -2,733 +2,648 @@
 <html lang="id">
 <head>
 <meta charset="utf-8">
-<title>Video Tameng</title>
+<title>Video Tameng v4</title>
 <!--
-  Video Tameng ±5:20, satu timeline GSAP yang dijeda (bisa di-seek ke detik mana pun).
-  Tanpa VO: cerita dibawa teks layar (COPY di bawah). Audio musik opsional saat render.
-  Buka langsung di browser:   index.html           Spasi putar/jeda, ← → mundur/maju 5 dtk
-                              index.html?t=212     mulai dari detik 212
-  Render per bingkai:         node render.mjs      (memakai window.__seek)
+  Video Tameng v4 (±2:34), gaya HUD seperti banner tameng.yogency.work.
+  Waktu tiap adegan mengikuti VO ElevenLabs (vo-plan.js, dibuat dari audio/vo-*.mp3).
+  Buka di browser:   index.html   Spasi putar/jeda, ← → 5 dtk, ?t=60 lompat
+  Render:            node render.mjs   (audio/audio.m4a otomatis digabung)
 -->
 <style>
 :root{
-  --bg:#070b10; --panel:#101821; --panel2:#0c131b; --line:#1d2a37;
-  --fg:#e9f0f5; --muted:#8ea3b4; --faint:#5a6b7a;
-  --it:#36c3e0; --ot:#f3a638; --ok:#2ecc71; --crit:#ff4d4f;
-  --sans:-apple-system,"SF Pro Display","Segoe UI",Roboto,system-ui,sans-serif;
-  --mono:"SF Mono",ui-monospace,Menlo,monospace;
+  --bg:#07090a; --bg2:#0c0f0c; --panel:#0f130f; --line:#25301f; --line2:#3a4a2c;
+  --acc:#d4f74b; --acc-dim:rgba(212,247,75,.14); --cream:#ece8d4; --text:#cfd2bf; --muted:#8c947c; --olive:#5f6b45;
+  --red:#ff4b3e; --amber:#ff9f1c; --green:#8fbf6a;
+  --disp:"DIN Condensed","Avenir Next Condensed","Arial Narrow",sans-serif;
+  --mono:"SF Mono",Menlo,monospace;
 }
-*{box-sizing:border-box}
-html,body{margin:0;height:100%;background:#000;overflow:hidden}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#000;overflow:hidden}
 #stage{position:absolute;left:50%;top:50%;width:1920px;height:1080px;overflow:hidden;transform-origin:50% 50%;
-  background:radial-gradient(1400px 800px at 85% -10%,#0f2230 0%,transparent 60%),var(--bg);color:var(--fg);font-family:var(--sans)}
+  background:radial-gradient(ellipse at 50% 45%,#121a0e 0%,var(--bg) 65%);color:var(--cream);font-family:var(--mono)}
+.grid{position:absolute;inset:0;opacity:.3;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
+  background-size:80px 80px;mask-image:radial-gradient(ellipse at center,#000 30%,transparent 85%)}
 .sc{position:absolute;inset:0;visibility:hidden;opacity:0}
-.mono{font-family:var(--mono)}
-.pad{position:absolute;inset:0;padding:110px 140px}
-.grid-bg{position:absolute;inset:0;opacity:.35;
-  background-image:linear-gradient(#13202c 1px,transparent 1px),linear-gradient(90deg,#13202c 1px,transparent 1px);background-size:80px 80px;
-  mask-image:radial-gradient(ellipse at 50% 55%,#000 30%,transparent 75%)}
-.kicker{font:600 24px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--it)}
-h1{font-size:80px;line-height:1.05;margin:16px 0 0;font-weight:800;letter-spacing:-.02em}
-h1 em{font-style:normal;color:var(--it)}
-.sub{font-size:36px;color:var(--muted);margin-top:18px;line-height:1.35}
-.src{position:absolute;left:140px;bottom:60px;font-size:20px;color:var(--faint)}
-.pill{position:absolute;left:56px;top:48px;display:flex;gap:12px;z-index:5}
-.pill span{font:600 22px var(--sans);padding:10px 20px;border-radius:999px;background:rgba(7,11,16,.86);border:1px solid #2b4a63;color:var(--fg);
-  display:inline-flex;align-items:center;gap:10px;box-shadow:0 8px 30px rgba(0,0,0,.5)}
-.pill span i{width:10px;height:10px;border-radius:50%;background:var(--it);box-shadow:0 0 10px var(--it)}
-.pill span.red i{background:var(--crit);box-shadow:0 0 10px var(--crit)}
-.pill span.amber i{background:var(--ot);box-shadow:0 0 10px var(--ot)}
-.pill.bottom{top:auto;bottom:52px}
-svg.ic{fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-
-/* kamera di atas footage */
+.disp{font-family:var(--disp);font-weight:700;text-transform:uppercase;letter-spacing:.02em}
+.kick{position:absolute;left:140px;top:120px;font-size:22px;letter-spacing:.24em;color:var(--acc);text-transform:uppercase}
+.h1{position:absolute;left:140px;top:158px;font-family:var(--disp);font-weight:700;font-size:96px;line-height:.92;text-transform:uppercase;max-width:1100px}
+.h1 em{font-style:normal;color:var(--acc)}
+svg.ic{fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.tag{position:absolute;font-family:var(--disp);font-weight:700;font-size:30px;letter-spacing:.08em;text-transform:uppercase;padding:8px 18px 4px;
+  color:var(--acc);background:var(--acc-dim);border:1.5px solid rgba(212,247,75,.55);white-space:nowrap;opacity:0}
+.tag.red{color:var(--red);background:rgba(255,75,62,.12);border-color:rgba(255,75,62,.6)}
+.tag.amber{color:var(--amber);background:rgba(255,159,28,.12);border-color:rgba(255,159,28,.6)}
+.tag.green{color:var(--green);background:rgba(143,191,106,.12);border-color:rgba(143,191,106,.6)}
+.tag.solid{background:#07090a;box-shadow:0 0 0 6px #07090a}
+.brk{position:absolute;pointer-events:none;opacity:0}
+.brk::before,.brk::after,.brk i::before,.brk i::after{content:"";position:absolute;width:34px;height:34px;border:3px solid var(--acc)}
+.brk::before{left:0;top:0;border-right:0;border-bottom:0}.brk::after{right:0;top:0;border-left:0;border-bottom:0}
+.brk i::before{left:0;bottom:0;border-right:0;border-top:0}.brk i::after{right:0;bottom:0;border-left:0;border-top:0}
+.brk.red::before,.brk.red::after,.brk.red i::before,.brk.red i::after{border-color:var(--red)}
 .cam{position:absolute;left:0;top:0;width:1920px;transform-origin:0 0}
 .cam img{position:absolute;left:0;top:0;width:1920px;display:block}
-.vignette{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,.55))}
-.hl{position:absolute;border:4px solid var(--it);border-radius:10px;box-shadow:0 0 0 9999px rgba(0,0,0,.45),0 0 30px rgba(54,195,224,.6);opacity:0}
+.vig{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at center,transparent 50%,rgba(0,0,0,.65))}
+.stamp{position:absolute;font-family:var(--disp);font-weight:700;font-size:64px;letter-spacing:.1em;color:var(--red);border:5px solid var(--red);padding:8px 22px 2px;
+  transform:rotate(-10deg);opacity:0;background:rgba(7,9,10,.6)}
 
-/* 1a */
-.devices{position:absolute;left:140px;right:140px;top:560px;display:flex;justify-content:space-between}
-.devline{position:absolute;left:230px;right:230px;top:650px;height:3px;background:linear-gradient(90deg,var(--it),var(--ot));transform-origin:0 50%;transform:scaleX(0)}
-.dev{width:300px;text-align:center;opacity:0}
-.dev .c{width:180px;height:180px;margin:0 auto;border-radius:50%;display:grid;place-items:center;background:var(--panel);border:2px solid #24425a;color:var(--it);
-  box-shadow:0 0 50px rgba(54,195,224,.18)}
-.dev.ot .c{color:var(--ot);border-color:#5a4213;box-shadow:0 0 50px rgba(243,166,56,.2)}
-.dev b{display:block;font-size:34px;margin-top:22px}
-.dev small{display:block;font-size:24px;color:var(--muted);margin-top:4px}
+/* ---- lapisan HUD tetap ---- */
+#hud{position:absolute;inset:0;pointer-events:none;z-index:30}
+#hud .c{position:absolute;font-size:16px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);line-height:1.6}
+#hud .c b{color:var(--acc);font-weight:500}
+#hud .tl{left:56px;top:40px}#hud .tr{right:56px;top:40px;text-align:right}
+#hud .bl{left:56px;bottom:40px}#hud .br{right:56px;bottom:40px;text-align:right}
+#hud .frame{position:absolute;inset:22px;border:1px solid var(--line);
+  clip-path:polygon(0 0,38% 0,40% 18px,60% 18px,62% 0,100% 0,100% 100%,62% 100%,60% calc(100% - 18px),40% calc(100% - 18px),38% 100%,0 100%)}
+#hud .prog{position:absolute;left:50%;transform:translateX(-50%);bottom:30px;display:flex;gap:8px}
+#hud .prog i{width:46px;height:4px;background:var(--line2)}
+#hud .prog i.on{background:var(--acc)}
+.cap{position:absolute;left:50%;bottom:92px;transform:translateX(-50%);max-width:1500px;width:max-content;z-index:25;
+  font:500 36px/1.35 var(--mono);text-align:center;color:#fff;padding:12px 28px;background:rgba(7,9,10,.82);border:1px solid var(--line2);
+  border-left:4px solid var(--acc);opacity:0;visibility:hidden}
 
-/* 1b */
-.big{font:800 200px/1 var(--sans);font-variant-numeric:tabular-nums;letter-spacing:-.03em;color:var(--it)}
-.big small{font:700 80px var(--sans);letter-spacing:0;margin-left:16px}
-.events{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:70px}
-.event{background:var(--panel);border:1px solid var(--line);border-radius:24px;padding:36px 40px;opacity:0}
-.event .d{font:600 24px var(--mono);color:var(--crit);letter-spacing:.06em}
-.event p{font-size:36px;line-height:1.35;margin:14px 0 0}
+/* ---- 1a ---- */
+.boot{position:absolute;left:140px;top:430px;font-size:24px;line-height:1.9;color:var(--muted);width:720px}
+.boot .ok{color:var(--acc)}
+.radar{position:absolute;left:940px;top:110px;width:860px;height:860px}
+.radar svg{width:100%;height:100%;overflow:visible}
+.spin{transform-origin:430px 430px;animation:none}
+.node{position:absolute;width:150px;text-align:center;opacity:0}
+.node .o{width:110px;height:110px;margin:0 auto;border-radius:50%;display:grid;place-items:center;background:var(--bg2);border:2px solid var(--line2);color:var(--acc);position:relative}
+.node .o.ot{color:var(--amber);border-color:rgba(255,159,28,.5)}
+.node b{display:block;font-family:var(--disp);font-size:26px;letter-spacing:.06em;margin-top:10px;text-transform:uppercase}
+.ping{position:absolute;inset:-2px;border-radius:50%;border:2px solid var(--acc);opacity:0}
+.sub1{position:absolute;left:140px;top:360px;font-size:30px;color:var(--acc);letter-spacing:.06em;opacity:0}
 
-/* 1c */
-.side-panel{position:absolute;right:0;top:0;bottom:0;width:780px;padding:150px 90px;
-  background:linear-gradient(90deg,transparent,rgba(5,8,12,.94) 22%)}
-.count{font:800 220px/1 var(--mono);color:var(--fg);letter-spacing:-.04em}
-.count-l{font-size:36px;color:var(--muted);margin-top:10px}
-.count2{font:800 120px/1 var(--mono);color:var(--crit);margin-top:60px;opacity:0}
+/* ---- 1b ---- */
+.side{position:absolute;right:0;top:0;bottom:0;width:760px;padding:200px 110px;background:linear-gradient(90deg,transparent,rgba(7,9,10,.95) 25%)}
+.cnt{font-family:var(--disp);font-weight:700;font-size:260px;line-height:.85;color:var(--cream)}
+.cntl{font-family:var(--disp);font-size:44px;letter-spacing:.1em;color:var(--acc);margin-top:10px;text-transform:uppercase}
 
-/* 2 & 3 */
-.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:30px;margin-top:70px}
-.card{position:relative;background:var(--panel);border:2px solid var(--line);border-radius:26px;padding:40px 34px;min-height:520px;opacity:0}
-.card .c{width:96px;height:96px;border-radius:50%;display:grid;place-items:center;background:#0e2a36;color:var(--it)}
-.card h3{font-size:38px;margin:28px 0 10px;line-height:1.15}
-.card p{font-size:28px;color:var(--muted);line-height:1.4;margin:0}
-.card .weak{position:absolute;left:24px;right:24px;bottom:24px;border-radius:18px;padding:22px 24px;background:rgba(255,77,79,.12);
-  border:1px solid rgba(255,77,79,.5);font-size:28px;line-height:1.35;color:#ffc7c8;opacity:0}
-.card.bad{border-color:rgba(255,77,79,.6)}
+/* ---- 1c ---- */
+.person{position:absolute;left:810px;top:300px;width:300px;height:300px;border-radius:50%;display:grid;place-items:center;
+  border:2px solid var(--line2);color:var(--cream);background:var(--bg2)}
 
-/* 4 */
-.center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
-.brand{font-size:190px;font-weight:800;letter-spacing:-.03em;margin-top:10px}
-.tag{font-size:46px;color:var(--it);margin-top:6px}
-.akr{font-size:26px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-top:4px}
-.chips{display:flex;gap:22px;margin-top:60px}
-.chips span{font-size:30px;padding:14px 28px;border-radius:999px;border:1px solid #2b4a63;background:var(--panel);opacity:0}
+/* ---- 2 ---- */
+.big{position:absolute;font-family:var(--disp);font-weight:700;font-size:200px;line-height:.85;color:var(--acc);opacity:0}
+.big small{font-size:90px;margin-left:12px}
+.lab{position:absolute;font-size:24px;letter-spacing:.12em;color:var(--muted);text-transform:uppercase;opacity:0}
+.bar{position:absolute;left:1120px;top:420px;width:640px;height:56px;border:2px solid var(--line2);opacity:0}
+.bar i{position:absolute;left:0;top:0;bottom:0;width:0;background:var(--red)}
+.ev{position:absolute;top:640px;width:520px;height:250px;border:1.5px solid var(--line);background:rgba(15,19,15,.9);padding:26px 30px;opacity:0}
+.ev .d{font-size:22px;letter-spacing:.16em;color:var(--red)}
+.ev .t{font-family:var(--disp);font-weight:700;font-size:44px;line-height:1;text-transform:uppercase;margin-top:14px}
+.ev .s{font-size:18px;color:var(--olive);position:absolute;left:30px;bottom:20px}
 
-/* 5a */
-.topo{position:absolute;left:140px;right:140px;top:330px;height:520px}
-.tn{position:absolute;width:300px;text-align:center;opacity:0}
-.tn .c{width:170px;height:170px;margin:0 auto;border-radius:50%;display:grid;place-items:center;color:#fff}
-.tn b{display:block;font:700 32px var(--mono);margin-top:18px}
-.tn small{display:block;font:22px var(--mono);color:var(--muted);margin-top:6px}
-.tl{position:absolute;height:4px;top:85px;background:#2a3d4f;transform-origin:0 50%;transform:scaleX(0)}
-.sensor{position:absolute;top:360px;border-radius:20px;padding:22px 30px;font-size:30px;font-weight:700;opacity:0}
-.sensor small{display:block;font-weight:400;font-size:24px;margin-top:6px;opacity:.85}
+/* ---- 3 ---- */
+.tool{position:absolute;top:400px;width:500px;height:430px;border:1.5px solid var(--line);background:rgba(15,19,15,.92);padding:34px;opacity:0;overflow:hidden}
+.tool .ic{color:var(--acc)}
+.tool h3{font-family:var(--disp);font-size:52px;line-height:1;text-transform:uppercase;margin-top:24px}
+.tool p{font-size:24px;color:var(--muted);margin-top:10px}
+.tool .scan{position:absolute;left:0;right:0;height:120px;top:-130px;background:linear-gradient(transparent,rgba(212,247,75,.25),transparent)}
+.tool .stamp{font-size:40px;left:34px;bottom:40px}
 
-/* 5b terminal */
-.term{position:absolute;left:140px;top:170px;width:1240px;height:800px;border-radius:18px;background:#05080c;border:1px solid #1f2d3b;
-  box-shadow:0 30px 90px rgba(0,0,0,.7);overflow:hidden}
-.term .bar{height:46px;background:#111a24;display:flex;align-items:center;gap:10px;padding:0 18px}
-.term .bar i{width:14px;height:14px;border-radius:50%;background:#2a3846}
-.term .bar span{font:20px var(--mono);color:var(--faint);margin-left:14px}
-.term pre{margin:0;padding:26px 30px;font:25px/1.55 var(--mono);color:#b9c7d3;white-space:pre-wrap}
-.term .h{color:var(--it);font-weight:600} .term .bad{color:#ff8a8b} .term .ok{color:var(--ok)} .term .p{color:#7ee787}
-.plc{position:absolute;right:120px;top:300px;width:520px;border-radius:20px;background:var(--panel);border:2px solid var(--line);padding:30px;opacity:0}
-.plc .t{font:600 22px var(--mono);color:var(--muted)}
-.plc .st{font:800 52px var(--sans);margin-top:16px;color:var(--ok)}
-.plc .lg{font:19px/1.5 var(--mono);color:var(--muted);margin-top:18px}
-.plc.off{border-color:var(--crit);box-shadow:0 0 60px rgba(255,77,79,.35)} .plc.off .st{color:var(--crit)}
+/* ---- 4 ---- */
+.hero{position:absolute;left:610px;top:0;width:700px;height:700px}
+.hero svg{width:100%;height:100%;overflow:visible}
+.brand{position:absolute;left:0;right:0;top:610px;text-align:center;font-family:var(--disp);font-weight:700;font-size:170px;line-height:.85;letter-spacing:.05em;opacity:0}
+.akr{position:absolute;left:0;right:0;top:770px;text-align:center;font-size:30px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);opacity:0}
+.akr span{transition:none}
+.akr span.on{color:var(--cream)}
+.akr span.on b{color:var(--acc)}
+.akr b{font-weight:700;color:var(--muted)}
 
-/* 5d validasi */
-.val{position:absolute;left:0;right:0;top:170px;bottom:0;background:rgba(5,8,12,.94);padding:120px 140px 0;
-  display:grid;grid-template-columns:1fr 1fr;gap:50px;opacity:0}
-.vc{position:relative;background:var(--panel);border:2px solid var(--line);border-radius:24px;padding:34px 40px;height:330px}
-.vc.good{border-color:var(--ok);background:#0d1d16;opacity:0}
-.vc .h{font:22px var(--mono);color:var(--muted);margin-bottom:16px}
-.vc .x{font-size:36px;line-height:1.4}
-.lie{border-radius:8px;padding:0 6px}
-.lie.on{background:rgba(255,77,79,.25);color:#ff8a8b;outline:3px solid var(--crit)}
-.stamp{position:absolute;right:40px;bottom:34px;font:900 64px var(--sans);letter-spacing:.1em;color:var(--crit);border:6px solid var(--crit);border-radius:14px;
-  padding:4px 24px;transform:rotate(-12deg) scale(2);opacity:0}
+/* ---- 5a ---- */
+.pipe{position:absolute;left:140px;right:140px;top:300px;display:grid;grid-template-columns:repeat(5,1fr);gap:0}
+.pn{border:1.5px solid var(--line);background:rgba(15,19,15,.9);padding:18px 22px;margin-right:-1.5px;opacity:.35;position:relative}
+.pn .n{font-size:18px;letter-spacing:.2em;color:var(--olive)}
+.pn .t{font-family:var(--disp);font-size:42px;letter-spacing:.06em;text-transform:uppercase}
+.pn.on{opacity:1;border-color:var(--acc);background:rgba(212,247,75,.08)}
+.pn.on .n{color:var(--acc)}
+.ws{position:absolute;left:140px;right:140px;top:470px;height:420px}
+.wsx{position:absolute;inset:0;opacity:0}
+.src{position:absolute;top:30px;width:520px;height:330px;border:1.5px solid var(--line2);background:var(--bg2);overflow:hidden}
+.src h4{font-family:var(--disp);font-size:30px;letter-spacing:.1em;padding:12px 18px;border-bottom:1px solid var(--line);color:var(--acc)}
+.src pre{font:17px/1.55 var(--mono);color:var(--muted);padding:10px 18px;white-space:pre}
+.dot{position:absolute;width:12px;height:12px;background:var(--acc);border-radius:50%}
+.chain{position:absolute;left:0;right:0;top:150px;display:flex;justify-content:space-between;opacity:0}
+.chain div{width:250px;border:1.5px solid var(--red);padding:14px 16px;font-family:var(--disp);font-size:28px;text-transform:uppercase;letter-spacing:.04em;color:var(--cream);background:rgba(255,75,62,.08)}
+.chain div small{display:block;font-family:var(--mono);font-size:16px;color:var(--muted);letter-spacing:0;text-transform:none;margin-top:4px}
+.note{position:absolute;font-size:22px;letter-spacing:.14em;color:var(--acc);text-transform:uppercase;opacity:0}
+.say{position:absolute;left:0;width:1000px;top:30px;border:1.5px solid var(--line2);background:var(--bg2);padding:28px 34px}
+.say .h{font-size:20px;letter-spacing:.16em;color:var(--muted);text-transform:uppercase;margin-bottom:12px}
+.say .x{font-size:34px;line-height:1.45;color:var(--cream);min-height:150px}
+.lie{padding:0 6px}
+.lie.on{background:rgba(255,75,62,.25);color:#ff8f86;outline:3px solid var(--red)}
+.chk{position:absolute;left:1080px;top:40px;width:560px;font-size:26px;line-height:1.9;color:var(--muted)}
+.chk div{opacity:0}.chk b{color:var(--acc);font-weight:500}.chk .x{color:var(--red)}
 
-/* 5e babak 2 */
-.vs{display:grid;grid-template-columns:1fr 1fr;gap:44px;margin-top:64px}
-.vsc{border-radius:26px;padding:40px 44px;background:var(--panel);border:2px solid var(--line);min-height:380px;opacity:0}
-.vsc .k{font:600 24px var(--mono);letter-spacing:.08em;color:var(--muted)}
-.vsc .st{font:800 64px var(--sans);margin:18px 0 22px}
-.vsc pre{margin:0;font:27px/1.55 var(--mono);color:#b9c7d3;white-space:pre-wrap}
-.vsc.mati{border-color:var(--crit);box-shadow:0 0 60px rgba(255,77,79,.25)} .vsc.mati .st{color:var(--crit)}
-.vsc.nyala{border-color:var(--ok);box-shadow:0 0 60px rgba(46,204,113,.25)} .vsc.nyala .st{color:var(--ok)}
-.vsc .bad{color:#ff8a8b} .vsc .ok{color:var(--ok)} .vsc .h{color:var(--it)}
-#rep2{position:absolute;inset:0;opacity:0;background:#fff}
-.hl2{position:absolute;border:4px solid var(--ok);border-radius:10px;box-shadow:0 0 30px rgba(46,204,113,.7);opacity:0}
+/* ---- footage overlay ---- */
+.ovl{position:absolute;right:110px;top:230px;width:640px;border:1.5px solid var(--acc);background:rgba(7,9,10,.92);padding:30px 36px;opacity:0}
+.ovl .k{font-size:20px;letter-spacing:.2em;color:var(--acc);text-transform:uppercase}
+.ovl .v{font-family:var(--disp);font-weight:700;font-size:120px;line-height:.9;margin-top:10px}
+.ovl .v em{font-style:normal;color:var(--acc)}
+.ovl .d{font-size:24px;color:var(--muted);margin-top:8px}
 
-/* 6 */
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:30px;margin-top:80px}
-.stat{background:var(--panel);border:1px solid var(--line);border-radius:26px;padding:46px 36px;min-height:420px;opacity:0}
-.stat b{display:block;font:800 96px/1 var(--mono);letter-spacing:-.04em;white-space:nowrap}
-.stat p{font-size:32px;color:var(--muted);line-height:1.38;margin:26px 0 0}
+/* ---- 6c ---- */
+.tile{position:absolute;top:300px;width:700px;height:520px;border:1.5px solid var(--line);background:rgba(15,19,15,.92);padding:50px;opacity:0}
+.tile .v{font-family:var(--disp);font-weight:700;font-size:330px;line-height:.8;color:var(--acc)}
+.tile .d{font-family:var(--disp);font-size:56px;text-transform:uppercase;letter-spacing:.04em;margin-top:20px;line-height:1}
 
-/* 7 */
-table.cmp{border-collapse:separate;border-spacing:0;margin-top:60px;width:100%;font-size:32px}
-.cmp th,.cmp td{padding:22px 26px;text-align:center;border-bottom:1px solid var(--line)}
-.cmp th{font-size:28px;color:var(--muted);font-weight:600}
-.cmp td:first-child,.cmp th:first-child{text-align:left;color:var(--fg)}
-.cmp tr{opacity:0}
-.cmp .no{color:#ff8a8b} .cmp .mid{color:var(--ot)} .cmp .yes{color:var(--ok)}
-.cmp .tm{background:rgba(54,195,224,.0);font-weight:800}
-.cmp .tm.on{background:rgba(54,195,224,.14)}
-#s7 .cmp th,#s7 .cmp td{padding:15px 20px}
-.next{font-size:40px;margin-top:50px;color:var(--it);font-weight:700;opacity:0}
+/* ---- 7 ---- */
+.url{position:absolute;left:0;right:0;top:470px;text-align:center;font-family:var(--disp);font-weight:700;font-size:130px;letter-spacing:.03em;color:var(--cream);opacity:0}
+.url em{font-style:normal;color:var(--acc)}
+.cta{position:absolute;left:50%;top:640px;transform:translateX(-50%);font-family:var(--disp);font-size:48px;letter-spacing:.14em;padding:18px 44px 12px;
+  background:var(--acc);color:var(--bg);clip-path:polygon(14px 0,100% 0,100% calc(100% - 14px),calc(100% - 14px) 100%,0 100%,0 14px);opacity:0}
+.tagline{position:absolute;left:0;right:0;top:800px;text-align:center;font-size:30px;letter-spacing:.3em;color:var(--muted);text-transform:uppercase;opacity:0}
+.small7{position:absolute;left:0;right:0;top:860px;text-align:center;font-size:20px;letter-spacing:.2em;color:var(--olive);text-transform:uppercase;opacity:0}
 
-/* 0 persona */
-.persona{margin-top:70px;display:grid;grid-template-columns:1fr 1fr;gap:28px}
-.pr{background:var(--panel);border:1px solid var(--line);border-radius:22px;padding:30px 36px;font-size:38px;line-height:1.3;opacity:0}
-.pr i{display:block;font:600 24px var(--mono);font-style:normal;color:var(--ot);margin-bottom:10px;letter-spacing:.08em}
-
-/* journey */
-.jh{font-size:64px}
-.jr{display:grid;grid-template-columns:repeat(6,1fr);gap:26px;margin-top:44px}
-.st6{opacity:0;text-align:center}
-.st6 .c{width:110px;height:110px;border-radius:50%;margin:0 auto;display:grid;place-items:center;background:var(--panel);border:2px solid var(--line);color:var(--muted)}
-.st6 b{display:block;font-size:30px;margin-top:16px}
-.st6 .pc{margin-top:18px;border-radius:20px;padding:22px 20px;min-height:250px;text-align:left;font-size:27px;line-height:1.35;background:var(--panel);border:1px solid var(--line)}
-.st6.pain .c{color:var(--crit);border-color:rgba(255,77,79,.6)}
-.st6.pain .pc{background:rgba(255,77,79,.1);border-color:rgba(255,77,79,.45);color:#ffd5d6}
-.st6.help .c{color:var(--it);border-color:#2b4a63}
-.st6.help .pc{background:rgba(54,195,224,.08);border-color:#24425a}
-.s6t{display:inline-block;margin-top:16px;font:600 22px var(--mono);padding:8px 18px;border-radius:999px}
-.s6t.ok{background:rgba(46,204,113,.15);color:var(--ok);border:1px solid var(--ok)}
-.s6t.part{background:rgba(243,166,56,.15);color:var(--ot);border:1px solid var(--ot)}
-.senior{margin:28px 0 0 calc((100% - 130px)/6 + 26px);border-radius:999px;padding:14px 30px;font-size:30px;font-weight:700;text-align:center;
-  background:rgba(255,77,79,.18);border:2px solid var(--crit);color:#ffc7c8;opacity:0}
-.prop{font-size:40px;line-height:1.3;max-width:1400px;margin-top:34px;font-weight:700}
-.prop em{font-style:normal;color:var(--ot)}
-
-/* UI di luar render */
-#hud{position:fixed;right:14px;bottom:10px;font:13px var(--mono);color:#9ab;background:rgba(0,0,0,.6);padding:6px 10px;border-radius:6px}
-.render #hud{display:none!important}
-/* teks layar: pembawa cerita (pengganti VO) */
-.cap{position:absolute;left:50%;bottom:58px;transform:translateX(-50%);max-width:1560px;width:max-content;z-index:20;
-  font:600 44px/1.3 var(--sans);text-align:center;color:#fff;padding:16px 34px;border-radius:16px;
-  background:rgba(5,8,12,.82);border:1px solid #22384b;box-shadow:0 12px 40px rgba(0,0,0,.5);opacity:0;visibility:hidden}
-.cap b{color:var(--it)} .cap .r{color:#ff8a8b}
+#play{position:fixed;right:14px;bottom:10px;font:13px var(--mono);color:#9ab;background:rgba(0,0,0,.6);padding:6px 10px;border-radius:6px}
+.render #play{display:none!important}
 </style>
 </head>
 <body>
 <div id="stage">
+<div class="grid"></div>
 
-<!-- ========== 0 Persona ========== -->
-<section class="sc" id="s0">
-  <div class="grid-bg"></div>
-  <div class="pad">
-    <div class="kicker">Masalah</div>
-    <h1 id="s0-h">Malam hari. <em>Satu analis</em> berjaga di ruang server satuan.</h1>
-    <div class="persona">
-      <div class="pr"><i>01</i>Sering masih junior</div>
-      <div class="pr"><i>02</i>Senior tidak selalu ada untuk ditanya</div>
-      <div class="pr"><i>03</i>Harus melapor ke komandan</div>
-      <div class="pr"><i>04</i>Tidak boleh memakai AI cloud: ini data militer</div>
-    </div>
-  </div>
+<!-- ================= 1a: jaringan militer ================= -->
+<section class="sc" id="b1a">
+  <div class="kick">01 · Masalah TNI saat ini</div>
+  <div class="h1" id="b1a-h">Satuan siber <em>menjaga</em><br>jaringan militer</div>
+  <div class="sub1" id="b1a-sub">&gt; Semua aset menghasilkan temuan</div>
+  <div class="boot" id="boot"></div>
+  <div class="radar" id="radar1"></div>
 </section>
 
-<!-- ========== 1a Yang dijaga ========== -->
-<section class="sc" id="s1a">
-  <div class="grid-bg"></div>
-  <div class="pad">
-    <div class="kicker">Yang ia jaga</div>
-    <h1 id="s1a-h">Markas yang kini <em>hidup di jaringan</em>.</h1>
-  </div>
-  <div class="src" style="bottom:auto;top:56px;left:auto;right:56px">Sumber: BSSN via Investortrust dan Bisnis.com (2025)</div>
-  <div class="devline" id="devline"></div>
-  <div class="devices">
-    <div class="dev" data-ic="pc"><div class="c"></div><b>PC staf</b><small>administrasi</small></div>
-    <div class="dev" data-ic="server"><div class="c"></div><b>Server data</b><small>arsip satuan</small></div>
-    <div class="dev" data-ic="cctv"><div class="c"></div><b>CCTV</b><small>pengamanan</small></div>
-    <div class="dev" data-ic="radio"><div class="c"></div><b>Radio</b><small>komunikasi</small></div>
-    <div class="dev ot" data-ic="bolt"><div class="c"></div><b>Genset</b><small>listrik cadangan</small></div>
-  </div>
-</section>
-
-<!-- ========== 1c Layar analis ========== -->
-<section class="sc" id="s1c">
+<!-- ================= 1b: 654 ================= -->
+<section class="sc" id="b1b">
   <div class="cam" id="camLog"><img src="assets/log.png" alt=""></div>
-  <div class="side-panel">
-    <div class="count mono" id="cnt654">0</div>
-    <div class="count-l">alert dalam 4 menit</div>
-    <div class="count2" id="cnt13">13</div>
-    <div class="count-l" id="cnt13l" style="opacity:0">yang berkaitan dengan serangan</div>
-  </div>
-  <div class="pill"><span><i></i>Log Wazuh asli · lab Tameng 6 Nov 2026</span></div>
-  <div class="vignette"></div>
+  <div class="side"><div class="cnt" id="cnt654">0</div><div class="cntl">temuan · 4 menit</div>
+    <div class="lab" style="position:static;opacity:1;margin-top:30px">Log Wazuh asli · uji lab Tameng</div></div>
+  <div class="vig"></div>
 </section>
 
-<!-- ========== J1 Journey: titik sakit ========== -->
-<section class="sc" id="sj1">
-  <div class="pad">
-    <div class="kicker">Perjalanan analis</div>
-    <h1 class="jh" id="sj1-h">Analis junior tersendat di tahap yang <em>butuh jam terbang</em></h1>
-    <div class="jr">
-      <div class="st6" data-ic="eye"><div class="c"></div><b>Memantau</b><div class="pc">Ratusan baris per menit; IT dan OT di layar berbeda</div></div>
-      <div class="st6 pain" data-ic="filter"><div class="c"></div><b>Memilah</b><div class="pc">654 alert, 13 serangan: mana yang penting?</div></div>
-      <div class="st6 pain" data-ic="graph"><div class="c"></div><b>Merangkai</b><div class="pc">Menyambung SSH, hash, gerak lateral, dan Modbus dari dua sistem</div></div>
-      <div class="st6 pain" data-ic="warn"><div class="c"></div><b>Menilai dampak</b><div class="pc">Apakah "Modbus write" berarti genset mati?</div></div>
-      <div class="st6 pain" data-ic="hand"><div class="c"></div><b>Bertindak</b><div class="pc">SOP terlalu umum, tidak menyebut host dan akun yang kena</div></div>
-      <div class="st6 pain" data-ic="file"><div class="c"></div><b>Melapor</b><div class="pc">Menulis laporan lama; istilah teknis membingungkan komandan</div></div>
+<!-- ================= 1c: analis, sistem lama, data ================= -->
+<section class="sc" id="b1c">
+  <div class="kick">01 · Masalah TNI saat ini</div>
+  <div class="person" id="person"></div>
+  <div class="brk" id="brkP" style="left:770px;top:260px;width:380px;height:380px"><i></i></div>
+  <div class="tag" id="t1" style="left:240px;top:420px">Analis jaga: baru bertugas</div>
+  <div class="tag amber" id="t2" style="left:1220px;top:420px">Sistem lama: sulit diperbarui</div>
+  <div class="tag red" id="t3" style="left:600px;top:700px">Data militer ✕ AI di internet</div>
+</section>
+
+<!-- ================= 2: fakta ================= -->
+<section class="sc" id="b2">
+  <div class="kick">02 · Fakta serangan siber · briefing intelijen</div>
+  <div class="h1" id="b2-h">Ancaman ini <em>nyata</em></div>
+  <div class="big" id="bssn" style="left:140px;top:350px"><span id="bssnN">0</span><small>MILIAR</small></div>
+  <div class="lab" id="bssnL" style="left:146px;top:540px">Anomali trafik ke Indonesia · 2025 · BSSN</div>
+  <div class="lab" id="barL" style="left:1120px;top:370px">Kapasitas pantau nasional</div>
+  <div class="bar" id="bar"><i id="barI"></i></div>
+  <div class="big" id="barV" style="left:1120px;top:500px;font-size:110px;color:var(--red)">&lt;10%</div>
+  <div class="ev" id="e1" style="left:140px"><div class="d">Juni 2024</div><div class="t">Pusat Data Nasional lumpuh</div><div class="s">Ransomware · pemberitaan 2024</div></div>
+  <div class="ev" id="e2" style="left:700px"><div class="d">Juni 2024</div><div class="t">Data diklaim milik BAIS TNI dijual</div><div class="s">Forum gelap · pemberitaan 2024</div></div>
+  <div class="ev" id="e3" style="left:1260px"><div class="d">mil.id</div><div class="t">Situs militer di-deface</div><div class="s">Narasumber Satsiber</div></div>
+  <div class="brk" id="eb1" style="left:126px;top:626px;width:548px;height:278px"><i></i></div>
+  <div class="brk" id="eb2" style="left:686px;top:626px;width:548px;height:278px"><i></i></div>
+  <div class="brk red" id="eb3" style="left:1246px;top:626px;width:548px;height:278px"><i></i></div>
+</section>
+
+<!-- ================= 3: kelemahan ================= -->
+<section class="sc" id="b3">
+  <div class="kick">03 · Kelemahan solusi yang ada</div>
+  <div class="h1" id="b3-h">Alatnya <em>sudah ada</em></div>
+  <div class="tool" id="k1" style="left:140px" data-ic="search"><div class="ico"></div><h3>Wazuh dan Suricata</h3><p>SIEM dan IDS</p><div class="scan"></div><div class="stamp">Temuan membanjir</div></div>
+  <div class="tool" id="k2" style="left:710px" data-ic="cloud"><div class="ico"></div><h3>Copilot AI</h3><p>Merangkum di cloud</p><div class="scan"></div><div class="stamp">Data ke server asing</div></div>
+  <div class="tool" id="k3" style="left:1280px" data-ic="factory"><div class="ico"></div><h3>Platform OT</h3><p>Keamanan industri</p><div class="scan"></div><div class="stamp">Mahal · terpisah IT</div></div>
+</section>
+
+<!-- ================= 4: kenapa Tameng ================= -->
+<section class="sc" id="b4">
+  <div class="hero" id="hero4"></div>
+  <div class="tag" id="h4a" style="left:250px;top:240px">IT · Wazuh siaga</div>
+  <div class="tag" id="h4b" style="right:250px;top:240px">OT · Suricata IPS</div>
+  <div class="tag amber" id="h4c" style="left:200px;top:470px">Tidak menggantikan analis</div>
+  <div class="tag green" id="h4d" style="right:200px;top:470px">Pendamping analis jaga</div>
+  <div class="brand" id="brand4">Tameng</div>
+  <div class="akr" id="akr4"><span><b>T</b>angkal</span> <span><b>A</b>ncaman</span> <span><b>M</b>andiri</span> lewat <span><b>E</b>dukasi,</span> <span><b>N</b>otifikasi,</span> dan <span><b>G</b>erak cepat</span></div>
+</section>
+
+<!-- ================= 5a: cara kerja ================= -->
+<section class="sc" id="b5a">
+  <div class="kick">05 · Cara kerja Tameng</div>
+  <div class="h1" style="font-size:72px">Fakta dari kode, <em>kalimat dari AI</em></div>
+  <div class="pipe" id="pipe">
+    <div class="pn"><div class="n">01</div><div class="t">Baca</div></div>
+    <div class="pn"><div class="n">02</div><div class="t">Rangkai</div></div>
+    <div class="pn"><div class="n">03</div><div class="t">Nilai</div></div>
+    <div class="pn"><div class="n">04</div><div class="t">Tulis</div></div>
+    <div class="pn"><div class="n">05</div><div class="t">Bertindak</div></div>
+  </div>
+  <div class="ws">
+    <div class="wsx" id="w1">
+      <div class="src" style="left:0"><h4>Wazuh · IT</h4><pre id="logW"></pre></div>
+      <div class="src" style="left:600px"><h4>Suricata · OT</h4><pre id="logS"></pre></div>
+      <div class="note" id="w1n" style="left:1200px;top:160px">→ semua temuan<br>&nbsp;&nbsp;masuk Tameng</div>
     </div>
-    <div class="senior" id="senior">Tahap 2–6 biasanya harus menunggu analis senior</div>
-  </div>
-</section>
-
-<!-- ========== 3 Solusi yang ada ========== -->
-<section class="sc" id="s3">
-  <div class="pad">
-    <div class="kicker">Solusi yang ada</div>
-    <h1>Alatnya ada, tapi analisnya tetap sendirian</h1>
-    <div class="cards" id="cards3">
-      <div class="card" data-ic="search"><div class="c"></div><h3>SIEM dan IDS</h3><p>Wazuh, Suricata</p>
-        <div class="weak">Satu alert per kejadian. Merangkai cerita tetap tugas analis.</div></div>
-      <div class="card" data-ic="cloud"><div class="c"></div><h3>Copilot AI komersial</h3><p>Microsoft, Google</p>
-        <div class="weak">Bisa merangkai, tapi data diproses di cloud asing.</div></div>
-      <div class="card" data-ic="factory"><div class="c"></div><h3>Platform keamanan OT</h3><p>Nozomi, Claroty, Dragos</p>
-        <div class="weak">Mahal, dan hanya melihat sisi OT.</div></div>
-      <div class="card" data-ic="flow"><div class="c"></div><h3>Otomasi buatan sendiri</h3><p>n8n + GPT</p>
-        <div class="weak">Isi insiden keluar ke server luar negeri.</div></div>
+    <div class="wsx" id="w2"><div id="dots"></div>
+      <div class="chain" id="chain"><div>Brute force<small>pc-staf-07</small></div><div>Login berhasil<small>akun sertu</small></div><div>Curi hash<small>/etc/shadow</small></div><div>Pindah server<small>srv-file-01</small></div><div>Matikan genset<small>PLC · Modbus</small></div></div>
+      <div class="note" id="w2n" style="left:0;top:300px">Satu cerita serangan · 7 teknik MITRE ATT&amp;CK</div>
     </div>
-  </div>
-</section>
-
-<!-- ========== 4 Tameng ========== -->
-<section class="sc" id="s4">
-  <div class="grid-bg"></div>
-  <div class="center">
-    <svg class="ic" width="140" height="140" viewBox="0 0 24 24" style="color:var(--it);margin-top:-120px">
-      <path id="shield1" d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6l-8-3z" stroke-width="1.1"/>
-      <path id="check1" d="m8.5 12 2.5 2.5 4.5-5" stroke-width="1.3"/>
-    </svg>
-    <div class="brand" id="s4-brand" style="font-size:150px">Tameng</div>
-    <div class="akr" id="s4-akr">Tangkal Ancaman Mandiri lewat Edukasi, Notifikasi, dan Gerak cepat</div>
-    <div class="tag" id="s4-tag">Pendamping analis insiden IT/OT, di dalam satuan</div>
-    <div class="prop" id="s4-prop">Dengan Tameng, analis junior bisa menangani insiden yang <em>biasanya harus menunggu analis senior</em>.</div>
-    <div class="chips" id="s4-chips" style="margin-top:44px">
-      <span>Lebih sederhana</span><span>Lebih mudah</span><span>Lebih murah</span><span>Lebih aman</span>
+    <div class="wsx" id="w3">
+      <div class="say"><div class="h">AI lokal · Qwen 2.5 · tanpa internet</div><div class="x" id="say1"></div></div>
     </div>
-  </div>
-</section>
-
-<!-- ========== J2 Journey dengan Tameng ========== -->
-<section class="sc" id="sj2">
-  <div class="pad">
-    <div class="kicker">Perjalanan yang sama, dengan Tameng</div>
-    <h1 class="jh" id="sj2-h">Tameng mengerjakan bagian yang butuh jam terbang; <em>analis tetap memutuskan</em></h1>
-    <div class="jr">
-      <div class="st6 help" data-ic="eye"><div class="c"></div><b>Memantau</b><div class="pc">Daftar insiden, bukan alert; IT dan OT dalam satu peta</div><span class="s6t ok">sudah jalan</span></div>
-      <div class="st6 help" data-ic="filter"><div class="c"></div><b>Memilah</b><div class="pc">654 alert dipilah kode menjadi 1 insiden</div><span class="s6t ok">sudah jalan</span></div>
-      <div class="st6 help" data-ic="graph"><div class="c"></div><b>Merangkai</b><div class="pc">Kronologi IT→OT; tiap baris menunjuk ID bukti</div><span class="s6t ok">sudah jalan</span></div>
-      <div class="st6 help" data-ic="warn"><div class="c"></div><b>Menilai dampak</b><div class="pc">"Genset DIMATIKAN" atau "DIBLOKIR, genset menyala"</div><span class="s6t ok">sudah jalan</span></div>
-      <div class="st6 help" data-ic="hand"><div class="c"></div><b>Bertindak</b><div class="pc">Host, akun, dan IP yang perlu ditindak</div><span class="s6t part">sebagian</span></div>
-      <div class="st6 help" data-ic="file"><div class="c"></div><b>Melapor</b><div class="pc">Laporan bahasa Indonesia ±1,5 menit</div><span class="s6t part">sebagian</span></div>
-    </div>
-  </div>
-</section>
-
-<!-- ========== 5a Lab ========== -->
-<section class="sc" id="s5a">
-  <div class="pad">
-    <div class="kicker">Proses kerja · lab</div>
-    <h1>Kami membangun markas mini di satu laptop</h1>
-  </div>
-  <div class="topo">
-    <div class="tl" style="left:150px;width:1490px" id="topoLine"></div>
-    <div class="tn" style="left:0" data-ic="attacker" data-bg="#c8312f"><div class="c"></div><b>kali-ops</b><small>penyerang · 10.10.5.90</small></div>
-    <div class="tn" style="left:480px" data-ic="pc" data-bg="#0f6f86"><div class="c"></div><b>pc-staf-07</b><small>10.10.5.66</small></div>
-    <div class="tn" style="left:960px" data-ic="server" data-bg="#0f6f86"><div class="c"></div><b>srv-file-01</b><small>10.10.5.7</small></div>
-    <div class="tn" style="left:1340px" data-ic="bolt" data-bg="#b8720b"><div class="c"></div><b>PLC genset</b><small>10.10.5.20 · Modbus</small></div>
-    <div class="sensor" id="sensIt" style="left:440px;width:820px;background:rgba(54,195,224,.12);border:2px solid var(--it)">Wazuh menjaga sisi IT<small>login, eksekusi berkas, akses /etc/shadow</small></div>
-    <div class="sensor" id="sensOt" style="left:1300px;width:340px;background:rgba(243,166,56,.12);border:2px solid var(--ot)">Suricata<small>jaringan kendali OT</small></div>
-  </div>
-  <div class="pill" style="left:auto;right:56px"><span><i></i>6 container Docker · 685 MB RAM · MacBook Air 16 GB</span></div>
-</section>
-
-<!-- ========== 5b Serangan ========== -->
-<section class="sc" id="s5b">
-  <div class="term">
-    <div class="bar"><i></i><i></i><i></i><span>kali-ops · bash lab/scripts/attack.sh</span></div>
-    <pre id="termText"></pre>
-  </div>
-  <div class="plc" id="plc">
-    <div class="t">plc-genset-01 · log PLC</div>
-    <div class="st" id="plcSt">GENSET NYALA</div>
-    <div class="lg" id="plcLg">10:19:24,635 PERINTAH TULIS coil0=1<br>-&gt; GENSET NYALA</div>
-  </div>
-  <div class="pill"><span class="red"><i></i>Serangan sungguhan di lab · output asli 6 Nov 2026</span></div>
-</section>
-
-<!-- ========== 5c Dashboard ========== -->
-<section class="sc" id="s5c">
-  <div class="cam" id="camDash">
-    <img src="assets/dash-0.png" alt="" data-step="0">
-    <img src="assets/dash-2.png" alt="" data-step="2" style="opacity:0">
-    <img src="assets/dash-4.png" alt="" data-step="4" style="opacity:0">
-    <img src="assets/dash-6.png" alt="" data-step="6" style="opacity:0">
-    <img src="assets/dash-7.png" alt="" data-step="7" style="opacity:0">
-  </div>
-  <div class="vignette"></div>
-  <div class="pill" id="pill5c"><span><i></i>Dashboard Tameng · data asli 6 Nov</span><span id="pill5c2" style="opacity:0"><i></i>Dirangkai kode, bukan tebakan AI</span></div>
-</section>
-
-<!-- ========== 5d Laporan + validasi ========== -->
-<section class="sc" id="s5d">
-  <div class="cam" id="camRep"><img src="assets/laporan.png" alt="">
-    <div class="hl" id="hlBukti"></div>
-  </div>
-  <div class="pill"><span class="amber"><i></i>AI lokal · Qwen 2.5 7B · tanpa internet</span></div>
-  <div class="val" id="val">
-    <div class="vc"><div class="h">Narasi AI · contoh uji</div>
-      <div class="x" id="lieText"></div><div class="stamp" id="stamp">DITOLAK</div></div>
-    <div class="vc good" id="good"><div class="h">Ringkasan cadangan dari kode</div>
-      <div class="x">Penyerang dari 10.10.5.90 menyasar pc-staf-07, srv-file-01, plc-genset-01, lalu mengirim perintah tulis tak sah ke PLC.</div></div>
-  </div>
-</section>
-
-<!-- ========== 5e Babak 2: mode blokir ========== -->
-<section class="sc" id="s5e">
-  <div class="pad">
-    <div class="kicker">Babak 2 · mode blokir</div>
-    <h1 id="s5e-h">Serangan yang sama, <em>genset tetap menyala</em></h1>
-    <div class="vs">
-      <div class="vsc mati" id="vs1"><div class="k">BABAK 1 · TANPA BLOKIR</div><div class="st">GENSET MATI</div>
-        <pre>PLC: PERINTAH TULIS coil0=0
--&gt; GENSET DIMATIKAN (dampak serangan)</pre></div>
-      <div class="vsc nyala" id="vs2"><div class="k">BABAK 2 · MODE BLOKIR</div><div class="st">GENSET NYALA</div>
-        <pre id="vs2t"></pre></div>
-    </div>
-  </div>
-  <div id="rep2"><div class="cam" id="camRep2"><img src="assets/laporan-ips.png" alt=""><div class="hl2" id="hlBlok"></div></div></div>
-  <div class="pill" id="pill5e" style="opacity:0"><span><i></i>Laporan Tameng · babak 2 · uji lab 7 Nov 2026</span></div>
-</section>
-
-<!-- ========== 6 Manfaat ========== -->
-<section class="sc" id="s6">
-  <div class="pad">
-    <div class="kicker">Manfaat bagi satuan</div>
-    <h1>Analis menerima cerita, bukan tumpukan alert</h1>
-    <div class="stats">
-      <div class="stat"><b style="color:var(--it)">654→1</b><p>alert mentah menjadi satu insiden dengan 13 bukti</p></div>
-      <div class="stat"><b style="color:var(--ot)">±1,5 mnt</b><p>dari bukti mentah sampai laporan berbahasa Indonesia</p></div>
-      <div class="stat"><b style="color:var(--ok)">0</b><p>data yang keluar dari jaringan satuan</p></div>
-      <div class="stat"><b>1 laptop</b><p>16 GB, perangkat lunak open-source</p></div>
+    <div class="wsx" id="w4">
+      <div class="say"><div class="h">Narasi AI · contoh uji</div><div class="x" id="say2"></div></div>
+      <div class="stamp" id="stamp5" style="left:620px;top:210px">Ditolak</div>
+      <div class="chk" id="chk"><div><b>✓</b> IP dicek ke bukti</div><div><b>✓</b> Host dicek ke bukti</div><div><b>✓</b> Waktu dicek ke bukti</div><div><span class="x">✕</span> 8.8.8.8 tidak ada di bukti</div></div>
     </div>
   </div>
 </section>
 
-<!-- ========== 7 Mengapa Tameng ========== -->
-<section class="sc" id="s7">
-  <div class="pad">
-    <div class="kicker">Mengapa Tameng</div>
-    <h1 style="font-size:64px">Bagiannya sudah ada. Tameng menyatukannya <em>untuk analis satuan</em>.</h1>
-    <table class="cmp" style="margin-top:44px;font-size:30px">
-      <tr><th></th><th>SIEM/IDS</th><th>Copilot AI</th><th>Platform OT</th><th>AI SOC open-source</th><th class="tm">Tameng</th></tr>
-      <tr><td>Dirancang untuk</td><td>analis ahli</td><td>analis ahli</td><td>operator OT</td><td>analis ahli</td><td class="tm yes">analis junior satuan</td></tr>
-      <tr><td>Merangkai insiden</td><td class="no">tidak</td><td class="yes">ya</td><td class="mid">sebagian</td><td class="yes">ya</td><td class="tm yes">ya</td></tr>
-      <tr><td>IT dan OT dalam satu insiden</td><td class="no">tidak</td><td class="mid">sebagian</td><td class="mid">OT saja</td><td class="mid">IT saja</td><td class="tm yes">ya</td></tr>
-      <tr><td>Data tetap di satuan</td><td class="yes">ya</td><td class="no">tidak</td><td class="yes">ya</td><td class="yes">ya</td><td class="tm yes">ya</td></tr>
-      <tr><td>Biaya untuk satuan</td><td class="yes">rendah</td><td class="no">tinggi</td><td class="no">sangat tinggi</td><td class="yes">rendah</td><td class="tm yes">rendah</td></tr>
-    </table>
-    <div class="next" id="next">Langkah berikutnya: uji bersama analis satuan, lalu pilot di satu markas.</div>
-  </div>
+<!-- ================= 5b: dashboard ================= -->
+<section class="sc" id="b5b">
+  <div class="cam" id="camDash"><img src="assets/k-dashboard.png" alt=""></div>
+  <div class="vig"></div>
+  <div class="tag solid" id="ovl5b" style="left:140px;top:130px">654 temuan → 1 insiden</div>
 </section>
 
-<!-- ========== Penutup ========== -->
-<section class="sc" id="s8">
-  <div class="grid-bg"></div>
-  <div class="center">
-    <svg class="ic" width="170" height="170" viewBox="0 0 24 24" style="color:var(--it)">
-      <path id="shield2" d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6l-8-3z" stroke-width="1.1"/>
-      <path id="check2" d="m8.5 12 2.5 2.5 4.5-5" stroke-width="1.3"/>
-    </svg>
-    <div class="brand" id="s8-brand">Tameng</div>
-    <div class="akr" id="s8-akr">Tangkal Ancaman Mandiri lewat Edukasi, Notifikasi, dan Gerak cepat</div>
-    <div class="tag" id="s8-tag">Pendamping analis insiden, di dalam satuan, untuk satuan</div>
-    <div class="sub" id="s8-ev" style="margin-top:50px">Kartika Cyber Hackathon 2026 · Defensive Shield<span id="tim"></span></div>
-  </div>
+<!-- ================= 5c: blokir ================= -->
+<section class="sc" id="b5c">
+  <div class="cam" id="camIps"><img src="assets/k-temuan-ips.png" alt=""></div>
+  <div class="vig"></div>
+  <div class="tag green solid" id="t5c" style="left:140px;top:130px">Diblokir · genset tetap menyala</div>
 </section>
 
+<!-- ================= 6a: rekomendasi ================= -->
+<section class="sc" id="b6a">
+  <div class="cam" id="camRek"><img src="assets/k-rekomendasi.png" alt=""></div>
+  <div class="vig"></div>
+  <div class="tag solid" id="t6a" style="left:140px;top:130px">06 · Langkah pertama yang jelas</div>
+</section>
+
+<!-- ================= 6b: edukasi ================= -->
+<section class="sc" id="b6b">
+  <div class="cam" id="camEdu"><img src="assets/k-temuan.png" alt=""></div>
+  <div class="vig"></div>
+  <div class="tag solid" id="t6b" style="left:140px;top:130px">Edukasi per teknik serangan</div>
+</section>
+
+<!-- ================= 6c: 0 dan 1 ================= -->
+<section class="sc" id="b6c">
+  <div class="kick">06 · Manfaat bagi TNI</div>
+  <div class="tile" id="tile0" style="left:200px"><div class="v">0</div><div class="d">data keluar<br>dari satuan</div></div>
+  <div class="tile" id="tile1" style="left:1020px"><div class="v">1</div><div class="d">laptop sudah<br>cukup</div></div>
+</section>
+
+<!-- ================= 7: CTA ================= -->
+<section class="sc" id="b7">
+  <div class="hero" id="hero7" style="left:810px;top:60px;width:300px;height:300px"></div>
+  <div class="url" id="url"><span id="urlT"></span></div>
+  <div class="brk" id="brkU" style="left:330px;top:440px;width:1260px;height:180px"><i></i></div>
+  <div class="cta" id="cta">Coba Tameng</div>
+  <div class="tagline" id="tagl">Tameng · siaga dari dalam satuan</div>
+  <div class="small7" id="sm7">Kartika Cyber Hackathon 2026 · Defensive Shield<span id="tim"></span></div>
+</section>
+
+<div id="hud">
+  <div class="frame"></div>
+  <div class="c tl">Sistem: <b>Tameng</b><br>Mode: <b>air-gapped</b></div>
+  <div class="c tr"><span id="hudT">T+00:00</span><br>Babak <b id="hudB">01</b>/07</div>
+  <div class="c bl">Kartika Cyber Hackathon 2026</div>
+  <div class="c br">tameng.yogency.work</div>
+  <div class="prog" id="prog"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
 </div>
-<div id="hud"></div>
+</div>
+<div id="play"></div>
 
+<script src="vo-plan.js"></script>
 <script src="../node_modules/gsap/dist/gsap.min.js"></script>
 <script>
-// Isi nama tim untuk penutup (kosongkan bila tidak perlu).
-const TIM = "";
+const TIM = "";   // nama tim untuk penutup
+const V = window.VO;
+const B = (k) => V.B[k];
+const beat = (k, s) => V.B[k] + V.T[k].start[s];
+const endOf = (k) => (k < 7 ? V.B[k + 1] : V.END);
+const $ = (s) => document.querySelector(s), $$ = (s) => [...document.querySelectorAll(s)];
+const NS = "http://www.w3.org/2000/svg";
+const tl = gsap.timeline({ paused: true, defaults: { ease: "power3.out" } });
+
+// Subtitle: teks asli (bukan ejaan fonetik untuk mesin VO).
+const CAP = {
+  1: ["Setiap malam, satuan siber TNI menjaga jaringan militer.", "Semuanya menghasilkan temuan.",
+      "Di uji lab kami, satu serangan saja memunculkan 654 temuan dalam empat menit.", "Dan bisa saja yang berjaga adalah analis baru.",
+      "Banyak sistem lama yang sulit diperbarui.", "Dan data militer tidak boleh dibawa ke layanan AI di internet."],
+  2: ["Ancaman ini nyata.", "Sepanjang 2025, BSSN mencatat 5,2 miliar anomali trafik ke Indonesia.", "Kemampuan pantaunya belum sampai 10 persen.",
+      "Juni 2024, ransomware melumpuhkan Pusat Data Nasional.", "Di bulan yang sama, data yang diklaim milik BAIS TNI dijual di forum gelap.",
+      "Situs mil.id juga pernah diretas dan diubah tampilannya."],
+  3: ["Alat keamanannya sebenarnya sudah ada.", "Wazuh dan Suricata bisa mendeteksi, tapi temuannya membanjir.",
+      "Copilot AI bisa merangkum, tapi datanya harus dikirim ke server asing.", "Platform keamanan OT ada, tapi mahal dan terpisah dari IT."],
+  4: ["Karena itu kami membuat Tameng.", "Tangkal Ancaman Mandiri lewat Edukasi, Notifikasi, dan Gerak cepat.",
+      "Tameng tidak menggantikan analis.", "Tameng menjadi pendamping analis yang berjaga."],
+  5: ["Tameng membaca semua temuan dari Wazuh dan Suricata.", "Kode merangkainya menjadi satu cerita serangan.",
+      "AI lokal menulis ringkasannya dalam bahasa Indonesia.", "Kalau AI menyebut fakta yang tidak ada di bukti, ringkasannya ditolak.",
+      "Hasilnya, 654 temuan menjadi satu insiden.", "Dan kalau penyerang mencoba mematikan genset, perintahnya diblokir."],
+  6: ["Analis langsung tahu langkah pertama yang harus dikerjakan.", "Analis baru ikut belajar dari setiap insiden.",
+      "Data tidak pernah keluar dari jaringan satuan.", "Dan semuanya cukup berjalan di satu laptop."],
+  7: ["Tameng sudah bisa dicoba sekarang.", "Buka tameng.yogency.work", "Tameng. Siaga dari dalam satuan."],
+};
 
 // ---------- ikon ----------
 const ICON = {
-  pc:'<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/>',
-  server:'<rect x="4" y="3" width="16" height="7" rx="1.5"/><rect x="4" y="14" width="16" height="7" rx="1.5"/><path d="M8 6.5h.01M8 17.5h.01"/>',
+  pc:'<rect x="3" y="4" width="18" height="12" rx="1"/><path d="M8 20h8M12 16v4"/>',
+  server:'<rect x="4" y="3" width="16" height="7"/><rect x="4" y="14" width="16" height="7"/><path d="M8 6.5h.01M8 17.5h.01"/>',
   cctv:'<path d="M3 7l12-3 2 6-12 3z"/><path d="M15 10l4 1-1 3-4-1M7 12l-1 6H3"/>',
-  radio:'<rect x="4" y="9" width="16" height="12" rx="2"/><path d="M8 9l9-5M8 15h.01M12 13h5M12 17h5"/>',
+  radio:'<rect x="4" y="9" width="16" height="12"/><path d="M8 9l9-5M8 15h.01M12 13h5M12 17h5"/>',
   bolt:'<path d="M13 2 4 14h7l-1 8 9-12h-7l1-8z"/>',
-  attacker:'<circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/>',
+  person:'<circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/>',
   search:'<circle cx="11" cy="11" r="6"/><path d="m20 20-4.5-4.5"/>',
   cloud:'<path d="M7 18a4 4 0 0 1-.5-8A6 6 0 0 1 18 9a4.5 4.5 0 0 1 0 9z"/>',
   factory:'<path d="M3 21V10l6 4V10l6 4V5h6v16z"/><path d="M7 18h2M12 18h2M17 18h2"/>',
-  flow:'<rect x="3" y="3" width="6" height="6" rx="1"/><rect x="15" y="15" width="6" height="6" rx="1"/><path d="M6 9v4a3 3 0 0 0 3 3h6"/>',
-  eye:'<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
-  filter:'<path d="M3 4h18l-7 8v6l-4 2v-8z"/>',
-  graph:'<circle cx="5" cy="6" r="2"/><circle cx="19" cy="6" r="2"/><circle cx="12" cy="18" r="2"/><path d="M7 6h10M6 8l5 8M18 8l-5 8"/>',
-  warn:'<path d="M12 3 2 20h20z"/><path d="M12 10v4M12 17h.01"/>',
-  hand:'<path d="M8 13V5.5a1.5 1.5 0 0 1 3 0V12M11 11V4.5a1.5 1.5 0 0 1 3 0V12M14 11.5V6a1.5 1.5 0 0 1 3 0v8c0 4-2.5 7-6.5 7S5 19 4 16l-1.5-3.5a1.4 1.4 0 0 1 2.4-1.4L8 14"/>',
-  file:'<path d="M6 2h9l5 5v15H6z"/><path d="M14 2v6h6M9 13h8M9 17h8"/>',
 };
-document.querySelectorAll("[data-ic]").forEach(el => {
-  const c = el.querySelector(".c"), size = el.classList.contains("card") ? 52 : el.classList.contains("st6") ? 56 : 88;
-  c.innerHTML = `<svg class="ic" width="${size}" height="${size}" viewBox="0 0 24 24">${ICON[el.dataset.ic]}</svg>`;
-  if (el.dataset.bg) c.style.background = el.dataset.bg;
+const ic = (k, s) => `<svg class="ic" width="${s}" height="${s}" viewBox="0 0 24 24">${ICON[k]}</svg>`;
+$$(".tool").forEach((t) => (t.querySelector(".ico").innerHTML = ic(t.dataset.ic, 72)));
+$("#person").innerHTML = ic("person", 170);
+if (TIM) $("#tim").textContent = " · " + TIM;
+
+// ---------- HUD perisai (sama dengan banner situs) ----------
+function shieldSVG(id) {
+  let ticks = "";
+  for (let a = 0; a < 360; a += 5) {
+    const big = a % 30 === 0, r1 = 232, r2 = big ? 246 : 240, rad = a * Math.PI / 180;
+    ticks += `<line x1="${300 + r1 * Math.sin(rad)}" y1="${300 - r1 * Math.cos(rad)}" x2="${300 + r2 * Math.sin(rad)}" y2="${300 - r2 * Math.cos(rad)}" stroke="${big ? "#d4f74b" : "#3a4a2c"}" stroke-width="${big ? 1.4 : 1}"/>`;
+  }
+  return `<svg viewBox="0 0 600 600">
+    <defs><radialGradient id="gl${id}" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#d4f74b" stop-opacity=".2"/><stop offset="1" stop-color="#d4f74b" stop-opacity="0"/></radialGradient>
+    <linearGradient id="sw${id}" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#d4f74b" stop-opacity="0"/><stop offset="1" stop-color="#d4f74b" stop-opacity=".3"/></linearGradient></defs>
+    <circle cx="300" cy="300" r="250" fill="url(#gl${id})"/>
+    <g class="r1"><circle cx="300" cy="300" r="270" fill="none" stroke="#3a4a2c" stroke-dasharray="2 10"/></g>
+    <g class="r2">${ticks}</g>
+    <g class="r3"><circle cx="300" cy="300" r="205" fill="none" stroke="#d4f74b" stroke-width="2" stroke-dasharray="80 1208" opacity=".85"/>
+      <circle cx="300" cy="300" r="205" fill="none" stroke="#d4f74b" stroke-width="2" stroke-dasharray="30 1258" stroke-dashoffset="-640" opacity=".6"/></g>
+    <g class="sw"><path d="M300 300 L300 112 A188 188 0 0 1 432.9 167.1 Z" fill="url(#sw${id})" opacity=".5"/></g>
+    <g class="lk1"><path d="M300 78 L492 410 L108 410 Z" fill="none" stroke="#d4f74b" stroke-width="1" opacity=".55"/>
+      <path d="M290 74 L300 90 L310 74 Z M486 420 L470 414 L482 400 Z M114 420 L130 414 L118 400 Z" fill="#d4f74b"/></g>
+    <g class="lk2" fill="none" stroke="#d4f74b" stroke-width="2"><path d="M200 190 v-22 h22 M400 190 v-22 h-22 M200 420 v22 h22 M400 420 v22 h-22"/></g>
+    <path class="sf" d="M300 168 L388 200 V292 C388 352 352 396 300 420 C248 396 212 352 212 292 V200 Z" fill="#d4f74b" fill-opacity=".12" opacity="0"/>
+    <path class="s1" d="M300 168 L388 200 V292 C388 352 352 396 300 420 C248 396 212 352 212 292 V200 Z" fill="none" stroke="#ece8d4" stroke-width="2.4"/>
+    <path class="s2" d="M300 188 L370 213 V290 C370 340 341 376 300 397 C259 376 230 340 230 290 V213 Z" fill="none" stroke="#d4f74b" stroke-width="1" opacity=".7"/>
+    <path class="c1" d="M254 262 L300 286 L346 262" fill="none" stroke="#d4f74b" stroke-width="5"/>
+    <path class="c2" d="M254 292 L300 316 L346 292" fill="none" stroke="#d4f74b" stroke-width="5"/>
+    <path class="c3" d="M254 322 L300 346 L346 322" fill="none" stroke="#d4f74b" stroke-width="5" opacity=".55"/>
+  </svg>`;
+}
+$("#hero4").innerHTML = shieldSVG(4);
+$("#hero7").innerHTML = shieldSVG(7);
+// Cincin berputar terus (timeline-driven agar render per bingkai konsisten).
+function spinRings(root, a, b) {
+  const o = (sel) => root.querySelector(sel);
+  gsap.set([o(".r1"), o(".r2"), o(".r3"), o(".sw")], { transformOrigin: "300px 300px" });
+  const d = b - a;
+  tl.fromTo(o(".r1"), { rotation: 0 }, { rotation: d * 9, duration: d, ease: "none" }, a);
+  tl.fromTo(o(".r2"), { rotation: 0 }, { rotation: -d * 14, duration: d, ease: "none" }, a);
+  tl.fromTo(o(".r3"), { rotation: 0 }, { rotation: d * 40, duration: d, ease: "none" }, a);
+  tl.fromTo(o(".sw"), { rotation: 0 }, { rotation: d * 65, duration: d, ease: "none" }, a);
+}
+function drawShield(root, at) {
+  const o = (sel) => root.querySelector(sel);
+  ["s1", "s2", "c1", "c2", "c3"].forEach((c, k) => {
+    const p = o("." + c), L = p.getTotalLength();
+    gsap.set(p, { strokeDasharray: L, strokeDashoffset: L });
+    tl.to(p, { strokeDashoffset: 0, duration: k < 2 ? 1.6 : 0.5, ease: "power2.inOut" }, at + [0, 0.3, 1.0, 1.2, 1.4][k]);
+  });
+  tl.to(o(".sf"), { opacity: 1, duration: 0.8 }, at + 1.3);
+  gsap.set([o(".lk1"), o(".lk2")], { transformOrigin: "300px 300px" });
+  tl.fromTo(o(".lk1"), { scale: 1.9, rotation: -30, opacity: 0 }, { scale: 1, rotation: 0, opacity: 1, duration: 1.4 }, at + 1.2);
+  tl.fromTo(o(".lk2"), { scale: 1.6, opacity: 0 }, { scale: 1, opacity: 1, duration: 1.2 }, at + 1.5);
+}
+
+// ---------- adegan ----------
+const SCENES = [
+  ["b1a", B(1), beat(1, 2)], ["b1b", beat(1, 2), beat(1, 3)], ["b1c", beat(1, 3), endOf(1)],
+  ["b2", B(2), endOf(2)], ["b3", B(3), endOf(3)], ["b4", B(4), endOf(4)],
+  ["b5a", B(5), beat(5, 4)], ["b5b", beat(5, 4), beat(5, 5)], ["b5c", beat(5, 5), endOf(5)],
+  ["b6a", B(6), beat(6, 1)], ["b6b", beat(6, 1), beat(6, 2)], ["b6c", beat(6, 2), endOf(6)],
+  ["b7", B(7), V.END],
+];
+SCENES.forEach(([id, a, b], k) => {
+  tl.fromTo("#" + id, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.45, ease: "none" }, Math.max(0, a - 0.2));
+  if (k < SCENES.length - 1) tl.to("#" + id, { autoAlpha: 0, duration: 0.45, ease: "none" }, b - 0.25);
 });
-if (TIM) document.getElementById("tim").textContent = " · " + TIM;
-
-// ---------- data ----------
-const SCENES = [   // [id, mulai, selesai]
-  ["s0", 0, 14], ["s1c", 14, 36], ["s1a", 36, 52], ["sj1", 52, 84], ["s3", 84, 108], ["s4", 108, 132], ["sj2", 132, 165],
-  ["s5a", 165, 185], ["s5b", 185, 210], ["s5c", 210, 235], ["s5d", 235, 255], ["s5e", 255, 285], ["s6", 285, 315], ["s7", 315, 340], ["s8", 340, 350],
-];
-// Teks layar pembawa cerita: [muncul, hilang, teks]. <b> = sian, <span class="r"> = merah.
-const COPY = [
-  [9.8, 13.6, "Lalu layarnya mulai bergulir."],
-  [15.5, 21.0, "Ini layarnya saat lab kami diserang: <b>654 alert</b> dalam 4 menit."],
-  [21.6, 27.4, "Hanya <span class='r'>13</span> yang berkaitan dengan serangan. Sisanya pemeriksaan rutin."],
-  [28.0, 35.4, "Ia harus menemukan 13 baris itu sendiri, lalu memahami ceritanya."],
-  [39.5, 45.0, "Yang dipertaruhkan: PC staf, server, CCTV, radio, sampai <b>genset</b> markas."],
-  [45.6, 51.4, "BSSN: 5,2 miliar anomali trafik ke Indonesia, Jan–Nov 2025."],
-  [55.0, 62.0, "Kami petakan perjalanan analis, dari alert pertama sampai laporan."],
-  [62.6, 70.4, "Memilah, merangkai, menilai dampak, bertindak, melapor: semuanya butuh jam terbang."],
-  [74.6, 83.4, "Di tahap-tahap ini, analis junior biasanya <span class='r'>harus menunggu senior</span>."],
-  [86.6, 91.2, "SIEM berhenti di alert. Merangkai cerita tetap pekerjaan analis."],
-  [91.6, 96.2, "Copilot AI bisa merangkai, tapi data militer <span class='r'>tidak boleh</span> ke cloud asing."],
-  [96.6, 101.2, "Platform OT mahal, dan hanya melihat sisi OT."],
-  [101.6, 107.4, "Alur GPT buatan sendiri juga mengirim isi insiden ke luar negeri."],
-  [114.0, 119.0, "Tameng tidak menggantikan Wazuh, Suricata, atau analisnya."],
-  [119.6, 125.4, "Tameng membantu orang yang menjaganya."],
-  [126.0, 131.4, "Satu laporan IT dan OT, bahasa Indonesia, di satu laptop tanpa internet."],
-  [134.5, 141.0, "Perjalanan yang sama, dengan Tameng."],
-  [141.6, 149.4, "Kode memilah dan merangkai. Dampaknya ditulis jelas: genset mati, atau diblokir."],
-  [150.0, 157.0, "Checklist SOP dan ringkasan untuk komandan sedang kami kerjakan."],
-  [157.6, 164.4, "Keputusan tetap di tangan analis. Sekarang, buktinya."],
-  [167.0, 175.0, "Untuk membuktikannya, kami membangun markas mini: PC staf, server file, dan PLC genset."],
-  [175.6, 184.4, "Wazuh menjaga sisi IT. Suricata menjaga jaringan kendali OT."],
-  [186.0, 190.6, "Lalu kami menyerang markas itu."],
-  [191.2, 196.6, "Penyerang menebak kata sandi, lalu masuk dengan akun <b>sertu</b>."],
-  [197.2, 202.6, "Ia menyalin hash kata sandi, lalu pindah ke server file."],
-  [203.2, 209.4, "Dari server itu, satu perintah Modbus <span class='r'>mematikan genset</span>."],
-  [211.0, 217.0, "Tameng membaca bukti dari Wazuh dan Suricata."],
-  [217.6, 224.0, "Kode, bukan AI, merangkai rantai serangan per pelaku dan per host."],
-  [224.6, 229.6, "Hasilnya: <b>satu insiden kritis</b>."],
-  [230.2, 234.6, "15 detik dari tebakan pertama sampai genset mati. 7 teknik MITRE ATT&CK."],
-  [236.0, 240.6, "Baru di tahap akhir, AI lokal menulis laporannya."],
-  [241.0, 245.4, "Setiap fakta menunjuk ke bukti aslinya."],
-  [246.0, 254.6, "AI menyebut IP, waktu, atau host di luar bukti? Narasinya <span class='r'>ditolak</span>."],
-  [256.0, 261.0, "Sekarang serangan yang sama, dengan <b>mode blokir</b> Tameng."],
-  [261.6, 268.0, "Perintah Modbus dari host tak sah dijatuhkan sebelum sampai ke PLC. <b>Genset tetap menyala.</b>"],
-  [268.6, 276.4, "Tameng tetap mencatat seluruh rantai dan melaporkannya: serangan ke OT <b>digagalkan</b>."],
-  [277.0, 284.6, "Hanya HMI resmi yang boleh mengendalikan PLC."],
-  [287.6, 293.6, "Analis menerima satu insiden dengan 13 bukti, bukan 654 baris."],
-  [294.4, 300.2, "Laporan berbahasa Indonesia siap dalam sekitar satu setengah menit."],
-  [300.8, 305.8, "Tidak ada data yang keluar dari jaringan satuan."],
-  [306.4, 314.4, "Cukup satu laptop dan perangkat lunak open-source."],
-  [318.0, 323.8, "Alat lain dirancang untuk analis ahli, atau hanya melihat satu sisi."],
-  [324.6, 331.8, "Tameng menyatukannya untuk analis satuan, dari IT sampai OT."],
-];
-// Output asli attack.sh (uji lab 6 Nov 2026, 10:19 UTC).
-const TERM = [
-  ["p", "kali-ops$ bash lab/scripts/attack.sh"],
-  ["h", "==> 0. Reset: pastikan genset NYALA (coil0=1)"], ["", "genset di-set NYALA"],
-  ["h", "==> 1. Brute force SSH ke pc-staf-07 (beberapa percobaan gagal)"],
-  ["bad", "  coba admin ... gagal"], ["bad", "  coba root ... gagal"], ["bad", "  coba operator ... gagal"],
-  ["h", "==> 2. Login BERHASIL dengan kredensial curian (sertu) + eksekusi payload dari /tmp"],
-  ["", "  [pc-staf-07] /etc/shadow disalin ke /tmp/creds.txt"],
-  ["h", "==> 3. Gerak lateral: lewat sesi penyerang di pc-staf-07, SSH ke srv-file-01, lalu kirim Modbus MATIKAN genset (coil0=0)"],
-  ["", "  [srv-file-01] berhasil diakses dari pc-staf-07"],
-  ["bad", "  perintah Modbus OFF terkirim ke PLC genset dari srv-file-01"],
-];
-
-// ---------- timeline ----------
-const $ = (s) => document.querySelector(s);
-const $$ = (s) => [...document.querySelectorAll(s)];
-const tl = gsap.timeline({ paused: true, defaults: { ease: "power3.out" } });
-const IN = { opacity: 1, y: 0, duration: 0.8 };
-
-// Visibilitas tiap adegan (silang-pudar 0,6 dtk).
-SCENES.forEach(([id, a, b]) => {
-  tl.fromTo("#" + id, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.6, ease: "none" }, a);
-  if (id !== "s8") tl.to("#" + id, { autoAlpha: 0, duration: 0.6, ease: "none" }, b - 0.3);
-});
-
-// Kamera: bingkai persegi [x0,y0,x1,y1] (0..1 dari gambar) mengisi layar.
-function frame(camSel, natW, natH, r) {
-  const W = 1920, H = W * natH / natW;
-  const s = Math.min(1920 / ((r[2] - r[0]) * W), 1080 / ((r[3] - r[1]) * H));
-  const cx = (r[0] + r[2]) / 2 * W, cy = (r[1] + r[3]) / 2 * H;
-  return { x: 960 - s * cx, y: 540 - s * cy, scale: s };
-}
-function cam(sel, nat, r, at, dur = 2.2, ease = "power2.inOut") {
-  const f = frame(sel, nat[0], nat[1], r);
-  if (dur === 0) tl.set(sel, f, at); else tl.to(sel, { ...f, duration: dur, ease }, at);
-}
-function counter(sel, to, at, dur, fmt) {
-  const o = { v: 0 };
-  tl.fromTo(o, { v: 0 }, { v: to, duration: dur, ease: "power2.out", onUpdate: () => ($(sel).textContent = fmt(o.v)) }, at);
-}
+const IN = { opacity: 1, y: 0, x: 0, duration: 0.7 };
+const pop = (sel, at, from = { y: 30 }) => tl.fromTo(sel, { opacity: 0, ...from }, IN, at);
+const lock = (sel, at) => tl.fromTo(sel, { opacity: 0, scale: 1.35 }, { opacity: 1, scale: 1, duration: 0.6, ease: "back.out(1.6)" }, at);
 function typeText(el, text, at, dur) {
   const o = { n: 0 };
   tl.fromTo(o, { n: 0 }, { n: text.length, duration: dur, ease: "none", onUpdate: () => (el.textContent = text.slice(0, Math.round(o.n))) }, at);
 }
+function counter(el, to, at, dur, fmt) {
+  const o = { v: 0 };
+  tl.fromTo(o, { v: 0 }, { v: to, duration: dur, ease: "power2.out", onUpdate: () => (el.textContent = fmt(o.v)) }, at);
+}
+const W = 1920;
+function cam(sel, nat, r, at, dur = 2.2, ease = "power2.inOut") {
+  const Hh = W * nat[1] / nat[0];
+  const s = Math.min(1920 / ((r[2] - r[0]) * W), 1080 / ((r[3] - r[1]) * Hh));
+  const cx = (r[0] + r[2]) / 2 * W, cy = (r[1] + r[3]) / 2 * Hh;
+  const f = { x: 960 - s * cx, y: 540 - s * cy, scale: s };
+  if (dur === 0) tl.set(sel, f, at); else tl.to(sel, { ...f, duration: dur, ease }, at);
+}
 
-// 0 persona
-tl.from("#s0-h", { opacity: 0, y: 30, duration: 1 }, 0.4);
-$$("#s0 .pr").forEach((p, k) => tl.fromTo(p, { opacity: 0, y: 30 }, IN, 2.4 + k * 1.8));
+// ===== 1a =====
+const r1 = $("#radar1");
+r1.innerHTML = `<svg viewBox="0 0 860 860"><g id="rg1"><circle cx="430" cy="430" r="400" fill="none" stroke="#3a4a2c" stroke-dasharray="2 10"/></g>
+  <circle cx="430" cy="430" r="300" fill="none" stroke="#25301f"/><circle cx="430" cy="430" r="160" fill="none" stroke="#25301f"/>
+  <g id="sw1"><path d="M430 430 L430 130 A300 300 0 0 1 642 218 Z" fill="#d4f74b" fill-opacity=".14"/></g>
+  <line x1="130" y1="430" x2="730" y2="430" stroke="#25301f"/><line x1="430" y1="130" x2="430" y2="730" stroke="#25301f"/>
+  <text x="430" y="438" text-anchor="middle" fill="#8c947c" font-family="SF Mono,Menlo,monospace" font-size="18" letter-spacing="3">JARINGAN MILITER</text></svg>`;
+const NODES = [["pc", "PC staf", 0], ["server", "Server", 72], ["cctv", "CCTV", 144], ["radio", "Radio", 216], ["bolt", "Genset", 288]];
+NODES.forEach(([k, label, deg], i) => {
+  const rad = deg * Math.PI / 180, x = 430 + 300 * Math.sin(rad) - 75, y = 430 - 300 * Math.cos(rad) - 60;
+  const n = document.createElement("div"); n.className = "node"; n.style.left = x + "px"; n.style.top = y + "px";
+  n.innerHTML = `<div class="o ${k === "bolt" ? "ot" : ""}">${ic(k, 52)}<span class="ping"></span><span class="ping"></span></div><b>${label}</b>`;
+  r1.appendChild(n);
+});
+gsap.set(["#rg1", "#sw1"], { transformOrigin: "430px 430px" });
+tl.fromTo("#rg1", { rotation: 0 }, { rotation: 60, duration: beat(1, 2) - B(1), ease: "none" }, B(1));
+tl.fromTo("#sw1", { rotation: 0 }, { rotation: 720, duration: beat(1, 2) - B(1), ease: "none" }, B(1));
+pop("#b1a-h", B(1) + 0.3);
+const BOOT = ["> Memuat sensor satuan … [ok]", "> Menghubungkan Wazuh (IT) … [ok]", "> Menghubungkan Suricata (OT) … [ok]", "> Memantau 5 aset markas"];
+BOOT.forEach((t, k) => {
+  const d = document.createElement("div"); $("#boot").appendChild(d);
+  typeText(d, t, B(1) + 0.6 + k * 0.9, 0.7);
+});
+$$("#radar1 .node").forEach((n, k) => lock(n, B(1) + 1.2 + k * 0.5));
+pop("#b1a-sub", beat(1, 1));
+$$("#radar1 .ping").forEach((p, k) => {
+  const t0 = beat(1, 1) + (k % 2) * 0.6 + Math.floor(k / 2) * 0.15;
+  for (let r = 0; r < 3; r++) tl.fromTo(p, { opacity: 0.9, scale: 1 }, { opacity: 0, scale: 2.2, duration: 1.1, ease: "power1.out" }, t0 + r * 1.2);
+});
 
-// 1c (log 3200x3410)
+// ===== 1b (log 3200x3410) =====
 const LOG = [3200, 3410];
-cam("#camLog", LOG, [0, 0, 0.6, 0.18], 14, 0);
-cam("#camLog", LOG, [0, 0.82, 0.6, 1], 15, 19, "none");
-counter("#cnt654", 654, 15.5, 6, (v) => Math.round(v));
-tl.to("#cnt13", { opacity: 1, duration: 0.6 }, 22.8).to("#cnt13l", { opacity: 1, duration: 0.6 }, 23.1);
+cam("#camLog", LOG, [0, 0, 0.6, 0.18], beat(1, 2) - 0.3, 0);
+cam("#camLog", LOG, [0, 0.82, 0.6, 1], beat(1, 2), beat(1, 3) - beat(1, 2), "none");
+counter($("#cnt654"), 654, beat(1, 2) + 0.4, 5, (v) => Math.round(v));
 
-// 1a yang dijaga
-tl.from("#s1a-h", { opacity: 0, y: 30, duration: 1 }, 36.4);
-tl.to("#devline", { scaleX: 1, duration: 8, ease: "none" }, 38);
-$$("#s1a .dev").forEach((d, k) => tl.fromTo(d, { opacity: 0, y: 40 }, { ...IN }, 38 + k * 1.8));
-tl.to("#s1a .dev.ot .c", { boxShadow: "0 0 90px rgba(243,166,56,.55)", duration: 1, yoyo: true, repeat: 3, ease: "sine.inOut" }, 46);
+// ===== 1c =====
+lock("#person", beat(1, 3) + 0.1);
+lock("#brkP", beat(1, 3) + 0.4);
+pop("#t1", beat(1, 3) + 0.6, { x: -30 });
+pop("#t2", beat(1, 4) + 0.1, { x: 30 });
+pop("#t3", beat(1, 5) + 0.1, { y: 30 });
+tl.to("#brkP", { borderColor: "#ff4b3e", duration: 0.2 }, beat(1, 5));
 
-// J1 titik sakit
-tl.from("#sj1-h", { opacity: 0, y: 30, duration: 1 }, 52.4);
-$$("#sj1 .st6").forEach((s, k) => tl.fromTo(s, { opacity: 0, y: 40 }, IN, 54 + k * 3.2));
-tl.fromTo("#senior", { opacity: 0, y: 20 }, IN, 74);
+// ===== 2 =====
+pop("#b2-h", B(2) + 0.2);
+pop("#bssn", beat(2, 1));
+counter($("#bssnN"), 5.2, beat(2, 1), 2.8, (v) => v.toFixed(1).replace(".", ","));
+pop("#bssnL", beat(2, 1) + 1);
+pop("#barL", beat(2, 2));
+tl.fromTo("#bar", { opacity: 0 }, { opacity: 1, duration: 0.4 }, beat(2, 2));
+tl.fromTo("#barI", { width: "0%" }, { width: "9%", duration: 1.2, ease: "power2.out" }, beat(2, 2) + 0.3);
+tl.to("#barI", { opacity: 0.2, duration: 0.25, yoyo: true, repeat: 5, ease: "none" }, beat(2, 2) + 1.6);
+pop("#barV", beat(2, 2) + 0.8);
+[["#e1", "#eb1", 3], ["#e2", "#eb2", 4], ["#e3", "#eb3", 5]].forEach(([e, b, s]) => {
+  pop(e, beat(2, s)); lock(b, beat(2, s) + 0.3);
+});
+tl.to("#e3", { borderColor: "#ff4b3e", backgroundColor: "rgba(255,75,62,.12)", duration: 0.2, yoyo: true, repeat: 3 }, beat(2, 5) + 0.8);
 
-// 3 solusi yang ada
-$$("#cards3 .card").forEach((c, k) => {
-  const t = [86.5, 91.5, 96.5, 101.5][k];
-  tl.set(c, { opacity: 1 }, 84);
-  tl.to(c, { borderColor: "rgba(255,77,79,.7)", duration: 0.5 }, t);
-  tl.fromTo(c.querySelector(".weak"), { opacity: 0, y: 30 }, IN, t);
+// ===== 3 =====
+pop("#b3-h", B(3) + 0.2);
+["#k1", "#k2", "#k3"].forEach((k, i) => pop(k, B(3) + 0.8 + i * 0.3, { y: 50 }));
+["#k1", "#k2", "#k3"].forEach((k, i) => {
+  const at = beat(3, i + 1);
+  tl.fromTo(k + " .scan", { top: -130 }, { top: 450, duration: 1, ease: "none" }, at);
+  tl.to(k, { borderColor: "#ff4b3e", duration: 0.3 }, at + 0.8);
+  tl.fromTo(k + " .stamp", { opacity: 0, scale: 1.8 }, { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(2)" }, at + 0.9);
 });
 
-// 4 Tameng + proposisi
-const dash = (sel) => { const p = $(sel), L = p.getTotalLength(); gsap.set(p, { strokeDasharray: L, strokeDashoffset: L }); return p; };
-tl.to(dash("#shield1"), { strokeDashoffset: 0, duration: 1.8, ease: "power2.inOut" }, 108.4);
-tl.to(dash("#check1"), { strokeDashoffset: 0, duration: 0.6 }, 110);
-tl.from("#s4-brand", { opacity: 0, y: 30, duration: 1 }, 109.5);
-tl.from("#s4-akr", { opacity: 0, y: 14, duration: 0.8 }, 110.2);
-tl.from("#s4-tag", { opacity: 0, y: 20, duration: 0.8 }, 110.8);
-tl.from("#s4-prop", { opacity: 0, y: 20, duration: 0.9 }, 112);
-$$("#s4-chips span").forEach((c, k) => tl.fromTo(c, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.6 }, 120 + k * 1.2));
+// ===== 4 =====
+spinRings($("#hero4"), B(4), endOf(4));
+drawShield($("#hero4"), B(4) + 0.1);
+pop("#brand4", B(4) + 1.6);
+pop("#h4a", B(4) + 2.0, { x: -30 }); pop("#h4b", B(4) + 2.2, { x: 30 });
+tl.fromTo("#akr4", { opacity: 0 }, { opacity: 1, duration: 0.5 }, beat(4, 1) - 0.2);
+const words = $$("#akr4 span"), span4 = (beat(4, 2) - beat(4, 1)) * 0.92;
+words.forEach((w, k) => tl.set(w, { className: "on" }, beat(4, 1) + span4 * (k / words.length)));
+tl.to(["#h4a", "#h4b"], { opacity: 0, duration: 0.3 }, beat(4, 2) - 0.3);
+pop("#h4c", beat(4, 2), { x: -30 });
+pop("#h4d", beat(4, 3), { x: 30 });
 
-// J2 dengan Tameng
-tl.from("#sj2-h", { opacity: 0, y: 30, duration: 1 }, 132.4);
-$$("#sj2 .st6").forEach((s, k) => tl.fromTo(s, { opacity: 0, y: 40 }, IN, 134 + k * 2.6));
+// ===== 5a =====
+const pn = $$("#pipe .pn");
+const lightPipe = (idx, at) => idx.forEach((i) => tl.set(pn[i], { className: "pn on" }, at));
+const ws = (id, a, b) => { tl.fromTo(id, { opacity: 0 }, { opacity: 1, duration: 0.35 }, a); tl.to(id, { opacity: 0, duration: 0.3 }, b - 0.3); };
+lightPipe([0], beat(5, 0) + 0.2);
+ws("#w1", beat(5, 0), beat(5, 1));
+const LW = ["sshd: Failed password for admin from 10.10.5.90", "sshd: Failed password for root from 10.10.5.90", "sshd: Accepted password for sertu", "tameng: exec /tmp/exfil.sh (sertu)", "tameng: open /etc/shadow", "sshd: Accepted password for sertu (10.10.5.66)", "wazuh: rootcheck scan", "sshd: session opened for user sertu"];
+const LS = ["modbus fc5 10.10.5.7 -> 10.10.5.20:502", "tcp syn 10.10.5.7 -> 502", "modbus write coil0=0", "flow 10.10.5.30 -> plc (HMI)", "modbus read holding regs"];
+LW.forEach((t, k) => { const d = document.createElement("div"); $("#logW").appendChild(d); typeText(d, t, beat(5, 0) + 0.3 + k * 0.42, 0.35); });
+LS.forEach((t, k) => { const d = document.createElement("div"); $("#logS").appendChild(d); typeText(d, t, beat(5, 0) + 0.5 + k * 0.6, 0.35); });
+pop("#w1n", beat(5, 0) + 2.2, { x: -20 });
+lightPipe([1, 2], beat(5, 1) + 0.1);
+ws("#w2", beat(5, 1), beat(5, 2));
+for (let k = 0; k < 46; k++) {
+  const d = document.createElement("div"); d.className = "dot"; $("#dots").appendChild(d);
+  const x0 = 60 + (k * 137) % 1500, y0 = 20 + (k * 71) % 360, tgt = Math.floor(k / 9.2), tx = 120 + tgt * 330, ty = 190;
+  tl.fromTo(d, { x: x0, y: y0, opacity: 0 }, { opacity: 1, duration: 0.2 }, beat(5, 1) + 0.05 + (k % 10) * 0.03);
+  tl.to(d, { x: tx, y: ty, duration: 1.1, ease: "power3.inOut" }, beat(5, 1) + 0.6);
+  tl.to(d, { opacity: 0, duration: 0.2 }, beat(5, 1) + 1.65);
+}
+tl.fromTo("#chain", { opacity: 0, scale: 0.96 }, { opacity: 1, scale: 1, duration: 0.5 }, beat(5, 1) + 1.6);
+pop("#w2n", beat(5, 1) + 2.2);
+lightPipe([3], beat(5, 2) + 0.1);
+ws("#w3", beat(5, 2), beat(5, 3));
+typeText($("#say1"), "Penyerang dari 10.10.5.90 masuk ke pc-staf-07 dengan akun sertu, pindah ke srv-file-01, lalu mengirim perintah yang mematikan genset.", beat(5, 2) + 0.3, 3.2);
+ws("#w4", beat(5, 3), beat(5, 4) + 0.3);
+const sayLie = $("#say2");
+sayLie.innerHTML = 'Penyerang dari <span class="lie" id="lieIp">8.8.8.8</span> masuk ke pc-staf-07, lalu mematikan genset markas.';
+tl.set("#lieIp", { className: "lie on" }, beat(5, 3) + 1.4);
+$$("#chk div").forEach((d, k) => pop(d, beat(5, 3) + 0.6 + k * 0.6, { x: 20 }));
+tl.fromTo("#stamp5", { opacity: 0, scale: 2 }, { opacity: 1, scale: 1, duration: 0.45, ease: "back.out(2)" }, beat(5, 3) + 2.9);
 
-// 5a
-$$("#s5a .tn").forEach((n, k) => tl.fromTo(n, { opacity: 0, y: 40 }, IN, 166 + k * 1.6));
-tl.to("#topoLine", { scaleX: 1, duration: 4, ease: "none" }, 166.5);
-tl.fromTo("#sensIt", { opacity: 0, y: 30 }, IN, 175);
-tl.fromTo("#sensOt", { opacity: 0, y: 30 }, IN, 178.5);
+// ===== 5b (dashboard 3200x2000) =====
+const KD = [3200, 2000];
+cam("#camDash", KD, [0.13, 0.0, 1, 0.55], beat(5, 4) - 0.3, 0);
+cam("#camDash", KD, [0.17, 0.315, 0.66, 0.6], beat(5, 4) + 0.3, beat(5, 5) - beat(5, 4) - 0.5, "power1.inOut");
+pop("#ovl5b", beat(5, 4) + 0.8, { x: -30 });
 
-// 5b
-const term = $("#termText");
-const lineAt = [185.6, 186.6, 187.2, 188.2, 189, 189.6, 190.2, 191.6, 194, 196.6, 199.5, 202];
-tl.add(() => {}, 185);
-TERM.forEach(([cls, txt], k) => {
-  const span = document.createElement("div"); span.className = cls; term.appendChild(span);
-  typeText(span, txt, lineAt[k], Math.min(1.4, txt.length / 55));
-});
-tl.fromTo("#plc", { opacity: 0, x: 40 }, { opacity: 1, x: 0, duration: 0.8 }, 186.5);
-tl.add(() => {}, 202.6);
-tl.set("#plc", { className: "plc off" }, 203);
-tl.set("#plcSt", { textContent: "GENSET DIMATIKAN" }, 203);
-tl.set("#plcLg", { innerHTML: "10:19:41,048 PERINTAH TULIS coil0=0<br>-&gt; GENSET DIMATIKAN (dampak serangan)" }, 203);
-tl.fromTo("#plc", { x: 0 }, { keyframes: { x: [0, -14, 12, -8, 6, 0] }, duration: 0.5 }, 203);
+// ===== 5c (temuan IPS 3202x4998, peta y .19-.43) =====
+const KI = [3202, 4998];
+cam("#camIps", KI, [0.15, 0.17, 0.99, 0.44], beat(5, 5) - 0.3, 0);
+cam("#camIps", KI, [0.5, 0.2, 0.99, 0.36], beat(5, 5) + 0.8, 2.6);
+pop("#t5c", beat(5, 5) + 2.2, { x: -30 });
 
-// 5c (dashboard 3200x2382)
-const D = [3200, 2382];
-const showStep = (n, at) => tl.to(`#camDash img[data-step="${n}"]`, { opacity: 1, duration: 0.5, ease: "none" }, at);
-cam("#camDash", D, [0, 0, 1, 0.56], 210, 0);
-cam("#camDash", D, [0.13, 0.11, 0.56, 0.47], 212, 2.5);          // peta + genset
-showStep(2, 213);
-tl.to("#pill5c2", { opacity: 1, duration: 0.6 }, 214.5);
-cam("#camDash", D, [0.54, 0.11, 0.87, 0.47], 217.5, 2.2);        // aliran alert
-showStep(4, 218.5); showStep(6, 221);
-cam("#camDash", D, [0.13, 0.11, 0.56, 0.47], 223.5, 2.2);        // kembali ke peta
-showStep(7, 225);
-cam("#camDash", D, [0.13, 0.36, 0.45, 0.47], 226.5, 2);          // genset DIMATIKAN
-cam("#camDash", D, [0.13, 0.46, 0.87, 0.64], 230, 2.2);          // ATT&CK
+// ===== 6a (rekomendasi 3200x3462) =====
+const KR = [3200, 3462];
+cam("#camRek", KR, [0.13, 0.0, 1, 0.3], B(6) - 0.3, 0);
+cam("#camRek", KR, [0.13, 0.05, 0.75, 0.2], B(6) + 0.6, beat(6, 1) - B(6) - 0.6);
+pop("#t6a", B(6) + 0.8, { x: -30 });
 
-// 5d (laporan 3200x4052)
-const R = [3200, 4052];
-cam("#camRep", R, [0, 0, 1, 0.19], 235, 0);
-cam("#camRep", R, [0.02, 0.2, 0.98, 0.38], 237.5, 2.2);          // kronologi
-gsap.set("#hlBukti", { left: 0.703 * 1920, top: 0.212 * 1920 * R[1] / R[0], width: 0.143 * 1920, height: 0.157 * 1920 * R[1] / R[0] });
-tl.to("#hlBukti", { opacity: 1, duration: 0.6 }, 240.5);
-tl.to("#hlBukti", { opacity: 0, duration: 0.5 }, 245.2);
-tl.to("#val", { opacity: 1, duration: 0.6 }, 245.5);
-const LIE = "Penyerang dari 8.8.8.8 masuk ke pc-staf-07, lalu mematikan genset markas.";
-const lie = $("#lieText");
-lie.innerHTML = 'Penyerang dari <span class="lie" id="ip">8.8.8.8</span> masuk ke pc-staf-07, lalu mematikan genset markas.';
-tl.fromTo(lie, { opacity: 0 }, { opacity: 1, duration: 0.4 }, 246);
-tl.set("#ip", { className: "lie on" }, 248.5);
-tl.to("#stamp", { opacity: 1, scale: 1, rotate: -12, duration: 0.5, ease: "back.out(2)" }, 249.6);
-tl.fromTo("#good", { opacity: 0, x: 40 }, { opacity: 1, x: 0, duration: 0.8 }, 251);
+// ===== 6b (temuan 3202x4926, edukasi y .69-.79) =====
+const KT = [3202, 4926];
+cam("#camEdu", KT, [0.15, 0.66, 0.99, 0.82], beat(6, 1) - 0.3, 0);
+cam("#camEdu", KT, [0.16, 0.716, 0.62, 0.81], beat(6, 1) + 0.3, beat(6, 2) - beat(6, 1) - 0.4, "power1.inOut");
+pop("#t6b", beat(6, 1) + 0.6, { x: -30 });
 
-// 5e babak 2 (laporan-ips 3200x4160; baris "DIBLOKIR" di y .343-.36)
-tl.from("#s5e-h", { opacity: 0, y: 30, duration: 0.8 }, 255.4);
-tl.fromTo("#vs1", { opacity: 0, y: 40 }, IN, 257);
-tl.fromTo("#vs2", { opacity: 0, y: 40 }, IN, 259.5);
-const VS2 = [
-  ["h", "[tameng] Suricata mode IPS"],
-  ["", "srv-file-01 -> PLC: perintah Modbus OFF"],
-  ["bad", "tidak dijawab PLC (diblokir di jalan)"],
-  ["", "Suricata 7100005: blocked"],
-  ["ok", "GENSET NYALA: serangan ke OT digagalkan"],
-];
-VS2.forEach(([cls, txt], k) => {
-  const el = document.createElement("div"); el.className = cls; $("#vs2t").appendChild(el);
-  typeText(el, txt, 260.5 + k * 1.3, Math.min(1.1, txt.length / 40));
-});
-const R2 = [3200, 4160];
-tl.to("#rep2", { opacity: 1, duration: 0.6, ease: "none" }, 268);
-tl.to("#pill5e", { opacity: 1, duration: 0.5 }, 268.4);
-cam("#camRep2", R2, [0, 0, 1, 0.18], 268, 0);
-cam("#camRep2", R2, [0.02, 0.2, 0.98, 0.37], 271.5, 2.2);
-gsap.set("#hlBlok", { left: 0.035 * 1920, top: 0.341 * 1920 * R2[1] / R2[0], width: 0.93 * 1920, height: 0.021 * 1920 * R2[1] / R2[0] });
-tl.to("#hlBlok", { opacity: 1, duration: 0.6 }, 274);
-cam("#camRep2", R2, [0.02, 0.74, 0.98, 0.91], 278.5, 2.2);
-tl.to("#hlBlok", { opacity: 0, duration: 0.4 }, 278.5);
+// ===== 6c =====
+lock("#tile0", beat(6, 2) + 0.1);
+lock("#tile1", beat(6, 3) + 0.1);
 
-// 6
-$$("#s6 .stat").forEach((s, k) => tl.fromTo(s, { opacity: 0, y: 50 }, IN, [287, 294, 300.5, 306][k]));
+// ===== 7 =====
+spinRings($("#hero7"), B(7), V.END);
+drawShield($("#hero7"), B(7) + 0.05);
+tl.fromTo("#url", { opacity: 0 }, { opacity: 1, duration: 0.3 }, beat(7, 1) - 0.1);
+const urlEl = $("#urlT"), URL = "tameng.yogency.work";
+const ou = { n: 0 };
+tl.fromTo(ou, { n: 0 }, { n: URL.length, duration: 1.4, ease: "none", onUpdate: () => {
+  const s = URL.slice(0, Math.round(ou.n)); urlEl.innerHTML = s.replace("tameng", "<em>tameng</em>"); } }, beat(7, 1));
+lock("#brkU", beat(7, 1) + 1.4);
+tl.fromTo("#cta", { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1, duration: 0.5 }, beat(7, 2) - 0.3);
+pop("#tagl", beat(7, 2) + 0.2);
+pop("#sm7", beat(7, 2) + 0.8);
 
-// 7
-$$("#s7 tr").forEach((r, k) => tl.fromTo(r, { opacity: 0 }, { opacity: 1, duration: 0.6 }, 316 + k * 1.6));
-tl.set("#s7 .tm", { className: "tm on" }, 324);
-$$("#s7 td.tm").forEach((c) => tl.set(c, { className: "tm yes on" }, 324));
-tl.fromTo("#next", { opacity: 0, y: 20 }, IN, 332.5);
+// ---------- subtitle ----------
+for (let k = 1; k <= 7; k++) {
+  CAP[k].forEach((txt, s) => {
+    const a = beat(k, s), b = s + 1 < CAP[k].length ? beat(k, s + 1) : B(k) + V.T[k].dur + 0.2;
+    const el = document.createElement("div"); el.className = "cap"; el.textContent = txt; $("#stage").appendChild(el);
+    tl.fromTo(el, { autoAlpha: 0, y: 10 }, { autoAlpha: 1, y: 0, duration: 0.25 }, a);
+    tl.to(el, { autoAlpha: 0, duration: 0.2, ease: "none" }, b - 0.15);
+  });
+}
+tl.set({}, {}, V.END);
 
-// 8
-tl.to(dash("#shield2"), { strokeDashoffset: 0, duration: 1.6, ease: "power2.inOut" }, 340.3);
-tl.to(dash("#check2"), { strokeDashoffset: 0, duration: 0.6 }, 341.7);
-tl.from("#s8-brand", { opacity: 0, y: 30, duration: 1 }, 341);
-tl.from("#s8-akr", { opacity: 0, y: 14, duration: 0.8 }, 341.7);
-tl.from("#s8-tag", { opacity: 0, y: 20, duration: 0.8 }, 342.3);
-tl.from("#s8-ev", { opacity: 0, duration: 0.8 }, 344);
-tl.set({}, {}, 350);
-
-// teks layar
-COPY.forEach(([a, b, html]) => {
-  const el = document.createElement("div"); el.className = "cap"; el.innerHTML = html;
-  $("#stage").appendChild(el);
-  tl.fromTo(el, { autoAlpha: 0, y: 16 }, { autoAlpha: 1, y: 0, duration: 0.45 }, a);
-  tl.to(el, { autoAlpha: 0, duration: 0.35, ease: "none" }, b - 0.35);
-});
+// ---------- HUD tetap ----------
+const progI = $$("#prog i");
+function hudUpdate(t) {
+  let k = 1; for (let i = 1; i <= 7; i++) if (t >= B(i) - 0.3) k = i;
+  $("#hudB").textContent = "0" + k;
+  progI.forEach((p, i) => p.classList.toggle("on", i < k));
+  const s = Math.floor(t);
+  $("#hudT").textContent = `T+${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
+}
 
 // ---------- pemutar ----------
 const P = new URLSearchParams(location.search);
 const DUR = tl.duration();
 window.__duration = DUR;
-window.__seek = (t) => { tl.seek(t, false); };   // jangan kembalikan objek timeline (Playwright akan mencoba menyalinnya)
+window.__seek = (t) => { tl.seek(t, false); hudUpdate(t); };
 if (P.has("render")) document.documentElement.classList.add("render");
-function fit() {
-  const s = Math.min(innerWidth / 1920, innerHeight / 1080);
-  $("#stage").style.transform = `translate(-50%,-50%) scale(${s})`;
-}
+function fit() { const s = Math.min(innerWidth / 1920, innerHeight / 1080); $("#stage").style.transform = `translate(-50%,-50%) scale(${s})`; }
 addEventListener("resize", fit); fit();
 tl.eventCallback("onUpdate", () => {
-  const t = tl.time(), m = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
-  $("#hud").textContent = `${tl.paused() ? "❚❚" : "▶"} ${m(t)} / ${m(DUR)} · Spasi putar/jeda · ← → 5 dtk`;
+  const t = tl.time(); hudUpdate(t);
+  const m = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
+  $("#play").textContent = `${tl.paused() ? "❚❚" : "▶"} ${m(t)} / ${m(DUR)} · Spasi putar/jeda · ← → 5 dtk`;
 });
-tl.seek(parseFloat(P.get("t")) || 0);
+tl.seek(parseFloat(P.get("t")) || 0); hudUpdate(tl.time());
 addEventListener("keydown", (e) => {
   if (e.code === "Space") { e.preventDefault(); tl.paused() ? tl.play() : tl.pause(); }
   if (e.code === "ArrowRight") tl.seek(Math.min(DUR, tl.time() + 5));
   if (e.code === "ArrowLeft") tl.seek(Math.max(0, tl.time() - 5));
 });
-// Siap direkam bila semua gambar termuat.
 Promise.all([...document.images].map((im) => im.complete ? 1 : new Promise((r) => (im.onload = im.onerror = r))))
   .then(() => (window.__ready = true));
 </script>
