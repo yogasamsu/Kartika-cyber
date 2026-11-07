@@ -63,6 +63,7 @@ Masalah yang disebut narasumber dan situs Satsiber/TTIS:
 | F4 | Narasi LLM lokal tervalidasi | Qwen 2.5 7B via Ollama; narasi ditolak bila menyebut fakta di luar bukti |
 | F5 | Mode blokir OT | Suricata inline menjatuhkan perintah tulis Modbus dari host selain HMI resmi |
 | F7 | **Edukasi SDM di laporan** (baru, 7 Nov) | Bagian "Pelajari insiden ini" untuk tiap teknik ATT&CK di insiden: apa yang terjadi, kenapa berbahaya, kerjakan sekarang, supaya tidak terulang. Materi ditulis manusia dan disimpan di kode (`mitre.EDUKASI`), bukan dibuat LLM. Ikut juga di JSON (`edukasi`) |
+| F9 | **Dashboard pusat komando gaya militer** (baru, 7 Nov) | `dashboard/`: pembuka HUD yang mengunci perisai Tameng, peta alur serangan IT/OT, kronologi, checklist gerak cepat, panel edukasi. Tanpa CDN atau font daring |
 | F5b | **Skenario deface situs** (baru, 7 Nov) | Unggahan lewat celah plugin, webshell, perintah sistem, halaman berubah. Sinyal: log akses web dan File Integrity Monitoring Wazuh di web root. ATT&CK T1190, T1505.003, T1059.004, T1491.002 |
 
 ### Rencana sampai 15 Nov
@@ -71,7 +72,6 @@ Masalah yang disebut narasumber dan situs Satsiber/TTIS:
 |---|---|---|---|
 | F6 | Ringkasan kerentanan ("scan sistem") | Baca hasil Wazuh Vulnerability Detection dan SCA yang sudah ada; LLM menjelaskan 3 temuan teratas dan alasannya. Tameng **tidak** membuat pemindai sendiri | Menjawab masalah sistem lama: kalau tidak bisa menambal semua, operator perlu urutan |
 | F8 | Mode latihan | Putar ulang skenario lab (IT→OT, blokir, deface) untuk melatih operator baru | Opsional bila waktu cukup |
-| F9 | Dashboard bergaya militer | Tampilan komando gelap: peta aset, status insiden, kronologi, panel ATT&CK | Diminta tim; referensi dua desain Dribbble |
 
 ### Di luar lingkup
 
@@ -132,7 +132,8 @@ Mengikuti bobot juri:
 | 7 Nov | Skenario deface di mesin korelasi + tes + replay (selesai) |
 | 7 Nov | F7 edukasi SDM di laporan (selesai) |
 | 8–9 Nov | F6 ringkasan kerentanan; peringatan aktif (notifikasi) |
-| 10–12 Nov | F9 dashboard gaya militer |
+| 7 Nov | F9 dashboard gaya militer (selesai) |
+| 10–12 Nov | Integrasi dashboard ke video dan deck |
 | 13 Nov | Perbarui video dan deck dengan babak deface |
 | 14 Nov | Uji ulang penuh, submit lebih awal |
 | 15 Nov | Batas submission |
