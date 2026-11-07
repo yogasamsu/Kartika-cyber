@@ -6,9 +6,15 @@ tetap jalan di laptop air-gapped.
 - **Beranda (`index.html`)**: HUD yang mengunci perisai Tameng, lalu tujuh
   bagian singkat: masalah, solusi saat ini, apa itu Tameng, cara kerja,
   keunggulan, limitasi, dan integrasi ke sistem TNI.
-- **Pusat komando (`komando.html`)**: cara kerja singkat, status sistem,
-  tindakan prioritas, notifikasi, insiden (peta alur serangan, kronologi,
-  ringkasan, checklist, edukasi), ringkasan kerentanan, dan daftar fitur.
+- **Pusat komando (`komando.html`)**, empat menu:
+  1. **Dashboard** (`#dashboard`): angka utama, insiden paling penting,
+     langkah pertama, daftar insiden, notifikasi terbaru.
+  2. **Temuan** (`#temuan/<i>`): analisa Tameng per insiden, peta alur
+     serangan, rantai serangan, edukasi, temuan kerentanan.
+  3. **Rekomendasi** (`#rekomendasi`): enam tindakan prioritas, checklist per
+     insiden, daftar tambal kerentanan.
+  4. **Data log** (`#log/<i>`): tabel alert asli, kronologi dengan penanda
+     bukti, catatan narasi, semua notifikasi, status sistem.
 - `tameng.css` dipakai kedua halaman.
 
 Deploy: proyek Vercel `tameng` dari folder ini (`vercel deploy --prod`).
