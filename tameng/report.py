@@ -5,6 +5,16 @@ SEV_BADGE = {"kritis": "🔴 KRITIS", "tinggi": "🟠 TINGGI",
              "sedang": "🟡 SEDANG", "rendah": "🟢 RENDAH"}
 
 
+def edukasi_list(inc):
+    """Materi edukasi untuk tiap teknik di insiden, urut sesuai kemunculan."""
+    out = []
+    for tid, name, _domain, _tactic in inc.techniques:
+        e = mitre.edukasi(tid)
+        if e:
+            out.append(dict(id=tid, name=name, **e))
+    return out
+
+
 def render_markdown(inc, summary):
     L = []
     L.append(f"# {summary['judul']}")
@@ -43,6 +53,19 @@ def render_markdown(inc, summary):
     for r in summary["rekomendasi"]:
         L.append(f"- {r}")
     L.append("")
+
+    edu = edukasi_list(inc)
+    if edu:
+        L.append("## Pelajari insiden ini")
+        L.append("*Materi tetap untuk analis jaga; ditulis manusia, bukan dibuat AI.*")
+        L.append("")
+        for x in edu:
+            L.append(f"### {x['id']} · {x['name']}")
+            L.append(f"- **Apa yang terjadi:** {x['apa']}")
+            L.append(f"- **Kenapa berbahaya:** {x['bahaya']}")
+            L.append(f"- **Kerjakan sekarang:** {x['tindakan']}")
+            L.append(f"- **Supaya tidak terulang:** {x['cegah']}")
+            L.append("")
 
     L.append("## Bukti")
     L.append("| ID | Sumber | Sinyal | Host/Alur | Waktu |")

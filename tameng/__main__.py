@@ -36,6 +36,7 @@ def incident_to_dict(inc, summary):
                     "time": e.ts.strftime("%H:%M:%S"), "domain": e.domain}
                    for e in inc.events],
         "notes": inc.notes,
+        "edukasi": report.edukasi_list(inc),
         "summary": {k: v for k, v in summary.items() if k != "_meta"},
         "meta": summary.get("_meta", {}),
     }

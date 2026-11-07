@@ -7,7 +7,7 @@ import os
 import tempfile
 import unittest
 
-from tameng import config, correlate, events, llm
+from tameng import config, correlate, events, llm, mitre, report
 
 
 def wazuh(t, rid, agent, **data):
@@ -275,6 +275,36 @@ class Deface(unittest.TestCase):
         with Evidence(DEMO_WAZUH + DEFACE_WAZUH, DEMO_EVE) as evs:
             incs = correlate.build_incidents(evs)
         self.assertEqual(len(incs), 2)
+
+
+class Edukasi(unittest.TestCase):
+    """F7: materi belajar tetap per teknik, ikut di laporan dan JSON."""
+
+    def test_semua_teknik_punya_materi(self):
+        for tid in mitre.TECHNIQUES:
+            with self.subTest(tid=tid):
+                e = mitre.edukasi(tid)
+                self.assertIsNotNone(e)
+                for k in ("apa", "bahaya", "tindakan", "cegah"):
+                    self.assertTrue(e[k].strip())
+
+    def test_materi_ikut_urutan_teknik_insiden(self):
+        with Evidence(DEFACE_WAZUH, []) as evs:
+            inc, = correlate.build_incidents(evs)
+        edu = report.edukasi_list(inc)
+        self.assertEqual([x["id"] for x in edu], [t[0] for t in inc.techniques])
+        md = report.render_markdown(inc, llm._fallback(inc))
+        self.assertIn("## Pelajari insiden ini", md)
+        self.assertIn("### T1491.002", md)
+        self.assertLess(md.index("## Rekomendasi"), md.index("## Pelajari insiden ini"))
+
+    def test_materi_ot_hanya_di_insiden_ot(self):
+        with Evidence(DEFACE_WAZUH, []) as evs:
+            inc, = correlate.build_incidents(evs)
+        self.assertNotIn("PLC", report.render_markdown(inc, llm._fallback(inc)))
+        with Evidence(DEMO_WAZUH, DEMO_EVE) as evs:
+            inc, = correlate.build_incidents(evs)
+        self.assertIn("### T0855", report.render_markdown(inc, llm._fallback(inc)))
 
 
 class Narration(unittest.TestCase):

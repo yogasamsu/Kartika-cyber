@@ -88,3 +88,74 @@ def technique_name(tid):
 def technique_domain(tid):
     t = TECHNIQUES.get(tid)
     return t[1] if t else "enterprise"
+
+
+# Edukasi SDM: penjelasan tetap per teknik untuk analis junior (bintara siber).
+# Ditulis manusia dan disimpan di kode, bukan dibuat LLM, supaya materi belajar
+# tidak bisa mengarang. Tiap entri menjawab tiga pertanyaan:
+#   apa      : apa yang dilakukan penyerang, dalam bahasa sehari-hari
+#   bahaya   : kenapa ini berbahaya bagi satuan
+#   tindakan : yang dikerjakan analis jaga sekarang
+#   cegah    : yang dikerjakan satuan supaya tidak terulang
+EDUKASI = {
+    "T1110": dict(
+        apa="Penyerang menebak kata sandi berkali-kali, biasanya dengan daftar sandi umum, sampai ada yang cocok.",
+        bahaya="Satu akun bersandi lemah sudah cukup untuk masuk ke jaringan satuan.",
+        tindakan="Catat IP sumber dan akun yang dicoba. Periksa apakah ada login BERHASIL dari IP yang sama sesudahnya.",
+        cegah="Wajibkan sandi panjang, kunci akun setelah beberapa kali gagal, dan batasi SSH hanya dari jaringan admin."),
+    "T1078": dict(
+        apa="Penyerang masuk memakai akun asli milik personel, sehingga terlihat seperti pengguna biasa.",
+        bahaya="Aktivitasnya sulit dibedakan dari pekerjaan normal, dan hak akses akun itu ikut jatuh ke tangan penyerang.",
+        tindakan="Hubungi pemilik akun: apakah dia yang login? Bila bukan, reset sandinya dan putus sesi yang aktif.",
+        cegah="Pasang autentikasi dua langkah untuk akses jarak jauh dan tinjau akun yang jarang dipakai."),
+    "T1021.004": dict(
+        apa="Penyerang memakai SSH untuk mengendalikan komputer dari jauh, lalu melompat ke komputer lain.",
+        bahaya="Dari satu PC staf, penyerang bisa berpindah ke server penting tanpa perlu menembus perimeter lagi.",
+        tindakan="Telusuri semua login SSH dari host yang sudah dikuasai. Tiap host tujuan ikut diperiksa.",
+        cegah="Segmentasi jaringan: PC staf tidak perlu bisa SSH ke server atau jaringan kendali."),
+    "T1059.004": dict(
+        apa="Penyerang menjalankan perintah atau skrip shell di komputer korban, sering dari folder /tmp.",
+        bahaya="Ini tanda penyerang sudah memegang kendali dan mulai menjalankan alatnya sendiri.",
+        tindakan="Amankan salinan skrip sebagai bukti (catat hash-nya) sebelum dihapus, lalu isolasi host.",
+        cegah="Pasang /tmp dengan opsi noexec dan pantau eksekusi dari folder sementara."),
+    "T1003.008": dict(
+        apa="Penyerang membaca /etc/shadow, berkas berisi hash kata sandi semua akun lokal.",
+        bahaya="Hash bisa dipecahkan di luar jaringan; sandi yang sama sering dipakai di host lain.",
+        tindakan="Anggap semua sandi akun lokal di host itu bocor. Ganti sandinya, terutama yang juga dipakai di tempat lain.",
+        cegah="Jangan pakai sandi yang sama di banyak host; batasi akun yang punya hak sudo."),
+    "T1190": dict(
+        apa="Penyerang memanfaatkan celah pada aplikasi yang terbuka ke internet, misalnya plugin situs yang belum diperbarui.",
+        bahaya="Situs publik bisa diakses siapa saja, jadi celahnya bisa dipakai tanpa perlu akun.",
+        tindakan="Cari tahu aplikasi atau plugin mana yang diserang dari URL di bukti, lalu matikan sementara.",
+        cegah="Perbarui CMS dan plugin secara rutin, hapus plugin yang tidak dipakai, dan pasang WAF di depan situs."),
+    "T1505.003": dict(
+        apa="Penyerang menaruh webshell: berkas kecil di server web yang menerima perintah lewat alamat situs.",
+        bahaya="Selama webshell masih ada, penyerang bisa kembali kapan saja walaupun celah awalnya sudah ditutup.",
+        tindakan="Salin berkas webshell ke media bukti dan catat hash-nya, baru hapus. Cari berkas serupa di folder unggahan.",
+        cegah="Larang eksekusi skrip di folder unggahan dan pantau berkas baru di direktori situs (FIM)."),
+    "T1491.002": dict(
+        apa="Penyerang mengganti tampilan halaman situs publik (deface), biasanya dengan pesan atau logo kelompoknya.",
+        bahaya="Merusak citra dan kepercayaan publik pada satuan; sering juga dipakai sebagai propaganda.",
+        tindakan="Pasang halaman pemeliharaan, laporkan ke atasan, dan pulihkan dari backup bersih yang sudah diverifikasi.",
+        cegah="Simpan backup situs yang terpisah dari server dan uji pemulihannya secara berkala."),
+    "T0855": dict(
+        apa="Penyerang mengirim perintah ke PLC (pengendali mesin) dari komputer yang bukan HMI resmi.",
+        bahaya="PLC menjalankan perintah apa pun yang diterimanya; mesin fisik seperti genset bisa dimatikan.",
+        tindakan="Pastikan status mesin lewat HMI resmi atau cek fisik, lalu cari komputer pengirim perintah.",
+        cegah="Hanya HMI resmi yang boleh menulis ke PLC; pakai mode blokir Tameng untuk menjatuhkan perintah lain."),
+    "T0816": dict(
+        apa="Perintah penyerang mematikan atau menyalakan ulang perangkat di lapangan.",
+        bahaya="Layanan yang bergantung pada perangkat itu ikut berhenti, misalnya listrik cadangan markas.",
+        tindakan="Nyalakan kembali perangkat secara manual sesuai SOP dan catat lama gangguannya.",
+        cegah="Siapkan prosedur pengoperasian manual dan uji secara berkala."),
+    "T0826": dict(
+        apa="Proses atau layanan fisik berhenti tersedia akibat serangan.",
+        bahaya="Dampaknya langsung terasa pada operasi satuan, bukan hanya pada data.",
+        tindakan="Laporkan dampak ke komandan dan jalankan rencana cadangan.",
+        cegah="Tentukan perangkat mana yang kritis dan siapkan cadangannya."),
+}
+
+
+def edukasi(tid):
+    """Materi edukasi untuk sebuah teknik, atau None bila belum ada."""
+    return EDUKASI.get(tid)
