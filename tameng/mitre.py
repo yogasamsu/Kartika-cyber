@@ -52,6 +52,9 @@ SIGNALS = {
                            tactic="Persistence", tech=["T1505.003"], domain="it"),
     ("wazuh", "550"): dict(kind="web_file_changed", label="Isi halaman situs web berubah",
                            tactic="Impact", tech=["T1491.002"], domain="it"),
+    # Respons otomatis Wazuh (active response firewall-drop): IP penyerang diblokir di host.
+    ("wazuh", "651"): dict(kind="ip_blocked", label="IP penyerang DIBLOKIR otomatis (active response)",
+                           tactic="Respons", tech=[], domain="it"),
     # Suricata (OT) — semua fungsi tulis Modbus dianggap perintah tak sah ke PLC.
     ("suricata", "7000005"): dict(kind="modbus_write", label="Perintah tulis Modbus (fc5) ke PLC",
                                   tactic="Impair Process Control", tech=["T0855", "T0816"], domain="ot"),

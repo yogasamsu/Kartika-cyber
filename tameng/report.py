@@ -21,6 +21,8 @@ def render_markdown(inc, summary):
     L.append("")
     L.append(f"**Insiden** `{inc.id}` · **Tingkat bahaya** {SEV_BADGE.get(inc.severity, inc.severity)}"
              f" · **Dampak OT** {'Ya' if inc.has_ot_impact else ('Dicoba, DIBLOKIR' if inc.ot_blocked else 'Tidak')}")
+    if inc.it_blocked:
+        L.append("**Respons otomatis** IP penyerang diblokir (active response)")
     if inc.defaced:
         L.append("**Dampak publik** Halaman situs diubah (deface)")
     L.append(f"**Waktu** {inc.start.strftime('%Y-%m-%d %H:%M:%S')} – {inc.end.strftime('%H:%M:%S')} UTC"

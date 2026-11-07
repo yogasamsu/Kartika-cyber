@@ -7,7 +7,9 @@ import os
 import tempfile
 import unittest
 
-from tameng import config, correlate, events, llm, mitre, report
+import io
+
+from tameng import config, correlate, events, llm, mitre, notify, report, vuln
 
 
 def wazuh(t, rid, agent, **data):
@@ -305,6 +307,96 @@ class Edukasi(unittest.TestCase):
         with Evidence(DEMO_WAZUH, DEMO_EVE) as evs:
             inc, = correlate.build_incidents(evs)
         self.assertIn("### T0855", report.render_markdown(inc, llm._fallback(inc)))
+
+
+def ar_block(t, src=ATK, host="web-portal", command="add"):
+    return {"timestamp": f"2026-10-28T{t}.000+0000", "rule": {"id": "651", "level": 3},
+            "agent": {"name": host}, "id": t,
+            "data": {"command": command, "parameters": {"alert": {"data": {"srcip": src}}}}}
+
+
+class BlokirOtomatisIT(unittest.TestCase):
+    """Netralisasi IT: Wazuh active response memblokir IP penyerang."""
+
+    def test_blokir_menempel_ke_rantai_dan_menghentikan_deface(self):
+        w = DEFACE_WAZUH[:3] + [ar_block("11:00:06")]
+        with Evidence(w, []) as evs:
+            inc, = correlate.build_incidents(evs)
+        self.assertTrue(inc.it_blocked)
+        self.assertFalse(inc.defaced)
+        self.assertIn("DIBLOKIR otomatis", inc.steps[-1].text)
+        self.assertTrue(any("Netralisasi otomatis" in n for n in inc.notes))
+        fb = llm._fallback(inc)
+        self.assertIn("diblokir otomatis", fb["judul"])
+        self.assertNotIn(f"Blokir {ATK} di perimeter.", fb["rekomendasi"])
+
+    def test_blokir_tanpa_rantai_bukan_insiden(self):
+        with Evidence([ar_block("11:00:00", src="10.10.5.77")], []) as evs:
+            self.assertEqual(correlate.build_incidents(evs), [])
+
+    def test_pembukaan_blokir_diabaikan(self):
+        with Evidence([ar_block("11:00:00", command="delete")], []) as evs:
+            self.assertEqual(evs, [])
+
+
+SAMPLE_VULN = os.path.join(os.path.dirname(__file__), "..", "lab", "sample", "kerentanan-alerts.json")
+
+
+class Kerentanan(unittest.TestCase):
+    def test_prioritas_kev_dan_aset_publik_di_atas(self):
+        s = vuln.summarize(SAMPLE_VULN)
+        top = s["prioritas"][0]
+        self.assertEqual((top["cve"], top["host"]), ("CVE-2020-25213", "web-portal"))
+        self.assertTrue(top["kev"])
+        self.assertIn("terbuka ke publik", top["alasan"])
+        self.assertEqual(s["total_kev"], 2)
+        self.assertEqual(len(s["tambal_dulu"]), 3)
+
+    def test_host_insiden_naik_prioritas(self):
+        a = {p["cve"] + p["host"]: p["skor"] for p in vuln.summarize(SAMPLE_VULN)["prioritas"]}
+        b = {p["cve"] + p["host"]: p["skor"] for p in vuln.summarize(SAMPLE_VULN, ["pc-staf-07"])["prioritas"]}
+        self.assertEqual(b["CVE-2024-6387pc-staf-07"] - a["CVE-2024-6387pc-staf-07"], 2)
+
+    def test_status_solved_dan_sca(self):
+        rows = [
+            {"agent": {"name": "pc-staf-07"}, "data": {"vulnerability": {"cve": "CVE-1", "status": "Solved"}}},
+            {"agent": {"name": "pc-staf-07"}, "data": {"sca": {"check": {"title": "Cek A", "result": "failed"}}}},
+            {"agent": {"name": "pc-staf-07"}, "data": {"sca": {"check": {"title": "Cek B", "result": "passed"}}}},
+        ]
+        with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False) as f:
+            f.write("\n".join(json.dumps(r) for r in rows))
+        try:
+            s = vuln.summarize(f.name)
+        finally:
+            os.unlink(f.name)
+        self.assertEqual(s["total_cve"], 0)
+        self.assertEqual(s["sca_gagal"], {"pc-staf-07": ["Cek A"]})
+
+
+class Notifikasi(unittest.TestCase):
+    def run_notifier(self, *rounds):
+        out = io.StringIO()
+        n = notify.Notifier(log_path="", desktop=False, webhook="", out=out)
+        sent = []
+        for w, e in rounds:
+            with Evidence(w, e) as evs:
+                sent.append([m["jenis"] for m in n.process(correlate.build_incidents(evs), llm._fallback)])
+        return sent, out.getvalue()
+
+    def test_baru_lalu_diam_bila_tidak_berubah(self):
+        sent, out = self.run_notifier((DEFACE_WAZUH, []), (DEFACE_WAZUH, []))
+        self.assertEqual(sent, [["BARU"], []])
+        self.assertIn("langkah pertama:", out)
+
+    def test_memburuk_saat_muncul_dampak_ot(self):
+        w = DEMO_WAZUH
+        sent, _ = self.run_notifier((w, []), (w, DEMO_EVE))
+        self.assertEqual(sent, [["BARU"], ["MEMBURUK"]])
+
+    def test_ditangani_saat_diblokir(self):
+        base = DEFACE_WAZUH[:3]
+        sent, _ = self.run_notifier((base, []), (base + [ar_block("11:00:06")], []))
+        self.assertEqual(sent, [["BARU"], ["DITANGANI"]])
 
 
 class Narration(unittest.TestCase):

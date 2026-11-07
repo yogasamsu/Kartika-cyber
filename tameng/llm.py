@@ -41,6 +41,8 @@ def _facts(inc):
         lines.append("Dampak OT: tidak; perintah ke PLC dicoba tetapi DIBLOKIR, genset tetap menyala")
     else:
         lines.append("Dampak OT: tidak")
+    if inc.it_blocked:
+        lines.append("Respons otomatis: IP penyerang sudah diblokir di host (active response)")
     if inc.defaced:
         lines.append("Dampak publik: ya, halaman situs web diubah penyerang (deface)")
     lines.append(f"IP masuk penyerang: {inc.entry_ip}")
@@ -110,6 +112,9 @@ def _fallback(inc):
         dampak = "mengubah halaman situs publik (deface)"
         if any(e.kind == "webshell_cmd" for e in inc.events):
             dampak = "menanam webshell dan mengubah halaman situs publik (deface)"
+    elif inc.it_blocked:
+        judul = f"Serangan {inc.severity} ke {hosts} dihentikan: IP penyerang diblokir otomatis"
+        dampak = "mulai menjalankan perintah, tetapi IP-nya diblokir otomatis sebelum menimbulkan dampak"
     elif any(e.kind in ("web_exploit", "webshell_cmd") for e in inc.events):
         judul = f"Insiden {inc.severity}: eksploitasi aplikasi web di {hosts}"
         dampak = "mengeksploitasi aplikasi web"
@@ -139,7 +144,9 @@ def _fallback(inc):
         rek.append(f"Salin {target} ke media bukti (hash dulu), baru hapus dari server.")
     if "web_exploit" in kinds:
         rek.append("Nonaktifkan atau perbarui plugin yang dieksploitasi; periksa berkas lain di direktori situs yang berubah.")
-    if inc.entry_ip and not config.asset(inc.entry_ip)[3]:
+    if inc.it_blocked:
+        rek.append("Blokir otomatis sudah aktif di host; pasang juga di firewall perimeter karena blokir host berbatas waktu.")
+    if inc.entry_ip and not config.asset(inc.entry_ip)[3] and not inc.it_blocked:
         rek.append(f"Blokir {inc.entry_ip} di perimeter.")
     if any(t[0] == "T1003.008" for t in inc.techniques):
         rek.append("Anggap seluruh hash kata sandi di host terdampak bocor; ganti kata sandi akun lokal.")

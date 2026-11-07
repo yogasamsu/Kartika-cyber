@@ -101,10 +101,17 @@ def load_wazuh(since=None):
             path = (a.get("syscheck") or {}).get("path", "")
             if not path.startswith(config.WEB_ROOTS):
                 continue
+        d = a.get("data", {})
+        if meta["kind"] == "ip_blocked":
+            # Log active response (JSON): IP ada di parameters.alert.data.srcip.
+            # Perintah "delete" adalah pembukaan blokir saat waktunya habis, bukan blokir.
+            if d.get("command") == "delete":
+                continue
+            ar_ip = (((d.get("parameters") or {}).get("alert") or {}).get("data") or {}).get("srcip")
+            d = dict(d, srcip=d.get("srcip") or ar_ip)
         ts, received = _source_ts(a)
         if not ts or (since and ts < since):
             continue
-        d = a.get("data", {})
         out.append(Event(
             eid="", ts=ts, source="wazuh", sid=sid,
             kind=meta["kind"], label=meta["label"], tactic=meta["tactic"],

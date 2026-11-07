@@ -4,13 +4,16 @@ Contoh:
   python3 -m tameng --minutes 10
   python3 -m tameng --minutes 10 --out laporan.md
   python3 -m tameng --no-llm           # hanya korelasi deterministik
+  python3 -m tameng --watch            # mode pantau: notifikasi saat insiden baru/memburuk
+  python3 -m tameng --kerentanan lab/sample/kerentanan-alerts.json   # ringkasan kerentanan
 """
 import argparse
 import datetime as dt
 import json
 import os
+import time
 
-from . import correlate, events, report
+from . import correlate, events, notify, report, vuln
 from .llm import summarize, _fallback
 
 
@@ -22,6 +25,7 @@ def incident_to_dict(inc, summary):
         "has_ot_impact": inc.has_ot_impact,
         "ot_blocked": inc.ot_blocked,
         "defaced": inc.defaced,
+        "it_blocked": inc.it_blocked,
         "start": inc.start.isoformat(),
         "end": inc.end.isoformat(),
         "entry_ip": inc.entry_ip,
@@ -49,7 +53,36 @@ def main():
     ap.add_argument("--out", help="tulis laporan Markdown ke berkas (atau direktori)")
     ap.add_argument("--json", dest="json_out", help="tulis insiden sebagai JSON (untuk dashboard/UI)")
     ap.add_argument("--no-llm", action="store_true", help="lewati LLM, pakai ringkasan deterministik")
+    ap.add_argument("--watch", action="store_true", help="mode pantau: cek bukti berkala dan kirim notifikasi")
+    ap.add_argument("--interval", type=int, default=15, help="jeda antar-pengecekan mode pantau (detik)")
+    ap.add_argument("--state", default=".tameng-notif.json", help="berkas status notifikasi mode pantau")
+    ap.add_argument("--kerentanan", metavar="ALERTS", help="ringkas kerentanan dari alert Wazuh VD/SCA")
     args = ap.parse_args()
+
+    if args.kerentanan:
+        s = vuln.summarize(args.kerentanan)
+        if args.json_out:
+            with open(args.json_out, "w", encoding="utf-8") as f:
+                json.dump(s, f, ensure_ascii=False, indent=2)
+        md = vuln.render_markdown(s)
+        if args.out:
+            with open(args.out, "w", encoding="utf-8") as f:
+                f.write(md + "\n")
+        print(md)
+        return
+
+    if args.watch:
+        n = notify.Notifier(state_path=args.state)
+        summ = _fallback if args.no_llm else summarize
+        print(f"Tameng memantau bukti tiap {args.interval} dtk (jendela {args.minutes} menit). Ctrl+C untuk berhenti.")
+        try:
+            while True:
+                evs = events.load_all(minutes=args.minutes)
+                n.process(correlate.build_incidents(evs), summ)
+                time.sleep(args.interval)
+        except KeyboardInterrupt:
+            print("\nPemantauan dihentikan.")
+        return
 
     since = events._parse_ts(args.since) if args.since else None
     if args.since and since is None:

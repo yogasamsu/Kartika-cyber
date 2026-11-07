@@ -35,6 +35,7 @@ class Incident:
     steps: list             # list[Step]
     notes: list = field(default_factory=list)
     defaced: bool = False   # halaman situs publik diubah penyerang
+    it_blocked: bool = False  # IP penyerang diblokir otomatis (active response)
 
     def evidence_ids(self):
         return [e.eid for e in self.events]
@@ -43,7 +44,8 @@ class Incident:
 # Pembacaan /etc/shadow oleh proses login (PAM) adalah derau, bukan pencurian.
 # Urutan rantai bila waktu urutnya sama: akses dulu, baru aksi di host, lalu OT.
 KIND_RANK = {"brute_force": 0, "auth_success": 1, "tmp_exec": 2, "shadow_read": 3, "modbus_write": 4, "modbus_block": 4,
-             "web_exploit": 1, "web_file_added": 2, "webshell_cmd": 3, "web_file_changed": 4}
+             "web_exploit": 1, "web_file_added": 2, "webshell_cmd": 3, "web_file_changed": 4,
+             "ip_blocked": 5}
 
 # Sinyal berkas dari FIM web root: ditempelkan ke rantai yang menguasai host web.
 WEB_FILE_KINDS = ("web_file_added", "web_file_changed")
@@ -216,6 +218,15 @@ def _assemble(events, window):
                 "(FTP, panel hosting, akun admin CMS).")
         d.add(e, d.owned.get(e.host))
 
+    # Blokir otomatis hanya bermakna bila melekat ke rantai pelaku yang sama.
+    # Blokir tanpa rantai (mis. brute force biasa yang langsung diputus) bukan insiden.
+    for e in events:
+        if e.kind != "ip_blocked":
+            continue
+        d = _find_by_actor(drafts, _actor(e.src_ip), e.ts, window)
+        if d is not None:
+            d.add(e)
+
     return drafts, benign
 
 
@@ -334,6 +345,13 @@ def _build_steps(events):
                 evidence=[e.eid],
                 tech=["T1491.002"],
             ))
+        elif e.kind == "ip_blocked":
+            steps.append(Step(
+                time=_hhmmss(e.ts),
+                text=f"IP {e.src_ip} DIBLOKIR otomatis di {e.host} (Wazuh active response) — akses penyerang diputus",
+                evidence=[e.eid],
+                tech=[],
+            ))
         elif e.kind == "modbus_write":
             tgt = config.asset(e.dst_ip)[0]
             src_name = config.asset(e.src_ip)[0]
@@ -432,7 +450,11 @@ def build_incidents(events, window=None):
             steps=_build_steps(cluster),
             notes=list(d.notes),
             defaced=any(e.kind == "web_file_changed" for e in cluster),
+            it_blocked=any(e.kind == "ip_blocked" for e in cluster),
         )
+        if inc.it_blocked:
+            ip = next(e.src_ip for e in cluster if e.kind == "ip_blocked")
+            inc.notes.append(f"Netralisasi otomatis: {ip} diblokir firewall host oleh Wazuh active response.")
         if blocked:
             inc.notes.append(
                 f"Serangan ke OT digagalkan: {blocked} perintah tulis Modbus dari host tak sah "

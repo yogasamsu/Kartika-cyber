@@ -8,7 +8,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y --no-install-recommends \
       openssh-server openssh-client sshpass auditd audispd-plugins \
       curl gnupg2 ca-certificates lsb-release procps sudo rsyslog \
-      python3 iproute2 iputils-ping netcat-openbsd \
+      python3 iproute2 iputils-ping netcat-openbsd iptables \
     && rm -rf /var/lib/apt/lists/*
 
 # Repo resmi Wazuh + agent (arm64 tersedia).
