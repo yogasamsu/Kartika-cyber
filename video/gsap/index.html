@@ -87,6 +87,7 @@ svg.ic{fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;strok
 .center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
 .brand{font-size:190px;font-weight:800;letter-spacing:-.03em;margin-top:10px}
 .tag{font-size:46px;color:var(--it);margin-top:6px}
+.akr{font-size:26px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-top:4px}
 .chips{display:flex;gap:22px;margin-top:60px}
 .chips span{font-size:30px;padding:14px 28px;border-radius:999px;border:1px solid #2b4a63;background:var(--panel);opacity:0}
 
@@ -283,6 +284,7 @@ table.cmp{border-collapse:separate;border-spacing:0;margin-top:60px;width:100%;f
       <path id="check1" d="m8.5 12 2.5 2.5 4.5-5" stroke-width="1.3"/>
     </svg>
     <div class="brand" id="s4-brand" style="font-size:150px">Tameng</div>
+    <div class="akr" id="s4-akr">Tangkal Ancaman Mandiri lewat Edukasi, Notifikasi, dan Gerak cepat</div>
     <div class="tag" id="s4-tag">Pendamping analis insiden IT/OT, di dalam satuan</div>
     <div class="prop" id="s4-prop">Dengan Tameng, analis junior bisa menangani insiden yang <em>biasanya harus menunggu analis senior</em>.</div>
     <div class="chips" id="s4-chips" style="margin-top:44px">
@@ -423,6 +425,7 @@ table.cmp{border-collapse:separate;border-spacing:0;margin-top:60px;width:100%;f
       <path id="check2" d="m8.5 12 2.5 2.5 4.5-5" stroke-width="1.3"/>
     </svg>
     <div class="brand" id="s8-brand">Tameng</div>
+    <div class="akr" id="s8-akr">Tangkal Ancaman Mandiri lewat Edukasi, Notifikasi, dan Gerak cepat</div>
     <div class="tag" id="s8-tag">Pendamping analis insiden, di dalam satuan, untuk satuan</div>
     <div class="sub" id="s8-ev" style="margin-top:50px">Kartika Cyber Hackathon 2026 · Defensive Shield<span id="tim"></span></div>
   </div>
@@ -593,6 +596,7 @@ const dash = (sel) => { const p = $(sel), L = p.getTotalLength(); gsap.set(p, { 
 tl.to(dash("#shield1"), { strokeDashoffset: 0, duration: 1.8, ease: "power2.inOut" }, 108.4);
 tl.to(dash("#check1"), { strokeDashoffset: 0, duration: 0.6 }, 110);
 tl.from("#s4-brand", { opacity: 0, y: 30, duration: 1 }, 109.5);
+tl.from("#s4-akr", { opacity: 0, y: 14, duration: 0.8 }, 110.2);
 tl.from("#s4-tag", { opacity: 0, y: 20, duration: 0.8 }, 110.8);
 tl.from("#s4-prop", { opacity: 0, y: 20, duration: 0.9 }, 112);
 $$("#s4-chips span").forEach((c, k) => tl.fromTo(c, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.6 }, 120 + k * 1.2));
@@ -690,6 +694,7 @@ tl.fromTo("#next", { opacity: 0, y: 20 }, IN, 332.5);
 tl.to(dash("#shield2"), { strokeDashoffset: 0, duration: 1.6, ease: "power2.inOut" }, 340.3);
 tl.to(dash("#check2"), { strokeDashoffset: 0, duration: 0.6 }, 341.7);
 tl.from("#s8-brand", { opacity: 0, y: 30, duration: 1 }, 341);
+tl.from("#s8-akr", { opacity: 0, y: 14, duration: 0.8 }, 341.7);
 tl.from("#s8-tag", { opacity: 0, y: 20, duration: 0.8 }, 342.3);
 tl.from("#s8-ev", { opacity: 0, duration: 0.8 }, 344);
 tl.set({}, {}, 350);

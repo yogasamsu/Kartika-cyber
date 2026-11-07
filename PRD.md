@@ -4,6 +4,17 @@ Versi 0.2, 7 November 2026. Disusun untuk Kartika Cyber Hackathon 2026 (submissi
 
 ## 1. Ringkasan
 
+**TAMENG** adalah singkatan dari **T**angkal **A**ncaman **M**andiri lewat **E**dukasi, **N**otifikasi, dan **G**erak cepat. Tiap kata merujuk ke fitur:
+
+| Kata | Fitur | Status 7 Nov |
+|---|---|---|
+| Mandiri | Berjalan di dalam satuan tanpa internet (LLM lokal) | Ada |
+| Edukasi | Tiap teknik di insiden dijelaskan: apa yang terjadi, kenapa berbahaya, apa yang dikerjakan sekarang, cara mencegah (F7) | Ada (7 Nov) |
+| Notifikasi | Ribuan alert diringkas jadi satu insiden berprioritas; peringatan aktif ke operator | Ringkasan ada; peringatan aktif belum |
+| Gerak cepat | Langkah respons siap kerja; mode blokir Modbus | Ada |
+
+Kata "netralisasi" sengaja tidak dipakai: pemblokiran otomatis baru ada untuk perintah Modbus, belum untuk serangan IT.
+
 Tameng membaca alert Wazuh dan Suricata, merangkainya menjadi insiden berantai dengan aturan deterministik, memetakan tiap langkah ke MITRE ATT&CK (Enterprise dan ICS), lalu meminta LLM lokal menulis ringkasan dan rekomendasi dalam bahasa Indonesia. Semua proses berjalan di satu laptop tanpa internet. Narasi LLM yang menyebut IP, host, waktu, atau teknik di luar bukti ditolak dan diganti ringkasan cadangan.
 
 ## 2. Pengguna dan batas peran
@@ -51,6 +62,7 @@ Masalah yang disebut narasumber dan situs Satsiber/TTIS:
 | F3 | Pembuangan derau | Pembacaan `/etc/shadow` oleh login PAM dan pemindaian agen Wazuh tidak dihitung serangan |
 | F4 | Narasi LLM lokal tervalidasi | Qwen 2.5 7B via Ollama; narasi ditolak bila menyebut fakta di luar bukti |
 | F5 | Mode blokir OT | Suricata inline menjatuhkan perintah tulis Modbus dari host selain HMI resmi |
+| F7 | **Edukasi SDM di laporan** (baru, 7 Nov) | Bagian "Pelajari insiden ini" untuk tiap teknik ATT&CK di insiden: apa yang terjadi, kenapa berbahaya, kerjakan sekarang, supaya tidak terulang. Materi ditulis manusia dan disimpan di kode (`mitre.EDUKASI`), bukan dibuat LLM. Ikut juga di JSON (`edukasi`) |
 | F5b | **Skenario deface situs** (baru, 7 Nov) | Unggahan lewat celah plugin, webshell, perintah sistem, halaman berubah. Sinyal: log akses web dan File Integrity Monitoring Wazuh di web root. ATT&CK T1190, T1505.003, T1059.004, T1491.002 |
 
 ### Rencana sampai 15 Nov
@@ -58,7 +70,6 @@ Masalah yang disebut narasumber dan situs Satsiber/TTIS:
 | ID | Fitur | Lingkup | Alasan |
 |---|---|---|---|
 | F6 | Ringkasan kerentanan ("scan sistem") | Baca hasil Wazuh Vulnerability Detection dan SCA yang sudah ada; LLM menjelaskan 3 temuan teratas dan alasannya. Tameng **tidak** membuat pemindai sendiri | Menjawab masalah sistem lama: kalau tidak bisa menambal semua, operator perlu urutan |
-| F7 | Edukasi di dalam alert | Setiap langkah kronologi diberi penjelasan singkat: apa yang terjadi, teknik ATT&CK, kenapa berbahaya, apa tindakan operator | Menjawab kekurangan SDM tanpa membuat modul pelatihan terpisah |
 | F8 | Mode latihan | Putar ulang skenario lab (IT→OT, blokir, deface) untuk melatih operator baru | Opsional bila waktu cukup |
 | F9 | Dashboard bergaya militer | Tampilan komando gelap: peta aset, status insiden, kronologi, panel ATT&CK | Diminta tim; referensi dua desain Dribbble |
 
@@ -76,7 +87,7 @@ Masalah yang disebut narasumber dan situs Satsiber/TTIS:
 | Kedaulatan data | Seluruh proses lokal; tidak ada panggilan ke layanan di luar mesin |
 | Perangkat | Satu laptop (uji: MacBook Air M4, Docker 6 GB); bukti dan model di SSD terenkripsi |
 | Dependensi | Python 3 pustaka standar; Wazuh, Suricata, Ollama (semua open-source) |
-| Ketepatan | Kronologi, severity, dan teknik ditentukan kode; tes regresi wajib lolos (21 tes per 7 Nov) |
+| Ketepatan | Kronologi, severity, dan teknik ditentukan kode; tes regresi wajib lolos (24 tes per 7 Nov) |
 | Keterbacaan | Laporan berbahasa Indonesia yang bisa dikerjakan bintara siber |
 
 ## 7. Skenario demo
@@ -119,7 +130,8 @@ Mengikuti bobot juri:
 | Tanggal | Target |
 |---|---|
 | 7 Nov | Skenario deface di mesin korelasi + tes + replay (selesai) |
-| 8–9 Nov | F7 edukasi dalam alert; F6 ringkasan kerentanan |
+| 7 Nov | F7 edukasi SDM di laporan (selesai) |
+| 8–9 Nov | F6 ringkasan kerentanan; peringatan aktif (notifikasi) |
 | 10–12 Nov | F9 dashboard gaya militer |
 | 13 Nov | Perbarui video dan deck dengan babak deface |
 | 14 Nov | Uji ulang penuh, submit lebih awal |

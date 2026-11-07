@@ -95,7 +95,8 @@ satu menunjukkan kekurangannya.
 ## 4. Solusi: Tameng (1:48–2:45)
 
 ### 4a. Proposisi (1:48–2:12)
-**Visual [grafis]:** logo perisai tergambar, nama Tameng, lalu proposisi dan
+**Visual [grafis]:** logo perisai tergambar, nama Tameng dengan kepanjangan
+*Tangkal Ancaman Mandiri lewat Edukasi, Notifikasi, dan Gerak cepat*, lalu proposisi dan
 empat chip.
 **Teks layar:** *Pendamping analis insiden IT/OT, di dalam satuan* ·
 *Dengan Tameng, analis junior bisa menangani insiden yang biasanya harus

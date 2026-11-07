@@ -35,7 +35,7 @@ async function icon(Comp, hex, size = 256) {
 (async () => {
   const pres = new pptxgen();
   pres.layout = "LAYOUT_WIDE";            // 13.333" x 7.5"
-  pres.title = "Tameng: pendamping analis insiden IT/OT";
+  pres.title = "Tameng (Tangkal Ancaman Mandiri lewat Edukasi, Notifikasi, dan Gerak cepat): pendamping analis insiden IT/OT";
   pres.author = "Tim Tameng";
   pres.theme = { headFontFace: THEME.headFontFace, bodyFontFace: THEME.bodyFontFace };
   const C = pres.SchemeColor;
@@ -120,6 +120,8 @@ async function icon(Comp, hex, size = 256) {
   let s = pres.addSlide({ masterName: "JUDUL_GELAP", sectionTitle: "Pembuka" });
   s.addText("Tameng", { placeholder: "title" });
   s.addText("Pendamping analis insiden IT/OT yang bekerja di dalam satuan, tanpa internet", { placeholder: "body" });
+  text(s, "TANGKAL ANCAMAN MANDIRI LEWAT EDUKASI, NOTIFIKASI, DAN GERAK CEPAT", {
+    x: M, y: 5.3, w: 8.6, h: 0.4, fontSize: 13, bold: true, color: C.accent6, charSpacing: 1, objectName: "Kepanjangan" });
   text(s, "Kartika Cyber Hackathon 2026 · Kategori Defensive Shield", {
     x: M, y: 6.55, w: 8, h: 0.4, fontSize: 14, color: C.accent5, objectName: "Acara" });
   const chain = [["skull", "Penyerang", C.accent3], ["pc", "PC staf", C.accent1], ["server", "Server file", C.accent1], ["plc", "PLC genset", C.accent2]];
@@ -129,7 +131,7 @@ async function icon(Comp, hex, size = 256) {
     badge(s, k, 10.0, y, 1.1, col, lbl);
     text(s, lbl, { x: 11.3, y: y + 0.35, w: 1.8, h: 0.4, fontSize: 14, color: C.background1, objectName: "Label " + lbl });
   });
-  s.addNotes("Selamat pagi. Kami membawa Tameng, pendamping untuk analis yang menjaga keamanan siber satuan. Kami mulai bukan dari teknologinya, tetapi dari orang yang harus menghadapi serangan: analis jaga di satuan.");
+  s.addNotes("Selamat pagi. Kami membawa Tameng, singkatan dari Tangkal Ancaman Mandiri lewat Edukasi, Notifikasi, dan Gerak cepat. Tameng adalah pendamping untuk analis yang menjaga keamanan siber satuan. Kami mulai bukan dari teknologinya, tetapi dari orang yang harus menghadapi serangan: analis jaga di satuan.");
 
   // ---------- 2. Masalah: orangnya ----------
   pres.addSection({ title: "Masalah" });

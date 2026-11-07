@@ -1,5 +1,11 @@
 # Tameng — mesin korelasi + ringkasan insiden IT/OT (lokal, air-gapped)
 
+**TAMENG** = **T**angkal **A**ncaman **M**andiri lewat **E**dukasi, **N**otifikasi,
+dan **G**erak cepat. *Mandiri*: berjalan di dalam satuan tanpa internet.
+*Edukasi*: tiap langkah insiden dijelaskan agar analis junior paham. *Notifikasi*:
+ribuan alert diringkas menjadi satu insiden berprioritas. *Gerak cepat*: langkah
+respons yang langsung bisa dikerjakan, plus mode blokir Modbus.
+
 Membaca bukti mentah dari SSD (`alerts.json` Wazuh + `eve.json` Suricata),
 mengorelasikannya menjadi insiden berantai secara **deterministik** (kode),
 lalu meminta **LLM lokal** (Ollama/Qwen) menulis narasi ringkas yang
@@ -97,6 +103,15 @@ python3 lab/scripts/replay-deface.py --out lab/out
 
 Rule 100020/100021 disiapkan untuk log akses server web satuan; di lab hanya
 dipakai lewat replay.
+
+## Edukasi SDM
+
+Laporan memuat bagian **Pelajari insiden ini**: untuk tiap teknik ATT&CK di
+insiden, analis jaga mendapat empat hal (apa yang terjadi, kenapa berbahaya,
+kerjakan sekarang, supaya tidak terulang). Materinya tetap, ditulis manusia di
+`mitre.EDUKASI`, dan tidak dibuat LLM. Setiap teknik di `mitre.TECHNIQUES` wajib
+punya materi; tes akan gagal bila ada yang terlewat. JSON insiden membawa materi
+yang sama di kunci `edukasi` untuk dashboard.
 
 ## Tes
 
