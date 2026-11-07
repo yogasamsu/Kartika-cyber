@@ -1,4 +1,4 @@
-# Video Tameng gaya AgMon (GSAP, ±5:20, tanpa VO)
+# Video Tameng gaya AgMon (GSAP, ±5:50, tanpa VO)
 
 Satu halaman `index.html` berisi satu timeline GSAP yang dijeda. Footage asli
 (dashboard, log Wazuh, laporan) digerakkan kamera; cerita dibawa teks layar.
@@ -18,7 +18,7 @@ render ulang. Hasilnya `out/tameng-video.mp4`, dengan fade-out 3 detik di akhir.
 
 | Berkas | Isi |
 |---|---|
-| `NASKAH.md` | Storyboard tujuh bagian dan naskah lisan (dipakai juga untuk presentasi final) |
+| `NASKAH.md` | Storyboard tujuh bagian (dimulai dari masalah analis) dan naskah lisan (dipakai juga untuk presentasi final) |
 | `index.html` | Adegan, teks layar (`COPY`), gerak kamera, nama tim (`TIM`) |
 | `render.mjs` | Render per bingkai dengan Chrome headless + ffmpeg |
 | `capture.mjs` | Ambil ulang footage dashboard (`artifacts/tameng-replay.html?step=N`) dan halaman sumber |

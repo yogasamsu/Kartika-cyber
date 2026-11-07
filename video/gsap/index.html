@@ -153,7 +153,32 @@ table.cmp{border-collapse:separate;border-spacing:0;margin-top:60px;width:100%;f
 .cmp .no{color:#ff8a8b} .cmp .mid{color:var(--ot)} .cmp .yes{color:var(--ok)}
 .cmp .tm{background:rgba(54,195,224,.0);font-weight:800}
 .cmp .tm.on{background:rgba(54,195,224,.14)}
+#s7 .cmp th,#s7 .cmp td{padding:15px 20px}
 .next{font-size:40px;margin-top:50px;color:var(--it);font-weight:700;opacity:0}
+
+/* 0 persona */
+.persona{margin-top:70px;display:grid;grid-template-columns:1fr 1fr;gap:28px}
+.pr{background:var(--panel);border:1px solid var(--line);border-radius:22px;padding:30px 36px;font-size:38px;line-height:1.3;opacity:0}
+.pr i{display:block;font:600 24px var(--mono);font-style:normal;color:var(--ot);margin-bottom:10px;letter-spacing:.08em}
+
+/* journey */
+.jh{font-size:64px}
+.jr{display:grid;grid-template-columns:repeat(6,1fr);gap:26px;margin-top:44px}
+.st6{opacity:0;text-align:center}
+.st6 .c{width:110px;height:110px;border-radius:50%;margin:0 auto;display:grid;place-items:center;background:var(--panel);border:2px solid var(--line);color:var(--muted)}
+.st6 b{display:block;font-size:30px;margin-top:16px}
+.st6 .pc{margin-top:18px;border-radius:20px;padding:22px 20px;min-height:250px;text-align:left;font-size:27px;line-height:1.35;background:var(--panel);border:1px solid var(--line)}
+.st6.pain .c{color:var(--crit);border-color:rgba(255,77,79,.6)}
+.st6.pain .pc{background:rgba(255,77,79,.1);border-color:rgba(255,77,79,.45);color:#ffd5d6}
+.st6.help .c{color:var(--it);border-color:#2b4a63}
+.st6.help .pc{background:rgba(54,195,224,.08);border-color:#24425a}
+.s6t{display:inline-block;margin-top:16px;font:600 22px var(--mono);padding:8px 18px;border-radius:999px}
+.s6t.ok{background:rgba(46,204,113,.15);color:var(--ok);border:1px solid var(--ok)}
+.s6t.part{background:rgba(243,166,56,.15);color:var(--ot);border:1px solid var(--ot)}
+.senior{margin:28px 0 0 calc((100% - 130px)/6 + 26px);border-radius:999px;padding:14px 30px;font-size:30px;font-weight:700;text-align:center;
+  background:rgba(255,77,79,.18);border:2px solid var(--crit);color:#ffc7c8;opacity:0}
+.prop{font-size:40px;line-height:1.3;max-width:1400px;margin-top:34px;font-weight:700}
+.prop em{font-style:normal;color:var(--ot)}
 
 /* UI di luar render */
 #hud{position:fixed;right:14px;bottom:10px;font:13px var(--mono);color:#9ab;background:rgba(0,0,0,.6);padding:6px 10px;border-radius:6px}
@@ -168,13 +193,29 @@ table.cmp{border-collapse:separate;border-spacing:0;margin-top:60px;width:100%;f
 <body>
 <div id="stage">
 
-<!-- ========== 1a Markas hidup di jaringan ========== -->
-<section class="sc" id="s1a">
+<!-- ========== 0 Persona ========== -->
+<section class="sc" id="s0">
   <div class="grid-bg"></div>
   <div class="pad">
     <div class="kicker">Masalah</div>
-    <h1 id="s1a-h">Markas satuan kini <em>hidup di jaringan</em>.</h1>
+    <h1 id="s0-h">Malam hari. <em>Satu analis</em> berjaga di ruang server satuan.</h1>
+    <div class="persona">
+      <div class="pr"><i>01</i>Sering masih junior</div>
+      <div class="pr"><i>02</i>Senior tidak selalu ada untuk ditanya</div>
+      <div class="pr"><i>03</i>Harus melapor ke komandan</div>
+      <div class="pr"><i>04</i>Tidak boleh memakai AI cloud: ini data militer</div>
+    </div>
   </div>
+</section>
+
+<!-- ========== 1a Yang dijaga ========== -->
+<section class="sc" id="s1a">
+  <div class="grid-bg"></div>
+  <div class="pad">
+    <div class="kicker">Yang ia jaga</div>
+    <h1 id="s1a-h">Markas yang kini <em>hidup di jaringan</em>.</h1>
+  </div>
+  <div class="src" style="bottom:auto;top:56px;left:auto;right:56px">Sumber: BSSN via Investortrust dan Bisnis.com (2025)</div>
   <div class="devline" id="devline"></div>
   <div class="devices">
     <div class="dev" data-ic="pc"><div class="c"></div><b>PC staf</b><small>administrasi</small></div>
@@ -183,20 +224,6 @@ table.cmp{border-collapse:separate;border-spacing:0;margin-top:60px;width:100%;f
     <div class="dev" data-ic="radio"><div class="c"></div><b>Radio</b><small>komunikasi</small></div>
     <div class="dev ot" data-ic="bolt"><div class="c"></div><b>Genset</b><small>listrik cadangan</small></div>
   </div>
-</section>
-
-<!-- ========== 1b Ancamannya nyata ========== -->
-<section class="sc" id="s1b">
-  <div class="pad">
-    <div class="kicker">Ancamannya nyata</div>
-    <div class="big" style="margin-top:40px"><span id="cnt52">0</span><small>miliar</small></div>
-    <div class="sub" id="s1b-sub">anomali trafik ke Indonesia, Januari sampai November 2025 (BSSN)</div>
-    <div class="events">
-      <div class="event" id="ev1"><div class="d">JUNI 2024</div><p>Ransomware melumpuhkan Pusat Data Nasional. <b>282 instansi</b> terdampak.</p></div>
-      <div class="event" id="ev2"><div class="d">JUNI 2024</div><p>Data yang diklaim milik <b>BAIS TNI</b> dijual di forum gelap.</p></div>
-    </div>
-  </div>
-  <div class="src" style="bottom:auto;top:56px;left:auto;right:56px">Sumber: BSSN via Investortrust, Bisnis.com (2025); Detik, Investortrust (2024)</div>
 </section>
 
 <!-- ========== 1c Layar analis ========== -->
@@ -212,32 +239,35 @@ table.cmp{border-collapse:separate;border-spacing:0;margin-top:60px;width:100%;f
   <div class="vignette"></div>
 </section>
 
-<!-- ========== 2 Solusi yang ada ========== -->
-<section class="sc" id="s2">
+<!-- ========== J1 Journey: titik sakit ========== -->
+<section class="sc" id="sj1">
   <div class="pad">
-    <div class="kicker">Solusi yang sudah ada</div>
-    <h1>Alatnya sebenarnya sudah ada</h1>
-    <div class="cards" id="cards2">
-      <div class="card" data-ic="search"><div class="c"></div><h3>SIEM dan IDS</h3><p>Wazuh, Suricata. Gratis dan andal untuk mendeteksi.</p></div>
-      <div class="card" data-ic="cloud"><div class="c"></div><h3>Copilot AI komersial</h3><p>Microsoft Security Copilot, Google SecOps.</p></div>
-      <div class="card" data-ic="factory"><div class="c"></div><h3>Platform keamanan OT</h3><p>Nozomi, Claroty, Dragos untuk PLC dan mesin industri.</p></div>
-      <div class="card" data-ic="flow"><div class="c"></div><h3>Otomasi buatan sendiri</h3><p>Alur n8n yang mengirim alert ke GPT.</p></div>
+    <div class="kicker">Perjalanan analis</div>
+    <h1 class="jh" id="sj1-h">Analis junior tersendat di tahap yang <em>butuh jam terbang</em></h1>
+    <div class="jr">
+      <div class="st6" data-ic="eye"><div class="c"></div><b>Memantau</b><div class="pc">Ratusan baris per menit; IT dan OT di layar berbeda</div></div>
+      <div class="st6 pain" data-ic="filter"><div class="c"></div><b>Memilah</b><div class="pc">654 alert, 13 serangan: mana yang penting?</div></div>
+      <div class="st6 pain" data-ic="graph"><div class="c"></div><b>Merangkai</b><div class="pc">Menyambung SSH, hash, gerak lateral, dan Modbus dari dua sistem</div></div>
+      <div class="st6 pain" data-ic="warn"><div class="c"></div><b>Menilai dampak</b><div class="pc">Apakah "Modbus write" berarti genset mati?</div></div>
+      <div class="st6 pain" data-ic="hand"><div class="c"></div><b>Bertindak</b><div class="pc">SOP terlalu umum, tidak menyebut host dan akun yang kena</div></div>
+      <div class="st6 pain" data-ic="file"><div class="c"></div><b>Melapor</b><div class="pc">Menulis laporan lama; istilah teknis membingungkan komandan</div></div>
     </div>
+    <div class="senior" id="senior">Tahap 2–6 biasanya harus menunggu analis senior</div>
   </div>
 </section>
 
-<!-- ========== 3 Masalah solusi yang ada ========== -->
+<!-- ========== 3 Solusi yang ada ========== -->
 <section class="sc" id="s3">
   <div class="pad">
-    <div class="kicker">Masalahnya</div>
-    <h1>Setiap solusi punya lubang</h1>
+    <div class="kicker">Solusi yang ada</div>
+    <h1>Alatnya ada, tapi analisnya tetap sendirian</h1>
     <div class="cards" id="cards3">
       <div class="card" data-ic="search"><div class="c"></div><h3>SIEM dan IDS</h3><p>Wazuh, Suricata</p>
-        <div class="weak">Satu alert per kejadian. Merangkai cerita serangan tetap tugas manusia.</div></div>
+        <div class="weak">Satu alert per kejadian. Merangkai cerita tetap tugas analis.</div></div>
       <div class="card" data-ic="cloud"><div class="c"></div><h3>Copilot AI komersial</h3><p>Microsoft, Google</p>
-        <div class="weak">Data diproses di cloud asing. Tidak boleh untuk data militer.</div></div>
+        <div class="weak">Bisa merangkai, tapi data diproses di cloud asing.</div></div>
       <div class="card" data-ic="factory"><div class="c"></div><h3>Platform keamanan OT</h3><p>Nozomi, Claroty, Dragos</p>
-        <div class="weak">Harga jauh di luar anggaran satuan.</div></div>
+        <div class="weak">Mahal, dan hanya melihat sisi OT.</div></div>
       <div class="card" data-ic="flow"><div class="c"></div><h3>Otomasi buatan sendiri</h3><p>n8n + GPT</p>
         <div class="weak">Isi insiden keluar ke server luar negeri.</div></div>
     </div>
@@ -248,14 +278,31 @@ table.cmp{border-collapse:separate;border-spacing:0;margin-top:60px;width:100%;f
 <section class="sc" id="s4">
   <div class="grid-bg"></div>
   <div class="center">
-    <svg class="ic" width="200" height="200" viewBox="0 0 24 24" style="color:var(--it)">
+    <svg class="ic" width="140" height="140" viewBox="0 0 24 24" style="color:var(--it);margin-top:-120px">
       <path id="shield1" d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6l-8-3z" stroke-width="1.1"/>
       <path id="check1" d="m8.5 12 2.5 2.5 4.5-5" stroke-width="1.3"/>
     </svg>
-    <div class="brand" id="s4-brand">Tameng</div>
-    <div class="tag" id="s4-tag">Analis insiden IT/OT yang bekerja di dalam satuan</div>
-    <div class="chips" id="s4-chips">
-      <span>Di atas Wazuh + Suricata</span><span>Laporan bahasa Indonesia</span><span>Blokir perintah tak sah ke PLC</span><span>1 laptop · tanpa internet</span>
+    <div class="brand" id="s4-brand" style="font-size:150px">Tameng</div>
+    <div class="tag" id="s4-tag">Pendamping analis insiden IT/OT, di dalam satuan</div>
+    <div class="prop" id="s4-prop">Dengan Tameng, analis junior bisa menangani insiden yang <em>biasanya harus menunggu analis senior</em>.</div>
+    <div class="chips" id="s4-chips" style="margin-top:44px">
+      <span>Lebih sederhana</span><span>Lebih mudah</span><span>Lebih murah</span><span>Lebih aman</span>
+    </div>
+  </div>
+</section>
+
+<!-- ========== J2 Journey dengan Tameng ========== -->
+<section class="sc" id="sj2">
+  <div class="pad">
+    <div class="kicker">Perjalanan yang sama, dengan Tameng</div>
+    <h1 class="jh" id="sj2-h">Tameng mengerjakan bagian yang butuh jam terbang; <em>analis tetap memutuskan</em></h1>
+    <div class="jr">
+      <div class="st6 help" data-ic="eye"><div class="c"></div><b>Memantau</b><div class="pc">Daftar insiden, bukan alert; IT dan OT dalam satu peta</div><span class="s6t ok">sudah jalan</span></div>
+      <div class="st6 help" data-ic="filter"><div class="c"></div><b>Memilah</b><div class="pc">654 alert dipilah kode menjadi 1 insiden</div><span class="s6t ok">sudah jalan</span></div>
+      <div class="st6 help" data-ic="graph"><div class="c"></div><b>Merangkai</b><div class="pc">Kronologi IT→OT; tiap baris menunjuk ID bukti</div><span class="s6t ok">sudah jalan</span></div>
+      <div class="st6 help" data-ic="warn"><div class="c"></div><b>Menilai dampak</b><div class="pc">"Genset DIMATIKAN" atau "DIBLOKIR, genset menyala"</div><span class="s6t ok">sudah jalan</span></div>
+      <div class="st6 help" data-ic="hand"><div class="c"></div><b>Bertindak</b><div class="pc">Host, akun, dan IP yang perlu ditindak</div><span class="s6t part">sebagian</span></div>
+      <div class="st6 help" data-ic="file"><div class="c"></div><b>Melapor</b><div class="pc">Laporan bahasa Indonesia ±1,5 menit</div><span class="s6t part">sebagian</span></div>
     </div>
   </div>
 </section>
@@ -354,15 +401,16 @@ table.cmp{border-collapse:separate;border-spacing:0;margin-top:60px;width:100%;f
 <section class="sc" id="s7">
   <div class="pad">
     <div class="kicker">Mengapa Tameng</div>
-    <h1>Satu-satunya yang memenuhi keempatnya</h1>
-    <table class="cmp">
-      <tr><th></th><th>SIEM/IDS</th><th>Copilot AI</th><th>Platform OT</th><th class="tm">Tameng</th></tr>
-      <tr><td>Merangkai insiden</td><td class="no">tidak</td><td class="yes">ya</td><td class="mid">sebagian</td><td class="tm yes">ya</td></tr>
-      <tr><td>Data tetap di satuan</td><td class="yes">ya</td><td class="no">tidak</td><td class="yes">ya</td><td class="tm yes">ya</td></tr>
-      <tr><td>IT dan OT sekaligus</td><td class="mid">sebagian</td><td class="mid">sebagian</td><td class="mid">OT saja</td><td class="tm yes">ya</td></tr>
-      <tr><td>Biaya untuk satuan</td><td class="yes">rendah</td><td class="no">tinggi</td><td class="no">sangat tinggi</td><td class="tm yes">rendah</td></tr>
+    <h1 style="font-size:64px">Bagiannya sudah ada. Tameng menyatukannya <em>untuk analis satuan</em>.</h1>
+    <table class="cmp" style="margin-top:44px;font-size:30px">
+      <tr><th></th><th>SIEM/IDS</th><th>Copilot AI</th><th>Platform OT</th><th>AI SOC open-source</th><th class="tm">Tameng</th></tr>
+      <tr><td>Dirancang untuk</td><td>analis ahli</td><td>analis ahli</td><td>operator OT</td><td>analis ahli</td><td class="tm yes">analis junior satuan</td></tr>
+      <tr><td>Merangkai insiden</td><td class="no">tidak</td><td class="yes">ya</td><td class="mid">sebagian</td><td class="yes">ya</td><td class="tm yes">ya</td></tr>
+      <tr><td>IT dan OT dalam satu insiden</td><td class="no">tidak</td><td class="mid">sebagian</td><td class="mid">OT saja</td><td class="mid">IT saja</td><td class="tm yes">ya</td></tr>
+      <tr><td>Data tetap di satuan</td><td class="yes">ya</td><td class="no">tidak</td><td class="yes">ya</td><td class="yes">ya</td><td class="tm yes">ya</td></tr>
+      <tr><td>Biaya untuk satuan</td><td class="yes">rendah</td><td class="no">tinggi</td><td class="no">sangat tinggi</td><td class="yes">rendah</td><td class="tm yes">rendah</td></tr>
     </table>
-    <div class="next" id="next">Langkah berikutnya: pilot di satu markas.</div>
+    <div class="next" id="next">Langkah berikutnya: uji bersama analis satuan, lalu pilot di satu markas.</div>
   </div>
 </section>
 
@@ -375,7 +423,7 @@ table.cmp{border-collapse:separate;border-spacing:0;margin-top:60px;width:100%;f
       <path id="check2" d="m8.5 12 2.5 2.5 4.5-5" stroke-width="1.3"/>
     </svg>
     <div class="brand" id="s8-brand">Tameng</div>
-    <div class="tag" id="s8-tag">Analis insiden yang bekerja di dalam satuan, untuk satuan</div>
+    <div class="tag" id="s8-tag">Pendamping analis insiden, di dalam satuan, untuk satuan</div>
     <div class="sub" id="s8-ev" style="margin-top:50px">Kartika Cyber Hackathon 2026 · Defensive Shield<span id="tim"></span></div>
   </div>
 </section>
@@ -400,9 +448,15 @@ const ICON = {
   cloud:'<path d="M7 18a4 4 0 0 1-.5-8A6 6 0 0 1 18 9a4.5 4.5 0 0 1 0 9z"/>',
   factory:'<path d="M3 21V10l6 4V10l6 4V5h6v16z"/><path d="M7 18h2M12 18h2M17 18h2"/>',
   flow:'<rect x="3" y="3" width="6" height="6" rx="1"/><rect x="15" y="15" width="6" height="6" rx="1"/><path d="M6 9v4a3 3 0 0 0 3 3h6"/>',
+  eye:'<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+  filter:'<path d="M3 4h18l-7 8v6l-4 2v-8z"/>',
+  graph:'<circle cx="5" cy="6" r="2"/><circle cx="19" cy="6" r="2"/><circle cx="12" cy="18" r="2"/><path d="M7 6h10M6 8l5 8M18 8l-5 8"/>',
+  warn:'<path d="M12 3 2 20h20z"/><path d="M12 10v4M12 17h.01"/>',
+  hand:'<path d="M8 13V5.5a1.5 1.5 0 0 1 3 0V12M11 11V4.5a1.5 1.5 0 0 1 3 0V12M14 11.5V6a1.5 1.5 0 0 1 3 0v8c0 4-2.5 7-6.5 7S5 19 4 16l-1.5-3.5a1.4 1.4 0 0 1 2.4-1.4L8 14"/>',
+  file:'<path d="M6 2h9l5 5v15H6z"/><path d="M14 2v6h6M9 13h8M9 17h8"/>',
 };
 document.querySelectorAll("[data-ic]").forEach(el => {
-  const c = el.querySelector(".c"), size = el.classList.contains("card") ? 52 : 88;
+  const c = el.querySelector(".c"), size = el.classList.contains("card") ? 52 : el.classList.contains("st6") ? 56 : 88;
   c.innerHTML = `<svg class="ic" width="${size}" height="${size}" viewBox="0 0 24 24">${ICON[el.dataset.ic]}</svg>`;
   if (el.dataset.bg) c.style.background = el.dataset.bg;
 });
@@ -410,30 +464,31 @@ if (TIM) document.getElementById("tim").textContent = " · " + TIM;
 
 // ---------- data ----------
 const SCENES = [   // [id, mulai, selesai]
-  ["s1a", 0, 16], ["s1b", 16, 38], ["s1c", 38, 60], ["s2", 60, 100], ["s3", 100, 140], ["s4", 140, 165],
+  ["s0", 0, 14], ["s1c", 14, 36], ["s1a", 36, 52], ["sj1", 52, 84], ["s3", 84, 108], ["s4", 108, 132], ["sj2", 132, 165],
   ["s5a", 165, 185], ["s5b", 185, 210], ["s5c", 210, 235], ["s5d", 235, 255], ["s5e", 255, 285], ["s6", 285, 315], ["s7", 315, 340], ["s8", 340, 350],
 ];
 // Teks layar pembawa cerita: [muncul, hilang, teks]. <b> = sian, <span class="r"> = merah.
 const COPY = [
-  [4.0, 9.6, "PC staf, server, CCTV, radio, sampai <b>genset</b>: pembangkit listrik cadangan markas."],
-  [10.2, 15.6, "Semuanya tersambung, dan semuanya bisa dikendalikan dari jauh."],
-  [20.6, 25.8, "Malware terbanyak menyasar perangkat seperti CCTV dan router."],
-  [27.2, 32.2, "Ransomware pernah melumpuhkan layanan negara."],
-  [33.2, 37.6, "Data militer pernah bocor ke pasar gelap."],
-  [39.5, 45.2, "Ini layar analis saat lab kami diserang: <b>654 alert</b> dalam 4 menit."],
-  [45.8, 51.6, "Hanya <span class='r'>13</span> yang berkaitan dengan serangan. Sisanya pemeriksaan rutin."],
-  [52.2, 59.4, "Analis satuan sedikit. Mereka harus menemukan 13 baris itu sendiri."],
-  [63.4, 68.8, "Wazuh dan Suricata mendeteksi kejadian, gratis dan andal."],
-  [69.4, 76.6, "Copilot AI komersial merangkum alert menjadi cerita."],
-  [77.4, 85.4, "Platform OT menjaga PLC dan mesin industri."],
-  [86.4, 98.8, "Sebagian tim merakit sendiri: alert dikirim ke GPT."],
-  [103.4, 110.6, "SIEM berhenti di alert. Merangkai cerita serangan tetap pekerjaan manusia."],
-  [111.4, 120.4, "Copilot AI memproses data di cloud asing. Untuk data militer, itu <span class='r'>tidak boleh</span>."],
-  [121.4, 129.4, "Platform OT harganya jauh di luar anggaran satuan."],
-  [130.4, 139.0, "Alur GPT buatan sendiri juga mengirim isi insiden ke luar negeri."],
-  [145.0, 150.0, "Karena itu kami membuat <b>Tameng</b>."],
-  [150.6, 157.0, "Tameng bekerja di atas Wazuh dan Suricata yang sudah terpasang."],
-  [157.6, 164.2, "Ia merangkai alert menjadi insiden dan menulis laporannya, tanpa internet."],
+  [9.8, 13.6, "Lalu layarnya mulai bergulir."],
+  [15.5, 21.0, "Ini layarnya saat lab kami diserang: <b>654 alert</b> dalam 4 menit."],
+  [21.6, 27.4, "Hanya <span class='r'>13</span> yang berkaitan dengan serangan. Sisanya pemeriksaan rutin."],
+  [28.0, 35.4, "Ia harus menemukan 13 baris itu sendiri, lalu memahami ceritanya."],
+  [39.5, 45.0, "Yang dipertaruhkan: PC staf, server, CCTV, radio, sampai <b>genset</b> markas."],
+  [45.6, 51.4, "BSSN: 5,2 miliar anomali trafik ke Indonesia, Jan–Nov 2025."],
+  [55.0, 62.0, "Kami petakan perjalanan analis, dari alert pertama sampai laporan."],
+  [62.6, 70.4, "Memilah, merangkai, menilai dampak, bertindak, melapor: semuanya butuh jam terbang."],
+  [74.6, 83.4, "Di tahap-tahap ini, analis junior biasanya <span class='r'>harus menunggu senior</span>."],
+  [86.6, 91.2, "SIEM berhenti di alert. Merangkai cerita tetap pekerjaan analis."],
+  [91.6, 96.2, "Copilot AI bisa merangkai, tapi data militer <span class='r'>tidak boleh</span> ke cloud asing."],
+  [96.6, 101.2, "Platform OT mahal, dan hanya melihat sisi OT."],
+  [101.6, 107.4, "Alur GPT buatan sendiri juga mengirim isi insiden ke luar negeri."],
+  [114.0, 119.0, "Tameng tidak menggantikan Wazuh, Suricata, atau analisnya."],
+  [119.6, 125.4, "Tameng membantu orang yang menjaganya."],
+  [126.0, 131.4, "Satu laporan IT dan OT, bahasa Indonesia, di satu laptop tanpa internet."],
+  [134.5, 141.0, "Perjalanan yang sama, dengan Tameng."],
+  [141.6, 149.4, "Kode memilah dan merangkai. Dampaknya ditulis jelas: genset mati, atau diblokir."],
+  [150.0, 157.0, "Checklist SOP dan ringkasan untuk komandan sedang kami kerjakan."],
+  [157.6, 164.4, "Keputusan tetap di tangan analis. Sekarang, buktinya."],
   [167.0, 175.0, "Untuk membuktikannya, kami membangun markas mini: PC staf, server file, dan PLC genset."],
   [175.6, 184.4, "Wazuh menjaga sisi IT. Suricata menjaga jaringan kendali OT."],
   [186.0, 190.6, "Lalu kami menyerang markas itu."],
@@ -455,7 +510,8 @@ const COPY = [
   [294.4, 300.2, "Laporan berbahasa Indonesia siap dalam sekitar satu setengah menit."],
   [300.8, 305.8, "Tidak ada data yang keluar dari jaringan satuan."],
   [306.4, 314.4, "Cukup satu laptop dan perangkat lunak open-source."],
-  [324.6, 331.8, "Hanya Tameng yang memenuhi keempatnya."],
+  [318.0, 323.8, "Alat lain dirancang untuk analis ahli, atau hanya melihat satu sisi."],
+  [324.6, 331.8, "Tameng menyatukannya untuk analis satuan, dari IT sampai OT."],
 ];
 // Output asli attack.sh (uji lab 6 Nov 2026, 10:19 UTC).
 const TERM = [
@@ -502,43 +558,48 @@ function typeText(el, text, at, dur) {
   tl.fromTo(o, { n: 0 }, { n: text.length, duration: dur, ease: "none", onUpdate: () => (el.textContent = text.slice(0, Math.round(o.n))) }, at);
 }
 
-// 1a
-tl.from("#s1a-h", { opacity: 0, y: 30, duration: 1 }, 0.4);
-tl.to("#devline", { scaleX: 1, duration: 9, ease: "none" }, 3);
-$$("#s1a .dev").forEach((d, k) => tl.fromTo(d, { opacity: 0, y: 40 }, { ...IN }, 3 + k * 2.2));
-tl.to("#s1a .dev.ot .c", { boxShadow: "0 0 90px rgba(243,166,56,.55)", duration: 1, yoyo: true, repeat: 3, ease: "sine.inOut" }, 12);
-
-// 1b
-counter("#cnt52", 5.2, 16.6, 3, (v) => v.toFixed(1).replace(".", ","));
-tl.from("#s1b-sub", { opacity: 0, y: 20, duration: 0.8 }, 19.5);
-tl.fromTo("#ev1", { opacity: 0, y: 40 }, IN, 26.5);
-tl.fromTo("#ev2", { opacity: 0, y: 40 }, IN, 32.5);
+// 0 persona
+tl.from("#s0-h", { opacity: 0, y: 30, duration: 1 }, 0.4);
+$$("#s0 .pr").forEach((p, k) => tl.fromTo(p, { opacity: 0, y: 30 }, IN, 2.4 + k * 1.8));
 
 // 1c (log 3200x3410)
 const LOG = [3200, 3410];
-cam("#camLog", LOG, [0, 0, 0.6, 0.18], 38, 0);
-cam("#camLog", LOG, [0, 0.82, 0.6, 1], 39, 18, "none");
-counter("#cnt654", 654, 39.5, 7, (v) => Math.round(v));
-tl.to("#cnt13", { opacity: 1, duration: 0.6 }, 47.5).to("#cnt13l", { opacity: 1, duration: 0.6 }, 47.8);
+cam("#camLog", LOG, [0, 0, 0.6, 0.18], 14, 0);
+cam("#camLog", LOG, [0, 0.82, 0.6, 1], 15, 19, "none");
+counter("#cnt654", 654, 15.5, 6, (v) => Math.round(v));
+tl.to("#cnt13", { opacity: 1, duration: 0.6 }, 22.8).to("#cnt13l", { opacity: 1, duration: 0.6 }, 23.1);
 
-// 2
-$$("#cards2 .card").forEach((c, k) => tl.fromTo(c, { opacity: 0, y: 50 }, IN, [63, 69, 77, 86][k]));
+// 1a yang dijaga
+tl.from("#s1a-h", { opacity: 0, y: 30, duration: 1 }, 36.4);
+tl.to("#devline", { scaleX: 1, duration: 8, ease: "none" }, 38);
+$$("#s1a .dev").forEach((d, k) => tl.fromTo(d, { opacity: 0, y: 40 }, { ...IN }, 38 + k * 1.8));
+tl.to("#s1a .dev.ot .c", { boxShadow: "0 0 90px rgba(243,166,56,.55)", duration: 1, yoyo: true, repeat: 3, ease: "sine.inOut" }, 46);
 
-// 3
+// J1 titik sakit
+tl.from("#sj1-h", { opacity: 0, y: 30, duration: 1 }, 52.4);
+$$("#sj1 .st6").forEach((s, k) => tl.fromTo(s, { opacity: 0, y: 40 }, IN, 54 + k * 3.2));
+tl.fromTo("#senior", { opacity: 0, y: 20 }, IN, 74);
+
+// 3 solusi yang ada
 $$("#cards3 .card").forEach((c, k) => {
-  const t = [103, 111, 121, 130][k];
-  tl.set(c, { opacity: 1 }, 100);
+  const t = [86.5, 91.5, 96.5, 101.5][k];
+  tl.set(c, { opacity: 1 }, 84);
   tl.to(c, { borderColor: "rgba(255,77,79,.7)", duration: 0.5 }, t);
   tl.fromTo(c.querySelector(".weak"), { opacity: 0, y: 30 }, IN, t);
 });
 
-// 4
+// 4 Tameng + proposisi
 const dash = (sel) => { const p = $(sel), L = p.getTotalLength(); gsap.set(p, { strokeDasharray: L, strokeDashoffset: L }); return p; };
-tl.to(dash("#shield1"), { strokeDashoffset: 0, duration: 1.8, ease: "power2.inOut" }, 140.4);
-tl.to(dash("#check1"), { strokeDashoffset: 0, duration: 0.6 }, 142);
-tl.from("#s4-brand", { opacity: 0, y: 30, duration: 1 }, 141.5);
-tl.from("#s4-tag", { opacity: 0, y: 20, duration: 0.8 }, 143);
-$$("#s4-chips span").forEach((c, k) => tl.fromTo(c, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.6 }, [150, 153.5, 157, 160.5][k]));
+tl.to(dash("#shield1"), { strokeDashoffset: 0, duration: 1.8, ease: "power2.inOut" }, 108.4);
+tl.to(dash("#check1"), { strokeDashoffset: 0, duration: 0.6 }, 110);
+tl.from("#s4-brand", { opacity: 0, y: 30, duration: 1 }, 109.5);
+tl.from("#s4-tag", { opacity: 0, y: 20, duration: 0.8 }, 110.8);
+tl.from("#s4-prop", { opacity: 0, y: 20, duration: 0.9 }, 112);
+$$("#s4-chips span").forEach((c, k) => tl.fromTo(c, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.6 }, 120 + k * 1.2));
+
+// J2 dengan Tameng
+tl.from("#sj2-h", { opacity: 0, y: 30, duration: 1 }, 132.4);
+$$("#sj2 .st6").forEach((s, k) => tl.fromTo(s, { opacity: 0, y: 40 }, IN, 134 + k * 2.6));
 
 // 5a
 $$("#s5a .tn").forEach((n, k) => tl.fromTo(n, { opacity: 0, y: 40 }, IN, 166 + k * 1.6));

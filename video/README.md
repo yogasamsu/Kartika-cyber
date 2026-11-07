@@ -1,6 +1,6 @@
 # Video Tameng
 
-Video demo ±5:20 (gaya AgMon, tanpa VO) ada di [gsap/](gsap/README.md):
+Video demo ±5:50 (gaya AgMon, tanpa VO) ada di [gsap/](gsap/README.md):
 footage asli lab 6 November 2026 yang digerakkan kamera, cerita lewat teks
 layar, dirender bingkai demi bingkai dengan GSAP + Chrome headless + ffmpeg.
 
