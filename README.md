@@ -12,6 +12,9 @@ Semuanya berjalan di satu laptop tanpa internet. Mesinnya hanya memakai pustaka
 standar Python, dan ringkasannya ditulis LLM lokal (Ollama) yang hasilnya dicek
 ulang terhadap bukti.
 
+[![Video Tameng (2:34)](artifacts/video-tameng.jpg)](https://youtu.be/cnkbeFkzYbA)
+
+- Video presentasi (2:34): **https://youtu.be/cnkbeFkzYbA**
 - Situs dan pusat komando: **https://tameng.yogency.work**
 - Karya untuk Kartika Cyber Hackathon 2026, kategori Penangkalan (Defensive Shield).
 
