@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tameng · Slide penjelasan karya</title>
+<meta name="description" content="Slide penjelasan karya Tameng untuk Kartika Cyber Hackathon 2026: masalah, fitur, arsitektur, teknologi, hasil uji lab, dan integrasi ke sistem TNI.">
+<link rel="stylesheet" href="../tameng.css">
+<style>
+body{background:var(--bg)}
+.top{position:sticky;top:0;z-index:5;background:rgba(7,9,10,.92);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;align-items:center;gap:16px;height:56px;flex-wrap:wrap}
+.top .logo{display:flex;align-items:center;gap:10px;font-family:var(--disp);font-size:22px;letter-spacing:.04em;text-transform:uppercase}
+.top .logo svg{width:22px;height:26px}
+.top .dl{margin-left:auto;display:flex;gap:10px}
+.top .btn{font-size:14px;padding:8px 14px 6px}
+main.wrap{padding-top:32px;padding-bottom:60px}
+h1{font-family:var(--disp);font-size:clamp(30px,4vw,48px);text-transform:uppercase;line-height:1}
+.intro{color:var(--text);margin:10px 0 28px;max-width:760px}
+.deck{display:flex;flex-direction:column;gap:26px}
+.deck figure{position:relative;border:1px solid var(--line2);background:#000}
+.deck img{display:block;width:100%;height:auto}
+.deck figcaption{position:absolute;top:8px;right:10px;font-size:10.5px;letter-spacing:.16em;color:var(--muted);background:rgba(7,9,10,.8);padding:2px 6px}
+footer{border-top:1px solid var(--line);padding:22px 0;color:var(--olive);font-size:10px;letter-spacing:.14em;text-transform:uppercase}
+@media (max-width:600px){ .top .dl .ghost{display:none} }
+</style></head><body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="../"><svg viewBox="0 0 26 30"><path d="M13 1 L25 5 V15 C25 22 20 27 13 29 C6 27 1 22 1 15 V5 Z" fill="none" stroke="#ece8d4" stroke-width="1.5"/><path d="M7 12 L13 15 L19 12 M7 17 L13 20 L19 17" fill="none" stroke="#d4f74b" stroke-width="2"/></svg>Tameng</a>
+  <div class="dl"><a class="btn ghost" href="tameng-slide.pptx" download>Unduh PPTX</a><a class="btn" href="tameng-slide.pdf" download>Unduh PDF</a></div>
+</div></header>
+<main class="wrap">
+  <h1>Slide penjelasan karya</h1>
+  <p class="intro">Tameng untuk Kartika Cyber Hackathon 2026, kategori Penangkalan: masalah, fitur, arsitektur, teknologi, hasil uji lab, dan integrasi ke sistem TNI. 16 slide.</p>
+  <div class="deck" id="deck"></div>
+</main>
+<footer><div class="wrap">Tameng · tameng.yogency.work · github.com/yogasamsu/Kartika-cyber</div></footer>
+<script>
+(function(){
+  "use strict";
+  const deck=document.getElementById("deck");
+  for(let i=1;i<=16;i++){
+    const n=String(i).padStart(2,"0");
+    const f=document.createElement("figure");
+    const img=document.createElement("img");
+    img.src=n+".jpg"; img.alt="Slide "+i+" Tameng"; img.loading=i>2?"lazy":"eager"; img.width=1920; img.height=1080;
+    const c=document.createElement("figcaption"); c.textContent=n+" / 16";
+    f.append(img,c); deck.append(f);
+  }
+})();
+</script>
+</body></html>

@@ -1,0 +1,446 @@
+<!doctype html>
+<html lang="id"><head><meta charset="utf-8"><title>Tameng · Slide</title>
+<style>
+:root{--bg:#07090a;--panel:#0f130f;--line:#25301f;--line2:#3a4a2c;--acc:#d4f74b;--cream:#ece8d4;--text:#cfd2bf;--muted:#8c947c;--olive:#5f6b45;
+--kritis:#ff4b3e;--tinggi:#ff9f1c;--rendah:#8fbf6a;
+--disp:"DIN Condensed","Avenir Next Condensed","Arial Narrow",sans-serif;--mono:"SF Mono",Menlo,Consolas,monospace}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#000;font-family:var(--mono);color:var(--cream)}
+.slide{position:relative;width:1920px;height:1080px;overflow:hidden;background:var(--bg);margin:0 auto 40px;page-break-after:always}
+.slide::before{content:"";position:absolute;inset:0;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
+  background-size:80px 80px;opacity:.22;-webkit-mask-image:radial-gradient(ellipse at center,#000 25%,transparent 85%)}
+.frame{position:absolute;inset:28px;border:1px solid var(--line)}
+.hud{position:absolute;font-size:15px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+.hud b{color:var(--acc);font-weight:500}
+.tl{top:52px;left:64px}.tr{top:52px;right:64px;text-align:right}.bl{bottom:50px;left:64px}.br{bottom:50px;right:64px}
+.c{position:absolute;inset:118px 120px 104px}
+.kick{font-size:17px;letter-spacing:.24em;text-transform:uppercase;color:var(--acc);margin-bottom:12px}
+h1{font-family:var(--disp);font-weight:700;font-size:74px;line-height:.98;text-transform:uppercase;letter-spacing:.01em;max-width:1600px}
+h1 em{font-style:normal;color:var(--acc)}
+.sub{font-size:22px;line-height:1.5;color:var(--text);margin-top:18px;max-width:1500px}
+.disp{font-family:var(--disp);font-weight:700;text-transform:uppercase;letter-spacing:.02em}
+.box{position:relative;border:1px solid var(--line);background:rgba(15,19,15,.92)}
+.br4::before,.br4::after{content:"";position:absolute;width:16px;height:16px;border:2px solid var(--acc)}
+.br4::before{top:-1px;left:-1px;border-right:0;border-bottom:0}.br4::after{bottom:-1px;right:-1px;border-left:0;border-top:0}
+.g{display:grid;gap:22px}
+.note{position:absolute;left:0;right:0;bottom:0;font-size:15px;color:var(--muted);line-height:1.5}
+.big{font-family:var(--disp);font-weight:700;line-height:.9;color:var(--acc)}
+.r{color:var(--kritis)}.o{color:var(--tinggi)}.gn{color:var(--rendah)}.m{color:var(--muted)}.a{color:var(--acc)}
+table{border-collapse:collapse;width:100%;font-size:24px}
+th{font-size:15px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);text-align:left;font-weight:500;padding:18px 22px;border-bottom:1px solid var(--line2)}
+td{padding:20px 22px;border-bottom:1px solid var(--line);color:var(--text);vertical-align:top;line-height:1.4}
+td.k{color:var(--cream);font-weight:600}
+tr.hi td{background:rgba(212,247,75,.08);color:var(--cream)}
+tr.hi td.k{color:var(--acc)}
+.chip{display:inline-block;font-size:15px;letter-spacing:.1em;text-transform:uppercase;padding:6px 12px;border:1px solid var(--line2);color:var(--muted)}
+.chip.a{border-color:rgba(212,247,75,.5);color:var(--acc)}
+.chip.r{border-color:var(--kritis);color:var(--kritis)}
+.chip.gn{border-color:var(--rendah);color:var(--rendah)}
+.chip.o{border-color:var(--tinggi);color:var(--tinggi)}
+.lbl{font-size:14px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+ul.l{list-style:none}
+ul.l li{position:relative;padding-left:32px;font-size:24px;line-height:1.45;color:var(--text);margin-bottom:16px}
+ul.l li::before{content:"";position:absolute;left:4px;top:14px;width:10px;height:10px;background:var(--acc)}
+.chips-big .chip{font-size:18px;padding:10px 16px}
+.shot{position:absolute;border:1px solid var(--line2);background:#000 top left/cover no-repeat}
+</style></head><body>
+
+<!-- 1 JUDUL -->
+<section class="slide" data-notes="Saya membawa Tameng, singkatan dari Tangkal Ancaman Mandiri lewat Edukasi, Notifikasi, dan Gerak cepat. Tameng adalah pendamping untuk analis yang menjaga keamanan siber satuan TNI. Saya mulai bukan dari teknologinya, tetapi dari orang yang menghadapi serangan: analis jaga.">
+  <div class="frame"></div>
+  <div class="hud tl">Sistem: <b>Tameng</b><br>Mode: <b>air-gapped</b></div>
+  <div class="hud tr">Kartika Cyber Hackathon 2026<br><b>Penangkalan</b> · Defensive Shield</div>
+  <div class="c">
+    <svg viewBox="0 0 600 600" style="position:absolute;right:-40px;top:20px;width:760px;height:760px">
+      <defs><radialGradient id="gl" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#d4f74b" stop-opacity=".22"/><stop offset="1" stop-color="#d4f74b" stop-opacity="0"/></radialGradient>
+      <linearGradient id="sf" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d4f74b" stop-opacity=".22"/><stop offset="1" stop-color="#d4f74b" stop-opacity=".03"/></linearGradient></defs>
+      <circle cx="300" cy="300" r="250" fill="url(#gl)"/>
+      <circle cx="300" cy="300" r="270" fill="none" stroke="#3a4a2c" stroke-dasharray="2 10"/>
+      <circle cx="300" cy="300" r="205" fill="none" stroke="#d4f74b" stroke-width="2" stroke-dasharray="80 1208" opacity=".85"/>
+      <circle cx="300" cy="300" r="205" fill="none" stroke="#d4f74b" stroke-width="2" stroke-dasharray="30 1258" stroke-dashoffset="-640" opacity=".6"/>
+      <circle cx="300" cy="300" r="190" fill="none" stroke="#25301f"/>
+      <g stroke="#3a4a2c"><line x1="20" y1="300" x2="150" y2="300"/><line x1="450" y1="300" x2="580" y2="300"/><line x1="300" y1="20" x2="300" y2="110"/><line x1="300" y1="490" x2="300" y2="580"/></g>
+      <path d="M300 78 L492 410 L108 410 Z" fill="none" stroke="#d4f74b" stroke-width="1" opacity=".55"/>
+      <path d="M290 74 L300 90 L310 74 Z M486 420 L470 414 L482 400 Z M114 420 L130 414 L118 400 Z" fill="#d4f74b"/>
+      <g fill="none" stroke="#d4f74b" stroke-width="2"><path d="M200 190 v-22 h22 M400 190 v-22 h-22 M200 420 v22 h22 M400 420 v22 h-22"/></g>
+      <path d="M300 168 L388 200 V292 C388 352 352 396 300 420 C248 396 212 352 212 292 V200 Z" fill="url(#sf)" stroke="#ece8d4" stroke-width="2.4" stroke-linejoin="round"/>
+      <path d="M300 188 L370 213 V290 C370 340 341 376 300 397 C259 376 230 340 230 290 V213 Z" fill="none" stroke="#d4f74b" stroke-width="1" opacity=".7"/>
+      <path d="M254 262 L300 286 L346 262 M254 292 L300 316 L346 292" fill="none" stroke="#d4f74b" stroke-width="5" stroke-linecap="square"/>
+      <path d="M254 322 L300 346 L346 322" fill="none" stroke="#d4f74b" stroke-width="5" stroke-linecap="square" opacity=".55"/>
+      <circle cx="300" cy="226" r="5" fill="#d4f74b"/>
+    </svg>
+    <div style="position:absolute;left:0;top:150px;width:1000px">
+      <div class="kick" style="margin-bottom:34px">Pendamping analis siber satuan TNI</div>
+      <div class="disp" style="font-size:230px;line-height:.85;color:var(--cream)">Tameng</div>
+      <div style="font-size:22px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-top:26px;line-height:1.7">
+        <b class="a">T</b>angkal <b class="a">A</b>ncaman <b class="a">M</b>andiri lewat<br><b class="a">E</b>dukasi, <b class="a">N</b>otifikasi, dan <b class="a">G</b>erak cepat</div>
+      <div class="sub" style="max-width:920px;font-size:25px">Ribuan alert IT dan OT jadi satu insiden yang jelas, lengkap dengan langkah pertama. Berjalan offline di satu laptop.</div>
+    </div>
+  </div>
+  <div class="hud bl">tameng.yogency.work · github.com/yogasamsu/Kartika-cyber</div>
+  <div class="hud br">Video: <b>youtu.be/cnkbeFkzYbA</b></div>
+</section>
+
+<!-- 2 MASALAH -->
+<section class="slide" data-notes="Bayangkan analis jaga di satuan. Sering masih baru, berjaga sendirian, kadang tengah malam. Dalam simulasi empat menit di lab, sistem deteksi mengeluarkan 654 alert. Hanya tiga belas yang bagian dari serangan. Ia harus menemukannya, merangkainya, lalu melapor ke komandan, tanpa boleh memakai AI di internet karena ini data militer.">
+  <div class="frame"></div><div class="hud tl">01 · <b>Masalah</b></div><div class="hud tr">Tameng</div>
+  <div class="c">
+    <div class="kick">01 · Masalah</div>
+    <h1>Satu analis jaga menerima <em>654 alert</em> dalam 4 menit. Hanya 13 yang serangan.</h1>
+    <div class="g" style="grid-template-columns:1fr 1.15fr;margin-top:56px;gap:40px">
+      <div class="box br4" style="padding:36px 40px">
+        <div class="lbl" style="margin-bottom:10px">Pengguna</div>
+        <div class="disp" style="font-size:46px;margin-bottom:24px">Analis jaga satuan</div>
+        <ul class="l">
+          <li>Sering bintara baru, berjaga sendirian</li>
+          <li>Senior tidak selalu ada untuk ditanya</li>
+          <li>Melapor ke komandan yang bukan orang teknis</li>
+          <li>Tidak boleh memakai AI cloud untuk data militer</li>
+        </ul>
+      </div>
+      <div class="g" style="gap:18px">
+        <div class="box" style="display:flex;align-items:center;gap:36px;padding:34px 36px"><div class="big" style="font-size:120px;width:230px;flex:none">654</div><div style="font-size:25px;color:var(--text)">alert dalam simulasi serangan 4 menit di lab</div></div>
+        <div class="box" style="display:flex;align-items:center;gap:36px;padding:34px 36px"><div class="big r" style="font-size:120px;width:230px;flex:none">13</div><div style="font-size:25px;color:var(--text)">di antaranya bagian dari serangan; sisanya pemeriksaan rutin</div></div>
+        <div class="box" style="display:flex;align-items:center;gap:36px;padding:34px 36px"><div class="big o" style="font-size:120px;width:230px;flex:none">1</div><div style="font-size:25px;color:var(--text)">orang yang harus menemukan, merangkai, dan melaporkannya</div></div>
+      </div>
+    </div>
+    <div class="note">Uji lab Tameng, 6 November 2026: serangan SSH ke PC staf sampai perintah Modbus ke PLC genset.</div>
+  </div>
+  <div class="hud bl">Kartika Cyber Hackathon 2026</div><div class="hud br">tameng.yogency.work</div>
+</section>
+
+<!-- 3 ANCAMAN -->
+<section class="slide" data-notes="Ancaman ini nyata. Sepanjang 2025 BSSN mencatat 5,2 miliar anomali trafik ke Indonesia, sementara kemampuan pantau nasional belum sampai sepuluh persen. Juni 2024 ransomware melumpuhkan Pusat Data Nasional, dan di bulan yang sama data yang diklaim milik BAIS TNI dijual di forum gelap. Situs mil.id juga pernah di-deface.">
+  <div class="frame"></div><div class="hud tl">02 · <b>Ancaman</b></div><div class="hud tr">Tameng</div>
+  <div class="c">
+    <div class="kick">02 · Fakta serangan siber</div>
+    <h1>Ancamannya nyata, <em>kapasitas pantaunya</em> terbatas</h1>
+    <div class="g" style="grid-template-columns:repeat(4,1fr);margin-top:70px">
+      <div class="box br4" style="padding:40px 34px;height:580px"><div class="big" style="font-size:96px">5,2 M</div><div class="disp" style="font-size:32px;margin:26px 0 12px">Anomali trafik</div><div style="font-size:23px;color:var(--text);line-height:1.5">ke Indonesia sepanjang 2025 (Januari sampai 15 November).</div><div class="lbl" style="position:absolute;bottom:34px">BSSN, 2025</div></div>
+      <div class="box br4" style="padding:40px 34px;height:580px"><div class="big r" style="font-size:96px">&lt;10%</div><div class="disp" style="font-size:32px;margin:26px 0 12px">Trafik terpantau</div><div style="font-size:23px;color:var(--text);line-height:1.5">Kemampuan pantau nasional belum sampai sepersepuluh.</div><div class="lbl" style="position:absolute;bottom:34px">BSSN, 2025</div></div>
+      <div class="box br4" style="padding:40px 34px;height:580px"><div class="big o" style="font-size:96px">Jun 24</div><div class="disp" style="font-size:32px;margin:26px 0 12px">PDN dan BAIS TNI</div><div style="font-size:23px;color:var(--text);line-height:1.5">Ransomware melumpuhkan Pusat Data Nasional; data yang diklaim milik BAIS TNI dijual di forum gelap.</div><div class="lbl" style="position:absolute;bottom:34px">Pemberitaan publik</div></div>
+      <div class="box br4" style="padding:40px 34px;height:580px"><div class="big r" style="font-size:96px">mil.id</div><div class="disp" style="font-size:32px;margin:26px 0 12px">Situs di-deface</div><div style="font-size:23px;color:var(--text);line-height:1.5">Halaman diubah lewat celah plugin WordPress.</div><div class="lbl" style="position:absolute;bottom:34px">Narasumber Satsiber</div></div>
+    </div>
+  </div>
+  <div class="hud bl">Kartika Cyber Hackathon 2026</div><div class="hud br">tameng.yogency.work</div>
+</section>
+
+<!-- 4 SOLUSI SAAT INI -->
+<section class="slide" data-notes="Alatnya sebenarnya ada. Wazuh dan Suricata andal untuk deteksi, tetapi alertnya membanjir dan butuh analis senior. Copilot AI cepat, tetapi datanya harus dikirim ke server asing. Platform OT komersial mahal dan terpisah dari IT. Proyek AI SOC open-source ada, tetapi hanya untuk IT dan untuk analis yang sudah ahli.">
+  <div class="frame"></div><div class="hud tl">03 · <b>Solusi saat ini</b></div><div class="hud tr">Tameng</div>
+  <div class="c">
+    <div class="kick">03 · Solusi saat ini</div>
+    <h1>Alatnya ada, tapi <em>tidak cocok</em> untuk satuan</h1>
+    <div class="box" style="margin-top:56px">
+      <table>
+        <tr><th style="width:34%">Solusi</th><th style="width:44%">Masalahnya</th><th>Untuk satuan</th></tr>
+        <tr><td class="k">SIEM dan IDS (Wazuh, Suricata)</td><td>Alert membanjir, perlu analis senior</td><td><span class="chip o">Sebagian</span></td></tr>
+        <tr><td class="k">Copilot AI cloud</td><td>Data militer harus dikirim ke server asing</td><td><span class="chip r">Tidak boleh</span></td></tr>
+        <tr><td class="k">Platform OT komersial</td><td>Mahal, dan terpisah dari sisi IT</td><td><span class="chip o">Mahal</span></td></tr>
+        <tr><td class="k">AI SOC open-source</td><td>Hanya IT, untuk analis yang sudah ahli</td><td><span class="chip o">Sebagian</span></td></tr>
+        <tr class="hi"><td class="k">Tameng</td><td>IT dan OT dalam satu insiden, offline, berbahasa Indonesia</td><td><span class="chip a">Dirancang untuk ini</span></td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="hud bl">Kartika Cyber Hackathon 2026</div><div class="hud br">tameng.yogency.work</div>
+</section>
+
+<!-- 5 APA ITU TAMENG -->
+<section class="slide" data-notes="Tameng adalah pendamping analis jaga, bukan pengganti. Tameng membaca alert Wazuh dan Suricata, merangkainya jadi satu insiden, lalu menyiapkan ringkasan, langkah respons, dan materi belajar. Setiap huruf di namanya adalah fitur: tangkal ancaman, mandiri tanpa internet, edukasi, notifikasi, dan gerak cepat. Keputusan tetap di tangan analis.">
+  <div class="frame"></div><div class="hud tl">04 · <b>Apa itu Tameng</b></div><div class="hud tr">Tameng</div>
+  <div class="c">
+    <div class="kick">04 · Apa itu Tameng</div>
+    <h1>Pendamping analis jaga, <em>bukan pengganti</em></h1>
+    <div class="sub">Tameng membaca alert Wazuh dan Suricata, merangkainya jadi satu insiden, lalu menyiapkan ringkasan, langkah respons, dan materi belajar. Keputusan tetap di tangan analis.</div>
+    <div class="g" style="grid-template-columns:repeat(5,1fr);margin-top:56px;gap:18px">
+      <div class="box br4" style="padding:34px 28px;height:540px"><div class="big" style="font-size:130px">T·A</div><div class="disp" style="font-size:40px;margin:30px 0 14px">Tangkal ancaman</div><div style="font-size:22px;color:var(--text);line-height:1.5">Rantai serangan dari IT sampai OT dalam satu insiden.</div></div>
+      <div class="box br4" style="padding:34px 28px;height:540px"><div class="big" style="font-size:130px">M</div><div class="disp" style="font-size:40px;margin:30px 0 14px">Mandiri</div><div style="font-size:22px;color:var(--text);line-height:1.5">Offline; data insiden tidak keluar dari jaringan satuan.</div></div>
+      <div class="box br4" style="padding:34px 28px;height:540px"><div class="big" style="font-size:130px">E</div><div class="disp" style="font-size:40px;margin:30px 0 14px">Edukasi</div><div style="font-size:22px;color:var(--text);line-height:1.5">Tiap teknik serangan dijelaskan dalam bahasa Indonesia.</div></div>
+      <div class="box br4" style="padding:34px 28px;height:540px"><div class="big" style="font-size:130px">N</div><div class="disp" style="font-size:40px;margin:30px 0 14px">Notifikasi</div><div style="font-size:22px;color:var(--text);line-height:1.5">Kabar saat insiden baru, memburuk, atau sudah ditangani.</div></div>
+      <div class="box br4" style="padding:34px 28px;height:540px"><div class="big" style="font-size:130px">G</div><div class="disp" style="font-size:40px;margin:30px 0 14px">Gerak cepat</div><div style="font-size:22px;color:var(--text);line-height:1.5">Checklist respons, plus blokir otomatis ke PLC dan IP penyerang.</div></div>
+    </div>
+  </div>
+  <div class="hud bl">Kartika Cyber Hackathon 2026</div><div class="hud br">tameng.yogency.work</div>
+</section>
+
+<!-- 6 CARA KERJA -->
+<section class="slide" data-notes="Di balik layar ada lima tahap. Membaca, merangkai, dan menilai murni dikerjakan kode: rantai per pelaku, pemetaan MITRE ATT&CK, tingkat bahaya. AI lokal hanya menulis narasi. Lalu kode memeriksanya: kalau AI menyebut IP, waktu, host, teknik, atau penanda bukti yang tidak ada di bukti, narasinya ditolak dan diganti ringkasan dari kode. Analis baru tidak punya pengalaman untuk menangkap kesalahan AI, jadi sistemnya yang harus menjaga.">
+  <div class="frame"></div><div class="hud tl">05 · <b>Cara kerja</b></div><div class="hud tr">Tameng</div>
+  <div class="c">
+    <div class="kick">05 · Cara kerja</div>
+    <h1>Fakta dari kode, <em>kalimat dari AI</em></h1>
+    <div class="g" style="grid-template-columns:repeat(5,1fr);margin-top:60px;gap:18px">
+      <div class="box br4" style="padding:30px 28px;height:360px"><div class="big m" style="font-size:60px">01</div><div class="disp" style="font-size:46px;margin:22px 0 12px">Baca</div><div style="font-size:22px;color:var(--text);line-height:1.5">Alert Wazuh (IT) dan Suricata (OT)</div></div>
+      <div class="box br4" style="padding:30px 28px;height:360px"><div class="big m" style="font-size:60px">02</div><div class="disp" style="font-size:46px;margin:22px 0 12px">Rangkai</div><div style="font-size:22px;color:var(--text);line-height:1.5">Rantai per pelaku dan host; derau dibuang</div></div>
+      <div class="box br4" style="padding:30px 28px;height:360px"><div class="big m" style="font-size:60px">03</div><div class="disp" style="font-size:46px;margin:22px 0 12px">Nilai</div><div style="font-size:22px;color:var(--text);line-height:1.5">Teknik ATT&amp;CK Enterprise + ICS dan tingkat bahaya</div></div>
+      <div class="box br4" style="padding:30px 28px;height:360px;border-color:var(--tinggi)"><div class="big o" style="font-size:60px">04</div><div class="disp" style="font-size:46px;margin:22px 0 12px">Tulis</div><div style="font-size:22px;color:var(--text);line-height:1.5">Qwen 2.5 7B lokal menulis ringkasan dan rekomendasi</div></div>
+      <div class="box br4" style="padding:30px 28px;height:360px"><div class="big m" style="font-size:60px">05</div><div class="disp" style="font-size:46px;margin:22px 0 12px">Bertindak</div><div style="font-size:22px;color:var(--text);line-height:1.5">Notifikasi, checklist, blokir otomatis</div></div>
+    </div>
+    <div class="g" style="grid-template-columns:3fr 1fr 1fr;gap:18px;margin-top:18px">
+      <div class="chip a" style="text-align:center;font-size:17px;padding:12px">Kode deterministik · fakta pasti</div>
+      <div class="chip o" style="text-align:center;font-size:17px;padding:12px">AI lokal · narasi</div>
+      <div class="chip a" style="text-align:center;font-size:17px;padding:12px">Kode · eksekusi</div>
+    </div>
+    <div class="box" style="margin-top:50px;padding:34px 38px;display:flex;align-items:center;gap:22px;flex-wrap:wrap;border-color:var(--line2)">
+      <div style="font-size:22px;color:var(--cream);margin-right:10px">Narasi AI <b class="r">ditolak</b> bila menyebut di luar bukti:</div>
+      <span class="chip r">IP</span><span class="chip r">Nama host</span><span class="chip r">Waktu</span><span class="chip r">Teknik ATT&amp;CK</span><span class="chip r">Penanda bukti W1, S2</span>
+      <div style="font-size:18px;color:var(--muted);width:100%;margin-top:6px">Bila ditolak, laporan memakai ringkasan cadangan yang ditulis kode. Laporan tetap keluar walau LLM mati.</div>
+    </div>
+  </div>
+  <div class="hud bl">Kartika Cyber Hackathon 2026</div><div class="hud br">tameng.yogency.work</div>
+</section>
+
+<!-- 7 ARSITEKTUR -->
+<section class="slide" data-notes="Arsitekturnya sederhana dan seluruhnya ada di dalam jaringan satuan. Sensor yang sudah umum dipakai, Wazuh di host IT dan Suricata di port mirror OT, menulis alerts.json dan eve.json. Mesin Tameng membaca berkas itu, hanya dengan pustaka standar Python. LLM lokal lewat Ollama di mesin yang sama. Keluarannya laporan, JSON, dashboard pusat komando, dan notifikasi ke chat internal.">
+  <div class="frame"></div><div class="hud tl">06 · <b>Arsitektur</b></div><div class="hud tr">Tameng</div>
+  <div class="c">
+    <div class="kick">06 · Arsitektur dan teknologi</div>
+    <h1>Semuanya di dalam <em>jaringan satuan</em></h1>
+    <svg viewBox="0 0 1680 560" style="width:1680px;height:560px;margin-top:50px;font-family:'SF Mono',Menlo,monospace">
+      <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#d4f74b"/></marker></defs>
+      <rect x="1" y="1" width="1678" height="558" fill="none" stroke="#3a4a2c" stroke-dasharray="6 6"/>
+      <text x="22" y="34" fill="#8c947c" font-size="15" letter-spacing="3">JARINGAN SATUAN · TANPA INTERNET</text>
+      <g font-size="19">
+        <rect x="40" y="80" width="340" height="190" fill="#0f130f" stroke="#25301f"/><text x="64" y="120" fill="#d4f74b" font-size="15" letter-spacing="3">SENSOR IT</text>
+        <text x="64" y="160" fill="#ece8d4" font-size="24">Wazuh 4.14.9</text><text x="64" y="194" fill="#cfd2bf">agen di PC dan server</text><text x="64" y="244" fill="#8c947c">→ alerts.json</text>
+        <rect x="40" y="310" width="340" height="190" fill="#0f130f" stroke="#25301f"/><text x="64" y="350" fill="#ff9f1c" font-size="15" letter-spacing="3">SENSOR OT</text>
+        <text x="64" y="390" fill="#ece8d4" font-size="24">Suricata 8</text><text x="64" y="424" fill="#cfd2bf">port mirror, IDS atau IPS</text><text x="64" y="474" fill="#8c947c">→ eve.json</text>
+        <line x1="380" y1="175" x2="510" y2="260" stroke="#d4f74b" stroke-width="2" marker-end="url(#ar)"/>
+        <line x1="380" y1="405" x2="510" y2="320" stroke="#d4f74b" stroke-width="2" marker-end="url(#ar)"/>
+        <rect x="520" y="80" width="560" height="420" fill="rgba(212,247,75,.06)" stroke="#d4f74b" stroke-width="2"/>
+        <text x="548" y="122" fill="#d4f74b" font-size="15" letter-spacing="3">MESIN TAMENG · PYTHON STDLIB</text>
+        <g fill="#ece8d4" font-size="21">
+          <text x="548" y="176"><tspan fill="#d4f74b">events</tspan><tspan x="700">baca dan seragamkan</tspan></text>
+          <text x="548" y="220"><tspan fill="#d4f74b">correlate</tspan><tspan x="700">rantai per pelaku</tspan></text>
+          <text x="548" y="264"><tspan fill="#d4f74b">mitre</tspan><tspan x="700">ATT&amp;CK + edukasi</tspan></text>
+          <text x="548" y="308"><tspan fill="#d4f74b">llm</tspan><tspan x="700">narasi + validasi</tspan></text>
+          <text x="548" y="352"><tspan fill="#d4f74b">vuln</tspan><tspan x="700">prioritas CVE</tspan></text>
+          <text x="548" y="396"><tspan fill="#d4f74b">notify</tspan><tspan x="700">baru, memburuk, ditangani</tspan></text>
+          <text x="548" y="440"><tspan fill="#d4f74b">report</tspan><tspan x="700">laporan Markdown, JSON</tspan></text>
+        </g>
+        <rect x="560" y="520" width="0" height="0"/>
+        <line x1="800" y1="500" x2="800" y2="500"/>
+        <rect x="1180" y="80" width="460" height="120" fill="#0f130f" stroke="#ff9f1c"/><text x="1204" y="118" fill="#ff9f1c" font-size="15" letter-spacing="3">LLM LOKAL</text>
+        <text x="1204" y="160" fill="#ece8d4" font-size="24">Ollama · Qwen 2.5 7B</text><text x="1204" y="188" fill="#8c947c">di laptop yang sama</text>
+        <line x1="1080" y1="140" x2="1170" y2="140" stroke="#ff9f1c" stroke-width="2" marker-end="url(#ar)"/>
+        <line x1="1180" y1="170" x2="1090" y2="170" stroke="#ff9f1c" stroke-width="2" stroke-dasharray="6 5" marker-end="url(#ar)"/>
+        <rect x="1180" y="240" width="460" height="260" fill="#0f130f" stroke="#25301f"/><text x="1204" y="278" fill="#d4f74b" font-size="15" letter-spacing="3">KELUARAN</text>
+        <g fill="#cfd2bf" font-size="20"><text x="1204" y="320">Pusat komando (HTML statis)</text><text x="1204" y="360">Laporan Markdown dan JSON</text><text x="1204" y="400">Notifikasi: webhook chat</text><text x="1204" y="430" fill="#8c947c">internal, desktop, JSONL</text><text x="1204" y="470">Ringkasan kerentanan</text></g>
+        <line x1="1080" y1="370" x2="1170" y2="370" stroke="#d4f74b" stroke-width="2" marker-end="url(#ar)"/>
+      </g>
+    </svg>
+    <div style="display:flex;gap:14px;margin-top:40px;flex-wrap:wrap">
+      <span class="chip a">Python 3.9+ tanpa pip</span><span class="chip a">Wazuh 4.14.9</span><span class="chip a">Suricata 8 · NFQUEUE</span><span class="chip a">Ollama + Qwen 2.5 7B</span><span class="chip a">HTML/CSS/JS tanpa CDN</span><span class="chip a">Lab Docker 6 container</span><span class="chip a">33 tes otomatis</span>
+    </div>
+  </div>
+  <div class="hud bl">Kartika Cyber Hackathon 2026</div><div class="hud br">tameng.yogency.work</div>
+</section>
+
+<!-- 8 FITUR -->
+<section class="slide" data-notes="Ini fitur yang sudah berjalan di purwarupa. Inti analisisnya: korelasi per pelaku, ATT&CK oleh kode, pembuangan derau, dan narasi tervalidasi. Respons: blokir Modbus lewat Suricata dan blokir IP penyerang lewat Wazuh active response. Untuk analis: edukasi per teknik, ringkasan kerentanan, notifikasi aktif, dan pusat komando. Blokir IP otomatis baru diuji lewat replay; mode latihan masih rencana.">
+  <div class="frame"></div><div class="hud tl">07 · <b>Fitur</b></div><div class="hud tr">Tameng</div>
+  <div class="c">
+    <div class="kick">07 · Fitur</div>
+    <h1>Sebelas fitur <em>di purwarupa</em></h1>
+    <div class="g" style="grid-template-columns:repeat(4,1fr);margin-top:48px;gap:16px">
+      <div class="box" style="padding:26px 26px;height:200px"><div class="disp" style="font-size:30px">Korelasi IT → OT</div><div style="font-size:19px;color:var(--text);margin-top:10px;line-height:1.45">Rantai per pelaku dan host, bukan sekadar kedekatan waktu</div><span class="chip gn" style="position:absolute;right:16px;top:16px;font-size:12px">Jalan</span></div>
+      <div class="box" style="padding:26px 26px;height:200px"><div class="disp" style="font-size:30px">ATT&amp;CK oleh kode</div><div style="font-size:19px;color:var(--text);margin-top:10px;line-height:1.45">Enterprise dan ICS; LLM tidak menentukan teknik</div><span class="chip gn" style="position:absolute;right:16px;top:16px;font-size:12px">Jalan</span></div>
+      <div class="box" style="padding:26px 26px;height:200px"><div class="disp" style="font-size:30px">Buang derau</div><div style="font-size:19px;color:var(--text);margin-top:10px;line-height:1.45">Login sah dan pemindaian agen tidak dihitung serangan</div><span class="chip gn" style="position:absolute;right:16px;top:16px;font-size:12px">Jalan</span></div>
+      <div class="box" style="padding:26px 26px;height:200px"><div class="disp" style="font-size:30px">Narasi tervalidasi</div><div style="font-size:19px;color:var(--text);margin-top:10px;line-height:1.45">LLM lokal; fakta di luar bukti ditolak</div><span class="chip gn" style="position:absolute;right:16px;top:16px;font-size:12px">Jalan</span></div>
+      <div class="box" style="padding:26px 26px;height:200px"><div class="disp" style="font-size:30px">Blokir Modbus</div><div style="font-size:19px;color:var(--text);margin-top:10px;line-height:1.45">Suricata IPS jatuhkan perintah tulis selain dari HMI resmi</div><span class="chip gn" style="position:absolute;right:16px;top:16px;font-size:12px">Jalan</span></div>
+      <div class="box" style="padding:26px 26px;height:200px"><div class="disp" style="font-size:30px">Blokir IP otomatis</div><div style="font-size:19px;color:var(--text);margin-top:10px;line-height:1.45">Wazuh active response; ditempel ke rantai pelaku</div><span class="chip o" style="position:absolute;right:16px;top:16px;font-size:12px">Replay</span></div>
+      <div class="box" style="padding:26px 26px;height:200px"><div class="disp" style="font-size:30px">Skenario deface</div><div style="font-size:19px;color:var(--text);margin-top:10px;line-height:1.45">Celah plugin, webshell, halaman berubah (FIM web root)</div><span class="chip o" style="position:absolute;right:16px;top:16px;font-size:12px">Replay</span></div>
+      <div class="box" style="padding:26px 26px;height:200px"><div class="disp" style="font-size:30px">Edukasi SDM</div><div style="font-size:19px;color:var(--text);margin-top:10px;line-height:1.45">Apa, bahayanya, kerjakan sekarang, cegah; ditulis manusia</div><span class="chip gn" style="position:absolute;right:16px;top:16px;font-size:12px">Jalan</span></div>
+      <div class="box" style="padding:26px 26px;height:200px"><div class="disp" style="font-size:30px">Ringkasan kerentanan</div><div style="font-size:19px;color:var(--text);margin-top:10px;line-height:1.45">CVSS + KEV + kritikalitas aset + terbuka ke publik</div><span class="chip gn" style="position:absolute;right:16px;top:16px;font-size:12px">Jalan</span></div>
+      <div class="box" style="padding:26px 26px;height:200px"><div class="disp" style="font-size:30px">Notifikasi aktif</div><div style="font-size:19px;color:var(--text);margin-top:10px;line-height:1.45">Baru, memburuk, ditangani; webhook chat internal</div><span class="chip gn" style="position:absolute;right:16px;top:16px;font-size:12px">Jalan</span></div>
+      <div class="box" style="padding:26px 26px;height:200px"><div class="disp" style="font-size:30px">Pusat komando</div><div style="font-size:19px;color:var(--text);margin-top:10px;line-height:1.45">Dashboard, temuan, rekomendasi, data log; tanpa CDN</div><span class="chip gn" style="position:absolute;right:16px;top:16px;font-size:12px">Jalan</span></div>
+      <div class="box" style="padding:26px 26px;height:200px;border-style:dashed"><div class="disp m" style="font-size:30px">Mode latihan</div><div style="font-size:19px;color:var(--muted);margin-top:10px;line-height:1.45">Putar ulang skenario untuk melatih operator baru</div><span class="chip" style="position:absolute;right:16px;top:16px;font-size:12px">Rencana</span></div>
+    </div>
+  </div>
+  <div class="hud bl">Kartika Cyber Hackathon 2026</div><div class="hud br">tameng.yogency.work</div>
+</section>
+
+<!-- 9 SKENARIO LAB -->
+<section class="slide" data-notes="Untuk membuktikannya saya membangun lab di satu laptop. Penyerang menebak kata sandi SSH, masuk sebagai sertu, menjalankan payload dan menyalin hash kata sandi, pindah ke server file, lalu mengirim perintah Modbus ke PLC genset. Dua babak: tanpa blokir genset mati; dengan mode blokir perintahnya dijatuhkan.">
+  <div class="frame"></div><div class="hud tl">08 · <b>Uji lab</b></div><div class="hud tr">Tameng</div>
+  <div class="c">
+    <div class="kick">08 · Uji lab</div>
+    <h1>Penyerang menembus PC staf, lalu <em>mematikan genset</em> lewat Modbus</h1>
+    <svg viewBox="0 0 1680 330" style="width:1680px;height:330px;margin-top:60px;font-family:'SF Mono',Menlo,monospace">
+      <defs><marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#ff4b3e"/></marker></defs>
+      <g font-size="20">
+        <rect x="0" y="120" width="300" height="130" fill="#1a0f0e" stroke="#ff4b3e" stroke-dasharray="6 5"/><text x="24" y="172" fill="#ece8d4" font-size="27">kali-ops</text><text x="24" y="210" fill="#8c947c">10.10.5.90 · luar</text>
+        <rect x="460" y="120" width="300" height="130" fill="#0f130f" stroke="#d4f74b"/><text x="484" y="172" fill="#ece8d4" font-size="27">pc-staf-07</text><text x="484" y="210" fill="#8c947c">10.10.5.66 · IT</text>
+        <rect x="920" y="120" width="300" height="130" fill="#0f130f" stroke="#d4f74b"/><text x="944" y="172" fill="#ece8d4" font-size="27">srv-file-01</text><text x="944" y="210" fill="#8c947c">10.10.5.7 · IT</text>
+        <rect x="1380" y="120" width="300" height="130" fill="#1a130a" stroke="#ff9f1c"/><text x="1404" y="172" fill="#ece8d4" font-size="27">plc-genset-01</text><text x="1404" y="210" fill="#8c947c">10.10.5.20 · OT</text>
+        <line x1="300" y1="185" x2="452" y2="185" stroke="#ff4b3e" stroke-width="3" stroke-dasharray="10 6" marker-end="url(#a2)"/>
+        <line x1="760" y1="185" x2="912" y2="185" stroke="#ff4b3e" stroke-width="3" stroke-dasharray="10 6" marker-end="url(#a2)"/>
+        <line x1="1220" y1="185" x2="1372" y2="185" stroke="#ff4b3e" stroke-width="3" stroke-dasharray="10 6" marker-end="url(#a2)"/>
+        <g fill="#cfd2bf" font-size="17" text-anchor="middle"><text x="380" y="80">brute force SSH,</text><text x="380" y="104">login 'sertu'</text><text x="840" y="80">payload /tmp,</text><text x="840" y="104">SSH lateral</text><text x="1300" y="80">Modbus tulis:</text><text x="1300" y="104">matikan genset</text></g>
+        <text x="0" y="310" fill="#8c947c" font-size="16" letter-spacing="3">WAZUH MENCATAT SISI IT · SURICATA MENCATAT SISI OT · TRAFIK NYATA DI LAB DOCKER</text>
+      </g>
+    </svg>
+    <div class="g" style="grid-template-columns:1fr 1fr;margin-top:40px;gap:24px">
+      <div class="box br4" style="padding:32px 36px;border-color:var(--kritis)"><div class="lbl" style="color:var(--kritis)">Babak 1 · tanpa blokir</div><div class="disp r" style="font-size:52px;margin-top:10px">Genset mati</div><div style="font-size:20px;color:var(--text);margin-top:6px">Perintah Modbus sampai ke PLC. Tameng melapor insiden kritis.</div></div>
+      <div class="box br4" style="padding:32px 36px;border-color:var(--rendah)"><div class="lbl" style="color:var(--rendah)">Babak 2 · mode blokir (Suricata IPS)</div><div class="disp gn" style="font-size:52px;margin-top:10px">Genset tetap menyala</div><div style="font-size:20px;color:var(--text);margin-top:6px">Perintah dari host tak sah dijatuhkan. Serangan tetap terlapor utuh.</div></div>
+    </div>
+  </div>
+  <div class="hud bl">Kartika Cyber Hackathon 2026</div><div class="hud br">tameng.yogency.work</div>
+</section>
+
+<!-- 10 HASIL -->
+<section class="slide" data-notes="Hasil babak pertama. Dari 654 alert, analis menerima satu insiden kritis dengan tiga belas bukti. Lima belas detik dari tebakan kata sandi pertama sampai genset mati, terangkai utuh dari IT ke OT, dengan tujuh teknik ATT&CK. Setiap baris kronologi menunjuk ke penanda bukti, jadi analis bisa mengecek sumbernya sendiri.">
+  <div class="frame"></div><div class="hud tl">09 · <b>Hasil</b></div><div class="hud tr">Tameng</div>
+  <div class="c">
+    <div class="kick">09 · Hasil babak 1</div>
+    <h1>Analis menerima <em>1 insiden</em> dengan 13 bukti, bukan 654 alert</h1>
+    <div class="g" style="grid-template-columns:480px 1fr;margin-top:56px;gap:48px">
+      <div class="g" style="gap:30px">
+        <div><div class="big" style="font-size:100px">654 → 1</div><div style="font-size:20px;color:var(--text);margin-top:8px">alert mentah menjadi satu insiden kritis</div></div>
+        <div><div class="big r" style="font-size:100px">15 detik</div><div style="font-size:20px;color:var(--text);margin-top:8px">dari tebakan sandi pertama sampai genset mati, terangkai utuh</div></div>
+        <div><div class="big o" style="font-size:100px">7 teknik</div><div style="font-size:20px;color:var(--text);margin-top:8px">ATT&amp;CK terpetakan: 5 Enterprise, 2 ICS</div></div>
+      </div>
+      <div class="box">
+        <table>
+          <tr><th style="width:170px">Waktu</th><th>Kronologi yang dibaca analis (ditetapkan kode)</th><th style="width:200px">Bukti</th></tr>
+          <tr><td>10:19:26</td><td>4 login SSH gagal dari 10.10.5.90</td><td class="a">W13 dst.</td></tr>
+          <tr><td>10:19:37</td><td>Login berhasil sebagai 'sertu'</td><td class="a">W18</td></tr>
+          <tr><td>10:19:37</td><td>Eksekusi /tmp/exfil.sh</td><td class="a">W24</td></tr>
+          <tr><td>10:19:37</td><td>Pembacaan /etc/shadow</td><td class="a">W22 dst.</td></tr>
+          <tr><td>10:19:38</td><td>SSH lateral ke srv-file-01</td><td class="a">W27</td></tr>
+          <tr><td>10:19:41</td><td class="r" style="font-weight:700">Modbus mematikan genset</td><td class="a">S1</td></tr>
+        </table>
+        <div style="padding:16px 18px;font-size:15px;color:var(--muted);line-height:1.5">Uji lab 6 November 2026. Sebagian besar alert adalah pemeriksaan konfigurasi CIS; 27 pembacaan /etc/shadow yang berupa derau dibuang.</div>
+      </div>
+    </div>
+  </div>
+  <div class="hud bl">Kartika Cyber Hackathon 2026</div><div class="hud br">tameng.yogency.work</div>
+</section>
+
+<!-- 11 DEFACE -->
+<section class="slide" data-notes="Skenario kedua menyasar situs web satuan, sesuai kasus deface mil.id. Penyerang mengunggah berkas lewat celah plugin, menanam webshell, menjalankan perintah, lalu mengubah halaman. Tameng merangkai log akses dan File Integrity Monitoring menjadi satu insiden. Pada varian dengan blokir otomatis, Wazuh active response memblokir IP penyerang setelah perintah webshell pertama, sehingga halaman tidak sempat diubah. Skenario ini memakai replay log deteksi sintetis.">
+  <div class="frame"></div><div class="hud tl">10 · <b>Deface</b></div><div class="hud tr">Tameng</div>
+  <div class="c">
+    <div class="kick">10 · Skenario situs web</div>
+    <h1>Deface situs <em>dihentikan</em> sebelum halaman berubah</h1>
+    <div class="g" style="grid-template-columns:repeat(4,1fr);margin-top:56px;gap:0">
+      <div class="box" style="padding:32px;height:280px"><div class="chip a">T1190</div><div class="disp" style="font-size:40px;margin-top:22px">Eksploit plugin</div><div style="font-size:21px;color:var(--text);margin-top:10px">Unggahan lewat celah file manager</div></div>
+      <div class="box" style="padding:32px;height:280px"><div class="chip a">T1505.003</div><div class="disp" style="font-size:40px;margin-top:22px">Webshell ditanam</div><div style="font-size:21px;color:var(--text);margin-top:10px">Berkas .php baru di web root (FIM)</div></div>
+      <div class="box" style="padding:32px;height:280px;border-color:var(--rendah)"><div class="chip a">T1059.004</div><div class="disp" style="font-size:40px;margin-top:22px">Perintah sistem</div><div style="font-size:21px;color:var(--text);margin-top:10px">IP penyerang <b class="gn">diblokir otomatis</b> di sini</div></div>
+      <div class="box" style="padding:32px;height:280px;border-style:dashed;opacity:.55"><div class="chip">T1491.002</div><div class="disp" style="font-size:40px;margin-top:22px;text-decoration:line-through">Halaman diubah</div><div style="font-size:21px;color:var(--text);margin-top:10px">Tidak sempat terjadi</div></div>
+    </div>
+    <div class="g" style="grid-template-columns:1fr 1fr;gap:24px;margin-top:36px">
+      <div class="box br4" style="padding:30px 34px"><div class="lbl">Yang diterima analis</div>
+        <ul class="l" style="margin-top:18px"><li>Satu insiden: eksploitasi, webshell, perintah, blokir</li><li>Langkah: salin webshell ke media bukti (hash dulu), perbarui plugin, cek berkas lain</li><li>Edukasi untuk tiap teknik di insiden</li></ul></div>
+      <div class="box br4" style="padding:30px 34px"><div class="lbl">Kerentanan terkait</div>
+        <div class="disp" style="font-size:42px;margin-top:14px">CVE-2020-25213 <span class="r">· KEV</span></div>
+        <div style="font-size:23px;color:var(--text);margin-top:14px;line-height:1.5">wp-file-manager 6.8 di web-portal, CVSS 9.8, sudah dieksploitasi di dunia nyata. Tameng menaruhnya di urutan pertama daftar tambal.</div></div>
+    </div>
+    <div class="note">Replay log deteksi sintetis (log akses web dan FIM Wazuh); tidak ada serangan yang dijalankan. Coba: python3 lab/scripts/replay-deface.py --blokir</div>
+  </div>
+  <div class="hud bl">Kartika Cyber Hackathon 2026</div><div class="hud br">tameng.yogency.work</div>
+</section>
+
+<!-- 12 PUSAT KOMANDO -->
+<section class="slide" data-notes="Ini pusat komando yang dipakai analis. Dashboard menunjukkan insiden paling penting dan langkah pertama. Halaman temuan menampilkan peta alur serangan dari luar, jaringan IT, sampai jaringan kendali OT. Semuanya halaman statis tanpa CDN, jadi bisa dibuka di jaringan tertutup. Bisa dicoba di tameng.yogency.work.">
+  <div class="frame"></div><div class="hud tl">11 · <b>Pusat komando</b></div><div class="hud tr">Tameng</div>
+  <div class="c">
+    <div class="kick">11 · Pusat komando</div>
+    <h1>Yang dilihat analis: <em>insiden dan langkah pertama</em></h1>
+    <div class="shot" style="left:0;top:200px;width:830px;height:519px;background-image:url(../../siap%20kirim/2-dashboard.png)"></div>
+    <div class="shot" style="left:850px;top:200px;width:830px;height:519px;background-image:url(../../siap%20kirim/3-temuan-it-ot.png)"></div>
+    <div style="position:absolute;left:0;top:736px;font-size:18px;color:var(--text)"><b class="a">Dashboard</b> · insiden paling penting, langkah pertama, notifikasi</div>
+    <div style="position:absolute;left:850px;top:736px;font-size:18px;color:var(--text)"><b class="a">Temuan</b> · peta alur serangan dari luar sampai OT</div>
+    <div class="note">Empat menu: dashboard, temuan, rekomendasi, data log. Halaman statis tanpa CDN atau font daring. Coba di tameng.yogency.work.</div>
+  </div>
+  <div class="hud bl">Kartika Cyber Hackathon 2026</div><div class="hud br">tameng.yogency.work</div>
+</section>
+
+<!-- 13 MENGAPA TAMENG -->
+<section class="slide" data-notes="Bagian-bagiannya sudah ada di tempat lain. Proyek AI SOC open-source ada, tetapi hanya untuk IT dan untuk analis yang sudah ahli. Platform OT ada, tetapi mahal dan tanpa sisi IT. Tameng menyatukannya untuk analis satuan: satu insiden dari IT sampai OT, data tetap di satuan, biaya satu laptop.">
+  <div class="frame"></div><div class="hud tl">12 · <b>Keunggulan</b></div><div class="hud tr">Tameng</div>
+  <div class="c">
+    <div class="kick">12 · Kenapa Tameng</div>
+    <h1>Disatukan untuk <em>analis satuan</em>, dengan biaya satu laptop</h1>
+    <div class="box" style="margin-top:50px">
+      <table style="font-size:20px">
+        <tr><th></th><th>SIEM / IDS</th><th>Copilot AI cloud</th><th>Platform OT</th><th>AI SOC open-source</th><th style="color:var(--acc)">Tameng</th></tr>
+        <tr><td class="k">Dirancang untuk</td><td>analis ahli</td><td>analis ahli</td><td>operator OT</td><td>analis ahli</td><td class="a" style="font-weight:700">analis jaga satuan</td></tr>
+        <tr><td class="k">Merangkai insiden</td><td class="r">tidak</td><td class="gn">ya</td><td class="o">sebagian</td><td class="gn">ya</td><td class="a" style="font-weight:700">ya</td></tr>
+        <tr><td class="k">IT dan OT dalam satu insiden</td><td class="r">tidak</td><td class="o">sebagian</td><td class="o">OT saja</td><td class="o">IT saja</td><td class="a" style="font-weight:700">ya</td></tr>
+        <tr><td class="k">Data tetap di satuan</td><td class="gn">ya</td><td class="r">tidak</td><td class="gn">ya</td><td class="gn">ya</td><td class="a" style="font-weight:700">ya</td></tr>
+        <tr><td class="k">Edukasi berbahasa Indonesia</td><td class="r">tidak</td><td class="o">sebagian</td><td class="r">tidak</td><td class="r">tidak</td><td class="a" style="font-weight:700">ya</td></tr>
+        <tr><td class="k">Biaya untuk satuan</td><td class="gn">rendah</td><td class="r">tinggi</td><td class="r">sangat tinggi</td><td class="gn">rendah</td><td class="a" style="font-weight:700">rendah</td></tr>
+      </table>
+    </div>
+    <div class="chips-big" style="display:flex;gap:14px;margin-top:40px;flex-wrap:wrap"><span class="chip a">1 laptop 16 GB</span><span class="chip a">Lab ±685 MB RAM</span><span class="chip a">Offline penuh</span><span class="chip a">Open-source, tanpa lisensi</span><span class="chip a">33 tes otomatis</span></div>
+  </div>
+  <div class="hud bl">Kartika Cyber Hackathon 2026</div><div class="hud br">tameng.yogency.work</div>
+</section>
+
+<!-- 14 INTEGRASI -->
+<section class="slide" data-notes="Integrasi ke sistem TNI memakai sensor yang sudah ada. Tameng dipasang di segmen SOC sebagai satu server tanpa internet, disambungkan ke Wazuh dan ke Suricata di port mirror OT. Inventaris aset dan daftar HMI sah diisi dari data satuan, notifikasi diarahkan ke chat internal lewat webhook, dan rekomendasi serta edukasinya disesuaikan bersama TTIS. Lalu pilot di satu markas. Batas perannya jelas: hanya aset TNI.">
+  <div class="frame"></div><div class="hud tl">13 · <b>Integrasi</b></div><div class="hud tr">Tameng</div>
+  <div class="c">
+    <div class="kick">13 · Integrasi ke sistem TNI</div>
+    <h1>Masuk lewat <em>sensor yang sudah ada</em></h1>
+    <div class="g" style="grid-template-columns:repeat(3,1fr);margin-top:56px;gap:18px">
+      <div class="box br4" style="padding:32px 34px;height:250px"><div class="big m" style="font-size:54px">01</div><div class="disp" style="font-size:40px;margin:14px 0 8px">Pasang di segmen SOC</div><div style="font-size:22px;color:var(--text)">Satu server, tanpa internet.</div></div>
+      <div class="box br4" style="padding:32px 34px;height:250px"><div class="big m" style="font-size:54px">02</div><div class="disp" style="font-size:40px;margin:14px 0 8px">Sambungkan sensor</div><div style="font-size:22px;color:var(--text)">Wazuh, plus Suricata di port mirror OT.</div></div>
+      <div class="box br4" style="padding:32px 34px;height:250px"><div class="big m" style="font-size:54px">03</div><div class="disp" style="font-size:40px;margin:14px 0 8px">Isi inventaris</div><div style="font-size:22px;color:var(--text)">Aset dan HMI sah dari daftar satuan.</div></div>
+      <div class="box br4" style="padding:32px 34px;height:250px"><div class="big m" style="font-size:54px">04</div><div class="disp" style="font-size:40px;margin:14px 0 8px">Arahkan notifikasi</div><div style="font-size:22px;color:var(--text)">Ke chat internal satuan lewat webhook.</div></div>
+      <div class="box br4" style="padding:32px 34px;height:250px"><div class="big m" style="font-size:54px">05</div><div class="disp" style="font-size:40px;margin:14px 0 8px">Sesuaikan SOP</div><div style="font-size:22px;color:var(--text)">Rekomendasi dan edukasi bersama TTIS.</div></div>
+      <div class="box br4" style="padding:32px 34px;height:250px;border-color:var(--acc)"><div class="big" style="font-size:54px">06</div><div class="disp a" style="font-size:40px;margin:14px 0 8px">Pilot satu markas</div><div style="font-size:22px;color:var(--text)">Ukur hasilnya, lalu perluas.</div></div>
+    </div>
+    <div class="box" style="margin-top:34px;padding:26px 32px;font-size:23px;color:var(--text);border-color:var(--line2)"><b class="a">Batas peran:</b> hanya untuk aset TNI. Insiden sipil tetap ditangani BSSN, Komdigi, dan Polri.</div>
+  </div>
+  <div class="hud bl">Kartika Cyber Hackathon 2026</div><div class="hud br">tameng.yogency.work</div>
+</section>
+
+<!-- 15 CATATAN MVP -->
+<section class="slide" data-notes="Saya jujur soal batas MVP ini. Semuanya baru diuji di lab, deface masih replay, sensor baru Linux dan Modbus TCP, LLM 7B kadang ditolak validasi, data kerentanan masih contoh, dan belum diuji bersama analis. Langkah berikutnya menjawab itu: uji dengan analis sungguhan, login dan jejak audit di dashboard, sensor tambahan, lalu pilot satu markas.">
+  <div class="frame"></div><div class="hud tl">14 · <b>Catatan MVP</b></div><div class="hud tr">Tameng</div>
+  <div class="c">
+    <div class="kick">14 · Catatan MVP dan langkah berikutnya</div>
+    <h1>Yang sudah terbukti di lab, dan <em>yang berikutnya</em></h1>
+    <div class="g" style="grid-template-columns:1fr 1fr;margin-top:56px;gap:30px;height:600px">
+      <div class="box" style="padding:30px 34px"><div class="lbl" style="margin-bottom:18px">Catatan atas MVP awal</div>
+        <table style="font-size:23px">
+          <tr><td class="k" style="padding-left:0">Baru diuji di lab</td><td>Belum di jaringan satuan</td></tr>
+          <tr><td class="k" style="padding-left:0">Deface masih replay</td><td>Bukti sintetis, bukan serangan live</td></tr>
+          <tr><td class="k" style="padding-left:0">Sensor terbatas</td><td>Linux dan Modbus TCP saja</td></tr>
+          <tr><td class="k" style="padding-left:0">LLM 7B kadang ditolak</td><td>Diganti ringkasan dari kode</td></tr>
+          <tr><td class="k" style="padding-left:0">Data kerentanan contoh</td><td>CVE nyata, pemetaan host contoh</td></tr>
+          <tr><td class="k" style="padding-left:0;border:0">Belum diuji analis</td><td style="border:0">Dashboard belum punya login</td></tr>
+        </table></div>
+      <div class="box br4" style="padding:30px 34px;border-color:var(--line2)"><div class="lbl" style="margin-bottom:18px;color:var(--acc)">Langkah berikutnya</div>
+        <ul class="l"><li>Uji bersama analis sungguhan: bandingkan log mentah dan laporan Tameng, ukur waktu dan ketepatan</li><li>Login dan jejak audit di pusat komando</li><li>Sensor Windows dan protokol OT lain</li><li>Mode latihan untuk operator baru</li><li>Pilot satu markas, data tetap di dalam satuan</li></ul></div>
+    </div>
+  </div>
+  <div class="hud bl">Kartika Cyber Hackathon 2026</div><div class="hud br">tameng.yogency.work</div>
+</section>
+
+<!-- 16 PENUTUP -->
+<section class="slide" data-notes="Tameng sudah bisa dicoba sekarang di tameng.yogency.work, kodenya terbuka di GitHub, dan videonya ada di YouTube. Alat deteksinya sudah ada; sekarang analisnya juga punya pendamping. Terima kasih.">
+  <div class="frame"></div>
+  <div class="hud tl">Sistem: <b>Tameng</b><br>Mode: <b>air-gapped</b></div><div class="hud tr">Kartika Cyber Hackathon 2026</div>
+  <div class="c" style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center">
+    <svg viewBox="0 0 600 600" style="width:300px;height:300px">
+      <circle cx="300" cy="300" r="270" fill="none" stroke="#3a4a2c" stroke-dasharray="2 10"/>
+      <circle cx="300" cy="300" r="205" fill="none" stroke="#d4f74b" stroke-width="3" stroke-dasharray="80 1208" opacity=".85"/>
+      <path d="M300 78 L492 410 L108 410 Z" fill="none" stroke="#d4f74b" stroke-width="2" opacity=".55"/>
+      <path d="M300 168 L388 200 V292 C388 352 352 396 300 420 C248 396 212 352 212 292 V200 Z" fill="rgba(212,247,75,.1)" stroke="#ece8d4" stroke-width="4" stroke-linejoin="round"/>
+      <path d="M254 262 L300 286 L346 262 M254 292 L300 316 L346 292" fill="none" stroke="#d4f74b" stroke-width="8" stroke-linecap="square"/>
+      <path d="M254 322 L300 346 L346 322" fill="none" stroke="#d4f74b" stroke-width="8" stroke-linecap="square" opacity=".55"/>
+    </svg>
+    <div class="disp" style="font-size:150px;line-height:.9;margin-top:20px"><span class="a">tameng</span>.yogency.work</div>
+    <div style="font-size:22px;letter-spacing:.3em;text-transform:uppercase;color:var(--muted);margin-top:30px">Tameng · siaga dari dalam satuan</div>
+    <div style="display:flex;gap:60px;margin-top:56px;font-size:22px;color:var(--text)">
+      <div><div class="lbl">Kode</div><div style="margin-top:8px">github.com/yogasamsu/Kartika-cyber</div></div>
+      <div><div class="lbl">Video</div><div style="margin-top:8px">youtu.be/cnkbeFkzYbA</div></div>
+    </div>
+  </div>
+  <div class="hud bl">Kartika Cyber Hackathon 2026</div><div class="hud br">Penangkalan · Defensive Shield</div>
+</section>
+
+</body></html>

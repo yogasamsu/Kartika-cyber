@@ -16,6 +16,7 @@ ulang terhadap bukti.
 
 - Video presentasi (2:34): **https://youtu.be/cnkbeFkzYbA**
 - Situs dan pusat komando: **https://tameng.yogency.work**
+- Slide penjelasan karya: **https://tameng.yogency.work/slide/** (PDF dan PPTX bisa diunduh di sana)
 - Karya untuk Kartika Cyber Hackathon 2026, kategori Penangkalan (Defensive Shield).
 
 ## Coba dalam 2 menit
