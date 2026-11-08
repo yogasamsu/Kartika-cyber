@@ -21,9 +21,13 @@ Semua image **arm64 native** (Wazuh 4.14.9, Suricata 8, python/pymodbus).
 
 ## Menjalankan
 
-> Colok SSD `Prika` dan buka volume `Prika-Tameng` dulu, lalu buka Docker Desktop.
+> Buka Docker Desktop dulu. Log Wazuh dan Suricata ditulis ke `$TAMENG_DATA`
+> (bawaan `/Volumes/Prika-Tameng/lab-data`, SSD terenkripsi milik penyusun).
+> Tanpa SSD itu, arahkan ke folder lain sebelum menyalakan lab; mesin Tameng
+> membaca variabel yang sama.
 
 ```bash
+export TAMENG_DATA="$PWD/lab-data"   # dari root repo; lewati bila memakai SSD Prika
 cd lab
 docker compose up -d --build
 ```
@@ -70,10 +74,10 @@ aturan NFQUEUE agar trafik normal lagi.
 python3 scripts/timeline.py 10     # 10 menit terakhir
 ```
 
-## Bukti di SSD (dibaca mesin korelasi Tameng)
+## Lokasi bukti (dibaca mesin korelasi Tameng)
 
-- Wazuh : `/Volumes/Prika-Tameng/lab-data/wazuh/alerts/alerts.json`
-- Suricata : `/Volumes/Prika-Tameng/lab-data/suricata/eve/eve.json`
+- Wazuh : `$TAMENG_DATA/wazuh/alerts/alerts.json`
+- Suricata : `$TAMENG_DATA/suricata/eve/eve.json`
 
 Sinyal utama:
 

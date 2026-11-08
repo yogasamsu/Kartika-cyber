@@ -9,10 +9,12 @@ Pakai:  python3 scripts/timeline.py [menit_terakhir]   (default 15)
 """
 import datetime as dt
 import json
+import os
 import sys
 
-WAZUH = "/Volumes/Prika-Tameng/lab-data/wazuh/alerts/alerts.json"
-EVE = "/Volumes/Prika-Tameng/lab-data/suricata/eve/eve.json"
+DATA = os.environ.get("TAMENG_DATA", "/Volumes/Prika-Tameng/lab-data")
+WAZUH = os.environ.get("TAMENG_WAZUH_ALERTS", os.path.join(DATA, "wazuh/alerts/alerts.json"))
+EVE = os.environ.get("TAMENG_SURICATA_EVE", os.path.join(DATA, "suricata/eve/eve.json"))
 
 # Rule Wazuh yang relevan untuk narasi serangan (abaikan derau SCA/CIS).
 WAZUH_RULES = {

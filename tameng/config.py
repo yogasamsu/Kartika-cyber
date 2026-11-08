@@ -1,14 +1,17 @@
 """Konfigurasi Tameng: lokasi bukti di SSD dan setelan LLM lokal."""
 import os
 
-# Sumber bukti (dibaca langsung dari SSD terenkripsi Prika-Tameng).
+# Sumber bukti. Bawaan: SSD terenkripsi Prika-Tameng. TAMENG_DATA mengganti
+# folder induknya (sama dengan yang dipakai lab/docker-compose.yml);
+# TAMENG_WAZUH_ALERTS dan TAMENG_SURICATA_EVE menunjuk berkas satu per satu.
+DATA_DIR = os.environ.get("TAMENG_DATA", "/Volumes/Prika-Tameng/lab-data")
 WAZUH_ALERTS = os.environ.get(
     "TAMENG_WAZUH_ALERTS",
-    "/Volumes/Prika-Tameng/lab-data/wazuh/alerts/alerts.json",
+    os.path.join(DATA_DIR, "wazuh/alerts/alerts.json"),
 )
 SURICATA_EVE = os.environ.get(
     "TAMENG_SURICATA_EVE",
-    "/Volumes/Prika-Tameng/lab-data/suricata/eve/eve.json",
+    os.path.join(DATA_DIR, "suricata/eve/eve.json"),
 )
 
 # LLM lokal (Ollama, air-gapped).

@@ -31,7 +31,7 @@ services:
       - FILEBEAT_SSL_VERIFICATION_MODE=none
     volumes:
       # Baca alerts.json langsung dari host (SSD).
-      - /Volumes/Prika-Tameng/lab-data/wazuh/alerts:/var/ossec/logs/alerts
+      - ${TAMENG_DATA:-/Volumes/Prika-Tameng/lab-data}/wazuh/alerts:/var/ossec/logs/alerts
     ports:
       - "127.0.0.1:1514:1514"
       - "127.0.0.1:1515:1515"
@@ -111,4 +111,4 @@ services:
       #   TAMENG_MODE=ips docker compose up -d --force-recreate suricata
       - TAMENG_MODE=${TAMENG_MODE:-ids}
     volumes:
-      - /Volumes/Prika-Tameng/lab-data/suricata/eve:/var/log/suricata
+      - ${TAMENG_DATA:-/Volumes/Prika-Tameng/lab-data}/suricata/eve:/var/log/suricata

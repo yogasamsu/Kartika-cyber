@@ -28,7 +28,8 @@ gagal, dipakai ringkasan cadangan deterministik.
 ## Pakai
 
 Tidak perlu dependensi (hanya pustaka standar Python 3). Ollama harus jalan
-(`scripts/ollama-serve.sh`).
+(`ollama serve`, atau `scripts/ollama-serve.sh` bila model disimpan di SSD Prika).
+Tanpa Ollama, pakai `--no-llm` atau biarkan Tameng memakai ringkasan cadangan.
 
 ```bash
 python3 -m tameng --minutes 10              # tampilkan laporan di layar
