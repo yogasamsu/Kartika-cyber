@@ -139,14 +139,72 @@ brute force SSH, login dengan kredensial curian, eksekusi payload, gerak lateral
 lalu perintah Modbus mematikan genset. Suricata bisa dijalankan sebagai IDS
 (mencatat) atau IPS (memblokir perintah dari host tak sah).
 
-Butuh Docker Desktop dengan memori ±6 GB. Image-nya disiapkan untuk Apple
-Silicon (arm64).
+### Docker yang dipakai
+
+| Sistem | Pasang |
+|---|---|
+| macOS | [Docker Desktop](https://www.docker.com/products/docker-desktop/) |
+| Windows | Docker Desktop dengan backend WSL2; jalankan perintah di bawah dari terminal WSL (Ubuntu), bukan PowerShell |
+| Linux | Docker Engine plus plugin Compose v2 (`docker-compose-plugin`) |
+
+Perintahnya `docker compose` (Compose v2, dengan spasi), bukan `docker-compose`
+versi lama. Cek dengan `docker compose version`.
+
+Lab ini diuji di Docker Desktop pada MacBook Air M4 (RAM 16 GB). Image dasarnya
+tersedia untuk arm64 dan amd64, jadi seharusnya jalan juga di laptop Intel/AMD,
+tetapi itu belum diuji.
+
+Sebelum mulai:
+
+- **Memori Docker minimal 6 GB.** Di Docker Desktop: Settings → Resources →
+  Memory. Lab sendiri memakai ±700 MB; sisanya untuk Wazuh saat start dan
+  untuk build.
+- **Internet hanya saat build pertama**, untuk mengunduh image dan paket agen
+  Wazuh. Setelah itu lab bisa dijalankan tanpa internet.
+- **Subnet `10.10.5.0/24` harus belum dipakai** jaringan lain di laptop Anda.
+- **Host korban berjalan `privileged`, dan Suricata butuh `NET_ADMIN`** untuk
+  mode IPS (NFQUEUE). Jalankan lab ini hanya di laptop uji, bukan di server
+  produksi.
+
+### Isi lab
+
+| Container | Image dasar | Peran |
+|---|---|---|
+| `wazuh-manager` | `wazuh/wazuh-manager:4.14.9` | SIEM sisi IT; menulis `alerts.json` |
+| `pc-staf-07`, `srv-file-01` | `ubuntu:22.04` + agen Wazuh 4.14.9 | Host korban dengan sensor Tameng |
+| `plc-genset-01` | `python:3.12-slim` + pymodbus | Simulator PLC genset (Modbus TCP :502) |
+| `hmi-genset` | sama dengan PLC | Pengirim perintah Modbus yang sah |
+| `suricata` | `jasonish/suricata:8.0.8` | Sensor OT (IDS atau IPS); menulis `eve.json` |
+| `attacker` | sama dengan host korban | Host penyerang untuk skenario |
+
+### Menjalankan
+
+Dari root repo:
 
 ```bash
 export TAMENG_DATA="$PWD/lab-data"      # tempat log Wazuh dan Suricata ditulis
 cd lab
-docker compose up -d --build
-bash scripts/demo-dua-babak.sh          # babak 1 tanpa blokir, babak 2 dengan blokir
+docker compose up -d --build            # build pertama butuh beberapa menit
+```
+
+Tunggu ±30 detik, lalu pastikan dua agen sudah `Active`:
+
+```bash
+docker exec wazuh-manager /var/ossec/bin/agent_control -l
+```
+
+Jalankan demo dua babak. Babak 1 tanpa blokir (genset mati), babak 2 dengan
+Suricata IPS (perintah ke genset diblokir). Laporan Tameng untuk tiap babak
+ditulis ke `lab/out/`.
+
+```bash
+bash scripts/demo-dua-babak.sh
+```
+
+Matikan lab setelah selesai:
+
+```bash
+docker compose down
 ```
 
 Rincian topologi, mode IDS/IPS, dan penyederhanaan lab dibanding produksi ada
