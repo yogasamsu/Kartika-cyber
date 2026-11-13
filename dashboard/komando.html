@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="id">
+<html lang="id" data-gate class="auth-wait">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -21,6 +21,7 @@ body{display:grid;grid-template-columns:232px minmax(0,1fr);min-height:100vh}
 .side .sys div{display:flex;align-items:center;gap:8px;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
 .side .sys i{width:6px;height:6px;border-radius:50%;background:var(--acc);box-shadow:0 0 8px var(--acc)}
 .side .sys .off i{background:var(--olive);box-shadow:none}
+.side .userbox{margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
 .side .back{margin-top:14px;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--olive)}
 .side .back:hover{color:var(--acc)}
 
@@ -173,7 +174,60 @@ table.tbl{width:100%;border-collapse:collapse;font-size:11.5px}
 .st .nm{font-family:var(--disp);font-size:17px;text-transform:uppercase;margin-top:4px}
 .st .pr{font-size:10.5px;color:var(--muted)}
 
+/* ===== simulasi ===== */
+.topr{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.topr .btn{font-size:15px;padding:8px 14px 6px}
+.simnote{margin:0 0 14px;padding:9px 12px;border:1px dashed var(--tinggi);color:var(--tinggi);font-size:11px;letter-spacing:.06em;background:rgba(255,159,28,.05)}
+.simbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px}
+.simbar .btn{font-size:16px;padding:9px 18px 7px}
+.simbar .btn[disabled]{opacity:.4;pointer-events:none}
+.spd{display:flex;border:1px solid var(--line2)}
+.spd button{padding:7px 10px;font-size:11px;color:var(--muted)}
+.spd button.on{background:var(--acc);color:var(--bg)}
+.phase{margin-top:14px;display:flex;align-items:center;gap:12px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--cream)}
+.phase i{width:8px;height:8px;border-radius:50%;background:var(--olive)}
+.phase.live i{background:var(--kritis);box-shadow:0 0 10px var(--kritis);animation:pulse 1s infinite}
+.phase.ok i{background:var(--acc);box-shadow:0 0 10px var(--acc)}
+.pbar{height:3px;background:var(--line);margin-top:8px;position:relative;overflow:hidden}
+.pbar b{position:absolute;inset:0 auto 0 0;width:0;background:var(--acc);transition:width .4s}
+.kpi.sim{margin-top:14px}
+.kp .v.bump{animation:bump .5s}
+@keyframes bump{30%{transform:scale(1.18);color:var(--acc)}}
+.simgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.35fr);gap:14px;margin-top:14px;align-items:start}
+.feed{max-height:384px;overflow-y:auto}
+.feed .fe{display:grid;grid-template-columns:64px 30px minmax(0,1fr);gap:8px;padding:8px 14px;border-bottom:1px solid var(--line);font-size:11.5px}
+.feed .fe .tm{color:var(--muted)}
+.feed .fe .id{color:var(--acc)}
+.feed .fe .lb{color:var(--cream)}
+.feed .fe .ip{display:block;color:var(--olive);font-size:10.5px}
+.feed .fe.new{animation:flash 1.6s ease-out}
+.feed .fe.b .lb{color:var(--rendah)}
+.feed .fe.x .lb{color:var(--kritis)}
+.feed .empty,.rep .empty{padding:26px 16px;color:var(--olive);font-size:11.5px;text-align:center}
+@keyframes flash{from{background:rgba(255,75,62,.22)}to{background:transparent}}
+.chain li.new{animation:flash 1.6s ease-out}
+.rep{padding:18px 22px}
+.rep h2{font-family:var(--disp);font-size:clamp(24px,2.6vw,34px);line-height:1.02;text-transform:uppercase;margin:8px 0 10px;min-height:1em}
+.rep p{font-size:13px;color:var(--text);max-width:820px;min-height:1.5em}
+.rep ol{margin:14px 0 0 18px;font-size:12.5px;color:var(--cream)}
+.rep ol li{margin-bottom:5px;animation:fade .4s forwards;opacity:0}
+.rep .acts{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.rep .acts .btn{font-size:15px;padding:9px 16px 7px}
+.rep .src{margin-top:12px;font-size:10.5px;color:var(--muted);letter-spacing:.06em}
+.caret::after{content:"▌";color:var(--acc);animation:pulse .8s infinite}
+.toasts{position:fixed;top:16px;right:16px;z-index:50;display:flex;flex-direction:column;gap:8px;width:min(340px,calc(100vw - 32px));pointer-events:none}
+.toast{border:1px solid var(--line2);border-left:4px solid var(--acc);background:rgba(12,15,12,.97);padding:10px 14px;box-shadow:0 8px 30px rgba(0,0,0,.5);animation:tin .35s ease-out;pointer-events:auto}
+.toast.MEMBURUK{border-left-color:var(--kritis)}.toast.DITANGANI{border-left-color:var(--rendah)}
+.toast .h{display:flex;justify-content:space-between;font-size:9.5px;letter-spacing:.14em;color:var(--muted)}
+.toast .tx{font-size:12.5px;color:var(--cream);margin-top:5px}
+.toast .ft{font-size:10.5px;color:var(--olive);margin-top:5px}
+.toast.out{opacity:0;transform:translateX(30px);transition:.4s}
+@keyframes tin{from{opacity:0;transform:translateX(40px)}}
+.menu a .live{margin-left:auto;width:7px;height:7px;border-radius:50%;background:var(--kritis);box-shadow:0 0 8px var(--kritis);animation:pulse 1s infinite;display:none}
+.menu a .live.on{display:block}.menu a .live.on+.no{display:none}
+
 @media (max-width:1100px){
+  .simgrid{grid-template-columns:minmax(0,1fr)}
   .hot,.verdict,.two{grid-template-columns:1fr}
   .vtop,.groups{grid-template-columns:1fr}
   .kpi{grid-template-columns:repeat(2,1fr)}
@@ -187,6 +241,7 @@ table.tbl{width:100%;border-collapse:collapse;font-size:11.5px}
   .menu a{font-size:14px;padding:8px 10px;gap:6px;white-space:nowrap}
   .menu a svg,.menu a .no{display:none}
   .side .sys,.side .back{display:none}
+  .side .userbox{margin:0 0 0 8px;padding:0;border:0;flex-shrink:0}.userbox .un{display:none}
   main{padding:18px 16px 40px}
   .kpi,.meta,.status{grid-template-columns:repeat(2,1fr)}
   .map-wrap{overflow-x:auto}.map{min-width:620px}
@@ -210,15 +265,17 @@ table.tbl{width:100%;border-collapse:collapse;font-size:11.5px}
     <a href="#temuan" data-v="temuan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="11" cy="11" r="7"/><path d="M21 21l-5-5M11 8v6M8 11h6"/></svg>Temuan<span class="no">02</span></a>
     <a href="#rekomendasi" data-v="rekomendasi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 6h2M4 12h2M4 18h2M10 6h10M10 12h10M10 18h10"/></svg>Rekomendasi<span class="no">03</span></a>
     <a href="#log" data-v="log"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 4h16v16H4zM4 9h16M9 9v11"/></svg>Data log<span class="no">04</span></a>
+    <a href="#simulasi" data-v="simulasi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M10 8.5v7l6-3.5z"/></svg>Simulasi<i class="live" id="liveDot"></i><span class="no">05</span></a>
   </nav>
   <div class="sys" id="sys"></div>
+  <div class="userbox" id="userBox" hidden></div>
   <a class="back" href="index.html">← Beranda</a>
 </aside>
 
 <main>
   <!-- ================= 1 DASHBOARD ================= -->
   <section class="view" id="v-dashboard">
-    <div class="top"><div><div class="k">01 · Dashboard</div><h1>Situasi saat ini</h1><p>Yang paling penting ada di kotak merah.</p></div><span class="clock" id="clock"></span></div>
+    <div class="top"><div><div class="k">01 · Dashboard</div><h1>Situasi saat ini</h1><p>Yang paling penting ada di kotak merah.</p></div><div class="topr"><a class="btn" href="#simulasi/mulai">▶ Simulasi serangan</a><span class="clock" id="clock"></span></div></div>
     <div class="kpi" id="kpi"></div>
     <div class="hot">
       <div class="hero-inc bracket" id="hotInc"></div>
@@ -273,8 +330,33 @@ table.tbl{width:100%;border-collapse:collapse;font-size:11.5px}
     <div class="sub">Status sistem</div>
     <div class="status" id="statusBox"></div>
   </section>
-</main>
 
+  <!-- ================= 5 SIMULASI ================= -->
+  <section class="view" id="v-simulasi">
+    <div class="top"><div><div class="k">05 · Simulasi</div><h1>Uji serangan langsung</h1><p>Putar ulang serangan dari lab dan lihat Tameng bekerja detik demi detik.</p></div></div>
+    <div class="simnote" id="simNote"></div>
+    <div class="chipsel" id="selS"></div>
+    <div class="simbar">
+      <button class="btn" id="simPlay">▶ Mulai serangan</button>
+      <button class="btn ghost" id="simReset">↺ Ulangi</button>
+      <div class="spd" id="simSpd"><button data-s="1" class="on">1×</button><button data-s="2">2×</button><button data-s="4">4×</button></div>
+    </div>
+    <div class="phase" id="simPhase"><i></i><span></span></div>
+    <div class="pbar"><b id="simProg"></b></div>
+    <div class="kpi sim" id="simKpi"></div>
+    <div class="simgrid">
+      <section class="panel"><h3>Aliran alert langsung <b id="simFeedN"></b></h3><div class="feed" id="simFeed"></div></section>
+      <section class="panel"><h3>Peta alur serangan <b>diperbarui tiap alert</b></h3><div class="map-wrap"><svg class="map" id="simMap" viewBox="0 0 820 340"></svg></div></section>
+    </div>
+    <div class="sub">Rantai serangan yang dirangkai Tameng</div>
+    <section class="panel"><ol class="chain" id="simChain"></ol></section>
+    <div class="sub">Laporan Tameng</div>
+    <section class="panel rep bracket" id="simRep"></section>
+  </section>
+</main>
+<div class="toasts" id="toasts" aria-live="polite"></div>
+
+<script src="auth.js"></script>
 <script src="data.js"></script>
 <script>
 (function(){
@@ -290,6 +372,7 @@ const INC = D.incidents || [], V = D.vulnerabilities, NOTIF = D.notifications ||
 const order = INC.map((x,i)=>i).sort((a,b)=>(RANK[INC[a].severity]-RANK[INC[b].severity]) || (INC[b].start > INC[a].start ? 1 : -1));
 let cur = order[0] ?? 0;
 const done = new Set();   // tindakan yang sudah dicentang (berlaku di semua menu)
+const track = (t, d) => window.tamengTrack && window.tamengTrack(t, d);   // auth.js; diam bila offline
 
 const impactOf = x => x.has_ot_impact ? ["k","Genset dimatikan perintah tak sah"]
   : x.ot_blocked ? ["b","Perintah ke PLC diblokir, genset tetap menyala"]
@@ -360,8 +443,8 @@ function el(tag, attrs, parent, text){
   if (text != null) n.textContent = text;
   if (parent) parent.appendChild(n); return n;
 }
-function drawMap(x){
-  const svg = $("#map"); svg.innerHTML = "";
+function drawMap(x, svg){
+  svg = svg || $("#map"); svg.innerHTML = "";
   el("rect",{x:8,y:24,width:130,height:300,class:"zone"},svg); el("text",{x:16,y:18,class:"zl"},svg,"LUAR");
   el("rect",{x:170,y:24,width:400,height:300,class:"zone"},svg); el("text",{x:178,y:18,class:"zl"},svg,"JARINGAN IT SATUAN");
   el("rect",{x:600,y:24,width:212,height:300,class:"zone"},svg); el("text",{x:608,y:18,class:"zl"},svg,"JARINGAN KENDALI OT");
@@ -450,7 +533,8 @@ function renderRekomendasi(){
 }
 document.addEventListener("click", e => {
   const li = e.target.closest("#v-rekomendasi li[data-k]");
-  if (li){ const k = li.dataset.k; done.has(k) ? done.delete(k) : done.add(k); renderRekomendasi(); return; }
+  if (li){ const k = li.dataset.k; done.has(k) ? done.delete(k) : done.add(k);
+    track("centang_rekomendasi", {teks: k.slice(0,120), selesai: done.has(k)}); renderRekomendasi(); return; }
   const g = e.target.closest("[data-go]");
   if (g){ location.hash = g.dataset.go; }
 });
@@ -479,11 +563,195 @@ function renderLog(){
     <div class="nm">${esc(s.nama)}</div><div class="pr">${esc(s.peran)}</div></div>`).join("");
 }
 
+/* ================= 5 SIMULASI =================
+   Memutar ulang alert asli hasil uji lab (data.js) satu per satu, dengan jeda
+   mengikuti selisih cap waktu aslinya. Tidak ada data yang dikarang: alert,
+   rantai, notifikasi, dan laporan semuanya diambil dari insiden yang terekam. */
+const REDUCE = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+const secs = t => { const [h,m,s] = String(t).split(":"); return (+h)*3600 + (+m)*60 + parseFloat(s||0); };
+const S = {i: order[0] ?? 0, k: 0, ev: [], steps: new Set(), notifs: new Set(), timer: null, playing: false, done: false, speed: 1, run: 0, sev: null};
+const evCls = l => /DIBLOKIR|active response/i.test(l) ? "b" : /DAMPAK OT|DEFACE|shutdown|mati/i.test(l) ? "x" : "";
+function liveSev(x){
+  let r = 3;
+  x.steps.forEach((s,k) => { if (!S.steps.has(k)) return;
+    r = Math.min(r, /DAMPAK OT/.test(s.text) ? 0 : /BERHASIL|DEFACE|lateral|DIBLOKIR|unggah/i.test(s.text) ? 1 : 2); });
+  if (!S.ev.length) return null;
+  return ["kritis","tinggi","sedang","rendah"][Math.max(r, RANK[x.severity])];
+}
+function setPhase(txt, cls){ const p = $("#simPhase"); p.className = "phase " + (cls||""); p.querySelector("span").textContent = txt; }
+function simKpi(bump){
+  const x = INC[S.i], hosts = new Set(), tech = new Set();
+  S.ev.forEach(e => { const h = nameOf(e.dst_ip) || e.host; if (h) hosts.add(h); });
+  x.steps.forEach((s,k) => S.steps.has(k) && s.tech.forEach(t => tech.add(t)));
+  const sev = liveSev(x);
+  const cells = [
+    ["Alert masuk", `${S.ev.length}<small style="font-size:20px;color:var(--olive)">/${x.events.length}</small>`, "", "dari Wazuh dan Suricata"],
+    ["Host tersentuh", hosts.size, "t", [...hosts].join(", ") || "belum ada"],
+    ["Teknik ATT&CK", tech.size, "a", [...tech].slice(-3).join(" · ") || "belum dikenali"],
+    ["Tingkat bahaya", sev ? sev.toUpperCase() : "—", sev==="kritis"?"k":sev==="tinggi"?"t":"a", S.done ? "insiden ditutup Tameng" : S.ev.length ? "dihitung ulang tiap alert" : "menunggu alert"],
+  ];
+  $("#simKpi").innerHTML = cells.map(([l,v,c,d],n) => `<div class="kp bracket"><div class="lbl">${esc(l)}</div><div class="v ${c} ${bump && bump.includes(n)?"bump":""}">${v}</div><div class="d">${esc(d)}</div></div>`).join("");
+  $("#simProg").style.width = (S.ev.length / x.events.length * (S.done ? 100 : 92)) + "%";
+}
+function simPlayBtn(){
+  const b = $("#simPlay");
+  b.textContent = S.done ? "✓ Selesai" : S.playing ? "❚❚ Jeda" : S.k ? "▶ Lanjutkan" : "▶ Mulai serangan";
+  b.disabled = S.done;
+  $("#liveDot").classList.toggle("on", S.playing);
+}
+function simReset(i){
+  clearTimeout(S.timer); S.run++;
+  Object.assign(S, {i, k:0, ev:[], steps:new Set(), notifs:new Set(), playing:false, done:false});
+  const x = INC[i];
+  $("#simNote").innerHTML = `◆ SIMULASI · memutar ulang ${x.events.length} alert asli dari uji lab ${esc(x.start.slice(0,10))} (${esc(x.skenario||x.id)}). Bukan serangan sungguhan, tidak ada data yang dikarang.`;
+  $("#selS").innerHTML = order.map(n => `<button data-sim="${n}" class="${n===i?"on":""}"><i style="background:${col(INC[n].severity)}"></i>${esc(INC[n].skenario || INC[n].id)}</button>`).join("");
+  $("#simFeed").innerHTML = `<div class="empty">Sensor siaga. Tekan “Mulai serangan”.</div>`;
+  $("#simFeedN").textContent = "";
+  $("#simChain").innerHTML = "";
+  $("#simRep").innerHTML = `<div class="empty">Laporan disusun otomatis setelah serangan selesai dirangkai.</div>`;
+  drawMap(Object.assign({}, x, {events:[], ot_blocked:false}), $("#simMap"));
+  setPhase("Siaga · sensor Wazuh dan Suricata aktif", "");
+  simKpi(); simPlayBtn();
+}
+function simArrive(e){
+  const x = INC[S.i];
+  S.ev.push(e);
+  const f = $("#simFeed"); if (S.ev.length === 1) f.innerHTML = "";
+  f.insertAdjacentHTML("afterbegin", `<div class="fe new ${evCls(e.label)}"><span class="tm">${esc(e.time)}</span><span class="id">${esc(e.eid)}</span>
+    <span class="lb">${esc(e.label)}<span class="ip">${esc(e.source)} · ${esc(e.sid)} · ${esc(e.src_ip||"-")} → ${esc(nameOf(e.dst_ip)||e.host||"-")}</span></span></div>`);
+  $("#simFeedN").textContent = `${S.ev.length} alert`;
+  const blocked = S.ev.some(v => /DIBLOKIR/.test(v.label));
+  drawMap(Object.assign({}, x, {events:S.ev, ot_blocked: x.ot_blocked && blocked}), $("#simMap"));
+  const have = new Set(S.ev.map(v => v.eid)), bump = [0];
+  x.steps.forEach((s,k) => {
+    if (S.steps.has(k) || !s.evidence.every(id => have.has(id))) return;
+    S.steps.add(k); bump.push(2,3);
+    $("#simChain").insertAdjacentHTML("beforeend", `<li class="new ${stepCls(s.text)}"><span class="tm">${esc(s.time)}</span><span class="tx">${fmtTx(s.text)}
+      <span class="chips">${s.tech.map(t=>`<span class="chip t">${esc(t)}</span>`).join("")}<span class="chip">bukti ${esc(s.evidence.join(", "))}</span></span></span></li>`);
+  });
+  bump.push(1);
+  NOTIF.filter(n => n.insiden === x.id).slice().reverse().forEach(n => {
+    const key = n.jenis + n.time + n.teks;
+    if (S.notifs.has(key) || n.time.slice(11,19) > e.time.slice(0,8)) return;
+    S.notifs.add(key); toast(n);
+  });
+  setPhase(S.steps.size ? `Tameng merangkai insiden · ${S.steps.size}/${x.steps.length} langkah dikenali` : "Sensor menangkap alert · menunggu pola", "live");
+  simKpi(bump);
+}
+function simNext(){
+  if (!S.playing) return;
+  const x = INC[S.i];
+  if (S.k >= x.events.length) return simFinish();
+  const e = x.events[S.k++]; simArrive(e);
+  const nx = x.events[S.k];
+  const gap = nx ? Math.min(Math.max(secs(nx.time) - secs(e.time), 0), 4) : 0;
+  S.timer = setTimeout(simNext, (650 + gap * 450) / S.speed);
+}
+function simToggle(){
+  if (S.done) return;
+  S.playing = !S.playing;
+  const x = INC[S.i];
+  if (S.playing && !S.k) { S.t0 = Date.now(); track("simulasi_mulai", {skenario: x.skenario || x.id, kecepatan: S.speed}); }
+  else track(S.playing ? "simulasi_lanjut" : "simulasi_jeda", {skenario: x.skenario || x.id, alert_ke: S.k});
+  if (S.playing) simNext(); else { clearTimeout(S.timer); setPhase("Dijeda", ""); }
+  simPlayBtn();
+}
+function simFinish(){
+  const x = INC[S.i], run = S.run;
+  S.playing = false; S.done = true; simPlayBtn();
+  track("simulasi_selesai", {skenario: x.skenario || x.id, insiden: x.id, detik: Math.round((Date.now() - (S.t0 || Date.now())) / 1000)});
+  setPhase("Tameng menyusun laporan…", "live");
+  setTimeout(() => {
+    if (run !== S.run) return;
+    simKpi(); setPhase(`Selesai · ${x.events.length} alert jadi 1 insiden, laporan siap`, "ok");
+    showReport(x, run);
+  }, REDUCE ? 0 : 1300 / S.speed);
+}
+function typeInto(node, text, cps, run){
+  return new Promise(res => {
+    if (REDUCE) { node.textContent = text; return res(); }
+    let n = 0; node.classList.add("caret");
+    const step = () => {
+      if (run !== S.run) return res();
+      n = Math.min(text.length, n + Math.ceil(cps * S.speed / 30));
+      node.textContent = text.slice(0, n);
+      if (n < text.length) setTimeout(step, 33); else { node.classList.remove("caret"); res(); }
+    };
+    step();
+  });
+}
+async function showReport(x, run){
+  const m = x.meta || {};
+  $("#simRep").innerHTML = `<div class="lbl">${esc(x.id)} · <span class="sev ${esc(x.severity)}">${esc(x.severity)}</span></div><h2></h2>${impactHtml(x)}<p style="margin-top:12px"></p>
+    <div class="lbl" style="margin-top:16px">Rekomendasi</div><ol></ol>
+    <div class="src">Narasi: ${m.fallback ? "ringkasan dari kode (fakta tervalidasi)" : "LLM lokal " + esc(m.model||"") + ", lolos validasi"} · ${x.events.length} bukti · ${x.techniques.length} teknik ATT&amp;CK</div>
+    <div class="acts" style="visibility:hidden"><a class="btn" href="#temuan/${S.i}">Lihat analisa lengkap</a><button class="btn ghost" id="simDl">⇩ Unduh laporan (.md)</button><button class="btn ghost" data-sim-next>Skenario berikutnya →</button></div>`;
+  const r = $("#simRep");
+  await typeInto(r.querySelector("h2"), x.summary.judul, 70, run);
+  await typeInto(r.querySelector("p"), x.summary.ringkasan, 260, run);
+  if (run !== S.run) return;
+  const ol = r.querySelector("ol");
+  x.summary.rekomendasi.forEach((t,k) => ol.insertAdjacentHTML("beforeend", `<li style="animation-delay:${REDUCE?0:k*.25/S.speed}s">${esc(t)}</li>`));
+  r.querySelector(".acts").style.visibility = "visible";
+}
+function reportMd(x){
+  const L = [`# ${x.summary.judul}`, "", `- ID: ${x.id}`, `- Skenario: ${x.skenario||"-"}`, `- Tingkat: ${x.severity}`,
+    `- Waktu: ${x.start.slice(0,19).replace("T"," ")} – ${x.end.slice(11,19)} UTC`, `- Pintu masuk: ${x.entry_ip}`, `- Host: ${x.hosts.join(", ")}`,
+    "", "## Ringkasan", "", x.summary.ringkasan, "", "## Kronologi", "", "| Waktu | Kejadian | Bukti |", "|---|---|---|",
+    ...x.steps.map(s => `| ${s.time} | ${s.text.replace(/\|/g,"/")} | ${s.evidence.join(", ")} |`),
+    "", "## Teknik MITRE ATT&CK", "", ...x.techniques.map(t => `- ${t.id} ${t.name} (${t.tactic})`),
+    "", "## Rekomendasi", "", ...x.summary.rekomendasi.map((r,k) => `${k+1}. ${r}`),
+    "", "## Bukti mentah", "", "| ID | Waktu | Sumber | Rule/SID | Sinyal | Asal | Tujuan |", "|---|---|---|---|---|---|---|",
+    ...x.events.map(e => `| ${e.eid} | ${e.time} | ${e.source} | ${e.sid} | ${e.label.replace(/\|/g,"/")} | ${e.src_ip||"-"} | ${e.dst_ip||e.host||"-"} |`),
+    ...(x.notes.length ? ["", "## Catatan Tameng", "", ...x.notes.map(n => `- ${n}`)] : []),
+    "", `_Dibuat Tameng dari simulasi ulang data lab, ${new Date().toISOString().slice(0,19).replace("T"," ")} UTC._`, ""];
+  return L.join("\n");
+}
+function toast(n){
+  const box = $("#toasts"), t = document.createElement("div");
+  t.className = "toast " + n.jenis;
+  t.innerHTML = `<div class="h"><span><span class="j ${esc(n.jenis)}">${esc(n.jenis)}</span><span class="sev ${esc(n.severity)}">${esc(n.severity)}</span></span><span>${esc(n.time.slice(11,19))}</span></div>
+    <div class="tx">${esc(n.teks)}</div>${n.jenis!=="DITANGANI" && n.langkah_pertama ? `<div class="ft">Langkah pertama: ${esc(n.langkah_pertama)}</div>` : ""}`;
+  box.prepend(t);
+  while (box.children.length > 4) box.lastChild.remove();
+  setTimeout(() => { t.classList.add("out"); setTimeout(() => t.remove(), 450); }, 6000);
+}
+$("#simPlay").addEventListener("click", simToggle);
+$("#simReset").addEventListener("click", () => { track("simulasi_ulang", {skenario: INC[S.i].skenario}); simReset(S.i); });
+$("#simSpd").addEventListener("click", e => { const b = e.target.closest("button[data-s]"); if (!b) return;
+  S.speed = +b.dataset.s; track("ubah_kecepatan", {kecepatan: S.speed}); $("#simSpd").querySelectorAll("button").forEach(x => x.classList.toggle("on", x === b)); });
+document.addEventListener("click", e => {
+  const s = e.target.closest("[data-sim]"); if (s){ track("pilih_skenario", {skenario: INC[+s.dataset.sim].skenario}); simReset(+s.dataset.sim); return; }
+  if (e.target.closest("[data-sim-next]")){ const p = order.indexOf(S.i); simReset(order[(p+1) % order.length]); simToggle(); return; }
+  if (e.target.closest("#simDl")){
+    const x = INC[S.i], a = document.createElement("a");
+    track("unduh_laporan", {insiden: x.id, skenario: x.skenario});
+    a.href = URL.createObjectURL(new Blob([reportMd(x)], {type:"text/markdown"}));
+    a.download = `laporan-${x.id}.md`; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  }
+});
+let simInit = false;
+function renderSimulasi(arg, auto){
+  if (!simInit || (arg !== undefined && INC[+arg] && +arg !== S.i)) { simInit = true; simReset(arg !== undefined && INC[+arg] ? +arg : S.i); }
+  if (auto && S.done) simReset(S.i);
+  if (auto && !S.playing) simToggle();
+}
+
 /* ---------- navigasi ---------- */
-const RENDER = {dashboard:renderDashboard, temuan:renderTemuan, rekomendasi:renderRekomendasi, log:renderLog};
+const RENDER = {dashboard:renderDashboard, temuan:renderTemuan, rekomendasi:renderRekomendasi, log:renderLog, simulasi:renderSimulasi};
 function route(){
-  const [v, i] = (location.hash.slice(1) || "dashboard").split("/");
+  const parts = (location.hash.slice(1) || "dashboard").split("/");
+  const [v, i] = parts, auto = parts.includes("mulai");
   const view = RENDER[v] ? v : "dashboard";
+  const idx = /^\d+$/.test(i||"") && INC[+i] ? +i : null;
+  track("buka_menu", {menu: view, insiden: idx !== null ? INC[idx].id : undefined, otomatis: auto || undefined});
+  if (view === "simulasi"){
+    document.querySelectorAll(".view").forEach(s => s.classList.toggle("on", s.id === "v-simulasi"));
+    document.querySelectorAll(".menu a").forEach(a => a.classList.toggle("on", a.dataset.v === view));
+    renderSimulasi(/^\d+$/.test(i||"") ? i : undefined, auto);
+    if (auto) history.replaceState(null, "", "#simulasi");
+    window.scrollTo(0,0); return;
+  }
   if (i !== undefined && INC[+i]) cur = +i;
   document.querySelectorAll(".view").forEach(s => s.classList.toggle("on", s.id === "v-"+view));
   document.querySelectorAll(".menu a").forEach(a => a.classList.toggle("on", a.dataset.v === view));

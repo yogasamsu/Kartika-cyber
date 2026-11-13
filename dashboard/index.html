@@ -220,6 +220,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
     <p class="lead">Ribuan alert IT dan OT jadi satu insiden yang jelas, lengkap dengan langkah pertama. Berjalan offline di satu laptop.</p>
     <div class="cta">
       <a class="btn" href="komando.html">Masuk pusat komando</a>
+      <a class="btn ghost" href="komando.html#simulasi/mulai">▶ Coba simulasi serangan</a>
       <a class="btn ghost" href="https://github.com/yogasamsu/Kartika-cyber" target="_blank" rel="noopener">Kode di GitHub</a>
     </div>
   </div>
@@ -376,6 +377,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
   <h2>Lihat Tameng bekerja</h2>
   <p>Empat skenario dari lab, termasuk serangan yang diblokir otomatis.</p>
   <div class="cta"><a class="btn" href="komando.html">Masuk pusat komando</a>
+  <a class="btn ghost" href="komando.html#simulasi/mulai">▶ Coba simulasi serangan</a>
   <a class="btn ghost" href="https://github.com/yogasamsu/Kartika-cyber" target="_blank" rel="noopener">Kode di GitHub</a></div>
 </div>
 
@@ -420,5 +422,6 @@ const nTech = new Set(inc.flatMap(i=>i.techniques.map(t=>t.id))).size;
   d.innerHTML=`&gt; ${esc(t)} … <span class="ok">[${esc(v)}]</span>`; $("#bootlog").appendChild(d); });
 })();
 </script>
+<script src="auth.js"></script>
 </body>
 </html>

@@ -33,3 +33,31 @@ python3 -m http.server 8765 --directory dashboard
 Membuka `index.html` langsung lewat `file://` juga bisa di browser biasa.
 `build.py` juga menerima JSON keluaran `python3 -m tameng --json` mana pun.
 Animasi dimatikan otomatis bila sistem meminta *reduced motion*.
+
+## Simulasi, login Google, dan pencatatan penguji
+
+- **Simulasi** (`komando.html#simulasi`, menu 05): memutar ulang alert asli dari
+  `data.js` satu per satu, lengkap dengan notifikasi, peta, rantai serangan, dan
+  laporan yang bisa diunduh (.md). Tautan `#simulasi/mulai` langsung berjalan.
+- **Login Google wajib** untuk `komando.html` di versi online. Beranda dan slide
+  tetap publik. Bila `/api` tidak ada (file://, `python3 -m http.server`, laptop
+  air-gapped), halaman terbuka tanpa login dan tanpa pencatatan.
+- **Pencatatan**: `auth.js` mengirim event (login, buka_menu, simulasi_mulai,
+  simulasi_selesai, unduh_laporan, centang_rekomendasi, logout, dll.) ke
+  `/api/track`, lalu diteruskan ke Google Sheet lewat Apps Script
+  (`setup/pencatat-sheet.gs`). Tab **Penguji** berisi ringkasan per email, tab
+  **Aktivitas** berisi semua event.
+- **Vercel Web Analytics** dimuat di semua halaman (kunjungan anonim). Aktifkan
+  di dashboard Vercel → proyek `tameng` → Analytics → Enable.
+
+Env Vercel yang dibutuhkan:
+
+| Nama | Isi |
+|---|---|
+| `GOOGLE_CLIENT_ID` | OAuth Client ID (Web) dari Google Cloud Console; origin: `https://tameng.yogency.work`, `https://tameng-lake.vercel.app` |
+| `SESSION_SECRET` | string acak panjang (`openssl rand -hex 32`) |
+| `SHEET_WEBHOOK` | URL `/exec` dari penerapan Apps Script |
+| `SHEET_SECRET` | sama dengan `RAHASIA` di `pencatat-sheet.gs` |
+
+Tanpa `GOOGLE_CLIENT_ID` atau `SESSION_SECRET`, gerbang login mati. Tanpa
+`SHEET_WEBHOOK`, event hanya masuk ke log fungsi Vercel.

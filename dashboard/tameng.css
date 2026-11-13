@@ -67,3 +67,24 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
   html{scroll-behavior:auto}
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;animation-delay:0s!important}
 }
+
+/* gerbang login (auth.js) */
+html.auth-wait body>*:not(.grid-bg){visibility:hidden}
+html.locked body>*:not(.gate):not(.grid-bg){display:none!important}
+html.locked body{display:block!important}
+.gate{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:16px;overflow-y:auto}
+.gate-card{position:relative;width:min(480px,100%);border:1px solid var(--line2);background:rgba(12,15,12,.96);padding:30px 28px 24px;text-align:center}
+.gate-logo{width:42px;height:48px;margin:0 auto 14px;display:block}
+.gate h1{font-size:clamp(30px,6vw,40px);line-height:1;margin:10px 0 10px}
+.gate p{color:var(--text);font-size:12.5px}
+.gate-btn{display:flex;justify-content:center;min-height:44px;margin:22px 0 6px}
+.gate-err{margin-top:10px;padding:8px 10px;border:1px solid var(--kritis);color:var(--kritis);font-size:11.5px}
+.gate-note{margin-top:18px;padding-top:14px;border-top:1px solid var(--line);font-size:10.5px!important;color:var(--muted)!important;text-align:left;line-height:1.6}
+.gate-back{display:inline-block;margin-top:14px;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--olive)}
+.gate-back:hover{color:var(--acc)}
+.userbox{display:flex;align-items:center;gap:8px;font-size:10.5px;color:var(--cream)}
+.userbox[hidden]{display:none}
+.userbox img{width:22px;height:22px;border-radius:50%;border:1px solid var(--line2)}
+.userbox .un{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;flex:1}
+.userbox button{font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--olive);border:1px solid var(--line2);padding:3px 7px}
+.userbox button:hover{color:var(--acc);border-color:var(--acc)}
